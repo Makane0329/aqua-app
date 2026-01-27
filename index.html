@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- iPhone PWA / Full Screen Meta Tags -->
+    <!-- PWA / Full Screen Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -10,9 +10,8 @@
     <meta name="theme-color" content="#000000">
     <title>RS AQUA PRO</title>
 
-    <!-- External CDNs -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
@@ -21,335 +20,346 @@
             --rs-card: #0c0c0c;
         }
         
-        /* iPhoneのダイナミックビューポート対応 */
+        /* iPhone Dynamic Viewport */
         html, body {
             height: 100dvh;
             margin: 0;
             padding: 0;
             background-color: var(--rs-bg);
             color: #f1f5f9;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden; /* 全体スクロールを禁止し、mainのみスクロール */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* セーフエリア対応のヘッダー */
+        /* Safe Area Padding */
         header {
             padding-top: env(safe-area-inset-top);
             background-color: #000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* セーフエリア対応のナビゲーション */
-        nav {
-            padding-bottom: env(safe-area-inset-bottom);
-            background-color: rgba(8, 8, 8, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             z-index: 100;
         }
+
+        nav {
+            padding-bottom: env(safe-area-inset-bottom);
+            background-color: rgba(8, 8, 8, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000; /* 確実に最前面へ */
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Layout */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 120px; /* ナビと入力欄のスペース */
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Button Styling */
+        .btn-rs {
+            background-color: var(--rs-red);
+            color: white;
+            font-weight: bold;
+            border-radius: 0.75rem;
+            min-height: 44px; /* Apple標準の最小タップサイズ */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .btn-rs:active { transform: scale(0.95); opacity: 0.8; }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            padding: 10px 0;
+            color: #4b5563;
+            transition: color 0.3s;
+            z-index: 1001;
+            min-height: 50px;
+        }
+        .nav-item.active { color: white; }
+        .nav-item.active .nav-icon-bg {
+            background-color: var(--rs-red);
+            box-shadow: 0 0 15px rgba(225, 29, 72, 0.5);
+        }
+
+        .nav-icon-bg {
+            padding: 8px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+        }
+
+        /* Chat Input Container */
+        #chat-input-container {
+            position: fixed;
+            bottom: calc(4.5rem + env(safe-area-inset-bottom));
+            left: 0;
+            right: 0;
+            padding: 0 1rem;
+            z-index: 500;
+            display: none;
+        }
+        #chat-input-container.active { display: block; }
 
         .glass-card {
             background-color: var(--rs-card);
             border: 1px solid #1a1a1a;
-            border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1.25rem;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(225, 29, 72, 0.4); border-radius: 10px; }
-
-        /* ナビゲーションの活性状態 */
-        .nav-item.active { color: #ffffff; }
-        .nav-item.active .nav-icon-bg {
-            background-color: var(--rs-red);
-            box-shadow: 0 0 20px rgba(225, 29, 72, 0.5);
+        /* Charts */
+        .chart-container {
+            height: 120px;
+            width: 100%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 1rem;
+            overflow: hidden;
         }
-
-        /* タブコンテンツの表示制御 */
-        .tab-content { display: none; height: 100%; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* チャット入力欄の浮遊配置 */
-        #chat-input-container {
-            position: fixed;
-            bottom: calc(5.5rem + env(safe-area-inset-bottom));
-            left: 0;
-            right: 0;
-            z-index: 90;
-            display: none;
-            padding: 0 1rem;
-        }
-        #chat-input-container.active { display: block; }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <!-- HEADER -->
+    <!-- Header -->
     <header class="shrink-0">
         <div class="px-6 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-black flex items-center gap-2 tracking-tighter text-white uppercase">
+            <h1 class="text-lg font-black tracking-tighter text-white uppercase">
                 <span class="text-[#e11d48]">RS</span> AQUA PRO
             </h1>
-            <div id="tank-volume-badge" class="px-3 py-1 bg-white/5 rounded-full border border-white/10 text-[10px] font-black text-slate-500 uppercase">
+            <div id="tank-vol-display" class="px-3 py-1 bg-white/5 rounded-full border border-white/10 text-[10px] font-black text-slate-500">
                 TANK: 25L
             </div>
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main id="main-scroll" class="flex-1 overflow-y-auto custom-scrollbar">
+    <!-- Main Content -->
+    <main id="scroll-area" class="px-4 py-6">
         
         <!-- Tab: Chat -->
-        <section id="tab-chat" class="tab-content active p-5">
-            <div id="chat-messages" class="space-y-6 pb-32">
+        <section id="tab-chat" class="tab-content active space-y-6 pb-20">
+            <div id="chat-messages" class="space-y-4">
                 <div class="flex justify-start">
-                    <div class="max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed bg-white/5 border border-white/10 rounded-tl-none shadow-lg">
-                        System Ready. 写真を送っていただければ詳細を解析します。
+                    <div class="max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 border border-white/10 rounded-tl-none">
+                        Ready. 25Lタンクのデータに基づき解析を開始します。画像も送れます。
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Tab: Equip -->
-        <section id="tab-equip" class="tab-content p-6 space-y-8">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-black text-white tracking-widest uppercase">EQUIPMENT</h2>
-                <button onclick="toggleForm('equip-form')" class="bg-white/5 border border-white/10 px-4 py-1.5 rounded-lg text-xs font-bold">ADD</button>
+        <section id="tab-equip" class="tab-content space-y-6">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl font-black uppercase tracking-widest">Equipment</h2>
+                <button onclick="toggleElement('equip-form')" class="p-2 bg-white/5 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
             </div>
-            <div id="equip-form" class="hidden glass-card p-6 border-[#e11d48]/40 mb-8 animate-in">
-                <div class="space-y-4">
-                    <input id="eq-name" placeholder="製品名・型番" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none text-white">
-                    <div class="grid grid-cols-2 gap-4">
-                        <select id="eq-cat" class="bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
-                            <option>スキマー</option><option>ポンプ</option><option>照明</option><option>ろ過装置</option>
-                            <option>ヒーター</option><option>クーラー</option><option>ライブロック</option><option>その他</option>
-                        </select>
-                        <input id="eq-date" type="date" class="bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
-                    </div>
-                    <button onclick="addEquipment()" class="w-full bg-[#e11d48] py-4 rounded-xl font-bold uppercase tracking-widest">Register Device</button>
+            <div id="equip-form" class="hidden glass-card p-5 border-[#e11d48]/40 space-y-4">
+                <input id="eq-name" placeholder="Name / Model" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none">
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="eq-cat" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
+                        <option>スキマー</option><option>ポンプ</option><option>照明</option><option>ろ過装置</option>
+                        <option>ヒーター</option><option>クーラー</option><option>ライブロック</option><option>その他</option>
+                    </select>
+                    <input id="eq-date" type="date" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
                 </div>
+                <button onclick="addEquipment()" class="btn-rs w-full">REGISTER DEVICE</button>
             </div>
-            <div id="equip-list" class="space-y-4 pb-20"></div>
+            <div id="equip-list" class="space-y-3"></div>
         </section>
 
-        <!-- Tab: Livestock -->
-        <section id="tab-live" class="tab-content p-6 space-y-10">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-black text-white tracking-widest uppercase">LIVESTOCK</h2>
-                <button onclick="toggleForm('live-form')" class="bg-white/5 border border-white/10 px-4 py-1.5 rounded-lg text-xs font-bold">ADD</button>
+        <!-- Tab: Live -->
+        <section id="tab-live" class="tab-content space-y-8">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl font-black uppercase tracking-widest">Livestock</h2>
+                <button onclick="toggleElement('live-form')" class="p-2 bg-white/5 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
             </div>
-            <div id="live-form" class="hidden glass-card p-6 border-[#e11d48]/40 mb-8 animate-in">
-                <div class="space-y-4">
-                    <input id="lv-name" placeholder="個体名称" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none text-white">
-                    <div class="grid grid-cols-2 gap-4">
-                        <select id="lv-cat" class="bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
-                            <option value="FISH">FISH</option><option value="CORALS">CORALS</option><option value="OTHERS">OTHERS</option>
-                        </select>
-                        <input id="lv-date" type="date" class="bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
-                    </div>
-                    <button onclick="addLivestock()" class="w-full bg-[#e11d48] py-4 rounded-xl font-bold uppercase tracking-widest">Register Life</button>
+            <div id="live-form" class="hidden glass-card p-5 border-[#e11d48]/40 space-y-4">
+                <input id="lv-name" placeholder="Name / Species" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none">
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="lv-cat" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
+                        <option value="FISH">FISH</option><option value="CORALS">CORALS</option><option value="OTHERS">OTHERS</option>
+                    </select>
+                    <input id="lv-date" type="date" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
                 </div>
+                <button onclick="addLivestock()" class="btn-rs w-full">REGISTER LIFE</button>
             </div>
-            <div id="live-list-fish" class="space-y-4"></div>
-            <div id="live-list-corals" class="space-y-4"></div>
-            <div id="live-list-others" class="space-y-4 pb-20"></div>
+            <div id="live-list" class="space-y-6"></div>
         </section>
 
         <!-- Tab: Logs -->
-        <section id="tab-logs" class="tab-content p-6 space-y-8">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-black text-white tracking-widest uppercase">WATER LOGS</h2>
-                <button onclick="toggleForm('log-form')" class="bg-white/5 border border-white/10 px-4 py-1.5 rounded-lg text-xs font-bold">ENTRY</button>
+        <section id="tab-logs" class="tab-content space-y-8">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-xl font-black uppercase tracking-widest">Logs</h2>
+                <button onclick="toggleElement('log-form')" class="p-2 bg-white/5 rounded-lg">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
             </div>
 
-            <div id="log-form" class="hidden glass-card p-6 border-[#e11d48]/50 mb-8 animate-in">
-                <div class="space-y-6">
-                    <div class="text-center">
-                        <label class="text-[10px] font-black tracking-widest text-[#e11d48] mb-2 block uppercase">Density (SG)</label>
-                        <input id="log-sg" type="number" step="0.001" value="1.025" class="w-full bg-black border border-white/5 p-6 rounded-3xl text-4xl font-mono text-white text-center outline-none">
+            <div id="log-form" class="hidden glass-card p-5 border-[#e11d48]/40 space-y-6">
+                <div class="text-center">
+                    <label class="text-[10px] font-black text-[#e11d48] uppercase tracking-widest mb-1 block">Density (SG)</label>
+                    <input id="log-sg" type="number" step="0.001" value="1.025" class="w-full bg-black border border-white/5 p-4 rounded-2xl text-4xl font-mono text-white text-center outline-none">
+                </div>
+                <div class="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-cyan-400 uppercase">Water Change</span>
+                        <input type="checkbox" id="log-wc-check" class="w-6 h-6 rounded bg-black">
                     </div>
-                    <div class="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-3 text-cyan-400 font-bold uppercase text-xs">水換え実施</div>
-                            <input type="checkbox" id="log-wc-check" class="w-6 h-6 rounded bg-black border-white/20">
-                        </div>
-                        <input id="log-wc-vol" type="number" placeholder="換水量 (L)" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
-                    </div>
-                    <div id="log-additives" class="space-y-3"></div>
-                    <button onclick="addLog()" class="w-full bg-[#e11d48] py-4 rounded-2xl font-bold tracking-widest uppercase shadow-lg">Submit Data</button>
+                    <input id="log-wc-vol" type="number" placeholder="Liters" class="w-full bg-black border border-white/10 p-3 rounded-lg text-sm text-white">
+                </div>
+                <div id="additive-inputs" class="space-y-2"></div>
+                <button onclick="addLog()" class="btn-rs w-full py-4 uppercase">Submit telemetry</button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="glass-card p-4">
+                    <div class="text-[9px] font-black text-[#e11d48] mb-4 uppercase text-center">Specific Gravity (Last 10)</div>
+                    <div id="chart-sg" class="chart-container"></div>
+                </div>
+                <div class="glass-card p-4">
+                    <div class="text-[9px] font-black text-cyan-400 mb-4 uppercase text-center">Water Change Volume (L)</div>
+                    <div id="chart-wc" class="chart-container"></div>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="glass-card p-6 bg-black border-white/5">
-                    <div class="text-[10px] font-black text-[#e11d48] mb-6 tracking-widest uppercase text-center">Specific Gravity (比重)</div>
-                    <div id="chart-sg" class="h-32 w-full relative"></div>
-                    <div class="flex justify-between text-[8px] mt-6 text-slate-700 font-black uppercase"><span>1.020</span><span>Ideal</span><span>1.030</span></div>
-                </div>
-                <div class="glass-card p-6 bg-black border-white/5 relative">
-                    <div class="text-[10px] font-black text-cyan-400 mb-6 tracking-widest uppercase text-center">Water Change (0-15L Scale)</div>
-                    <div id="chart-wc" class="h-32 w-full relative"></div>
-                </div>
-            </div>
-
-            <div id="log-list" class="space-y-4 pb-20"></div>
+            <div id="log-history" class="space-y-3 pb-20"></div>
         </section>
 
         <!-- Tab: Settings -->
-        <section id="tab-set" class="tab-content p-6 space-y-12">
-            <h2 class="text-xl font-black text-white tracking-widest uppercase">SETTINGS</h2>
-            <div class="space-y-4">
-                <label class="text-[10px] font-black tracking-widest text-slate-700 uppercase">System Total Volume (L)</label>
-                <div class="flex gap-4">
-                    <input id="set-tank-vol" type="number" class="flex-1 bg-black border border-white/10 p-5 rounded-2xl font-mono text-2xl text-[#e11d48]">
-                    <button onclick="saveTankSettings()" class="bg-[#e11d48] px-8 rounded-xl font-bold uppercase">Save</button>
+        <section id="tab-set" class="tab-content space-y-10">
+            <h2 class="text-xl font-black uppercase tracking-widest px-2">Settings</h2>
+            <div class="space-y-3 px-2">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tank Volume (L)</label>
+                <div class="flex gap-3">
+                    <input id="set-vol" type="number" class="flex-1 bg-white/5 border border-white/10 p-4 rounded-xl font-mono text-2xl text-[#e11d48]">
+                    <button onclick="saveTankSettings()" class="btn-rs px-6">SAVE</button>
                 </div>
             </div>
-            <div class="space-y-4">
-                <label class="text-[10px] font-black tracking-widest text-slate-700 uppercase">Additives Database</label>
-                <div class="glass-card p-6 border-white/5 space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input id="add-name" placeholder="名称" class="bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
-                        <input id="add-dose" type="number" step="0.1" placeholder="ml/10L" class="bg-black border border-white/10 p-4 rounded-xl text-sm text-white">
+            <div class="space-y-4 px-2">
+                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Additive List</label>
+                <div class="glass-card p-5 space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input id="add-name" placeholder="Name" class="bg-black border border-white/10 p-3 rounded-lg text-sm text-white">
+                        <input id="add-dose" type="number" step="0.1" placeholder="ml/10L" class="bg-black border border-white/10 p-3 rounded-lg text-sm text-white">
                     </div>
-                    <button onclick="addAdditiveToDB()" class="w-full bg-[#e11d48] py-4 rounded-xl text-sm font-bold uppercase">Update Database</button>
-                    <div id="additive-db-list" class="space-y-3 pt-6 border-t border-white/5"></div>
+                    <button onclick="addAdditiveToDB()" class="btn-rs w-full text-xs">ADD TO DATABASE</button>
+                    <div id="add-list" class="space-y-2 pt-4 border-t border-white/5"></div>
                 </div>
-            </div>
-            <div class="p-8 bg-white/5 rounded-3xl border border-white/5 mb-20 flex gap-5 text-[10px] italic text-slate-600 leading-relaxed shadow-inner">
-                <i data-lucide="shield-alert" class="text-[#e11d48] shrink-0 w-6 h-6"></i>
-                <p>Telemetry & Configuration. iPhoneから写真を撮影してAI相談が可能です。水槽情報に基づき管理をサポートします。</p>
             </div>
         </section>
     </main>
 
-    <!-- FOOTER NAV -->
-    <nav class="fixed bottom-0 left-0 right-0 border-t border-white/5 flex justify-around items-center pt-4">
-        <button onclick="switchTab('chat')" class="nav-item flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 active" data-tab="chat">
-            <div class="nav-icon-bg p-2.5 rounded-2xl transition-all mb-1"><i data-lucide="message-square" class="w-6 h-6"></i></div>
-            <span class="text-[9px] font-black tracking-tighter">CHAT</span>
-        </button>
-        <button onclick="switchTab('equip')" class="nav-item flex flex-col items-center gap-1.5 flex-1 transition-all duration-300" data-tab="equip">
-            <div class="nav-icon-bg p-2.5 rounded-2xl transition-all mb-1"><i data-lucide="wrench" class="w-6 h-6"></i></div>
-            <span class="text-[9px] font-black tracking-tighter">EQUIP</span>
-        </button>
-        <button onclick="switchTab('live')" class="nav-item flex flex-col items-center gap-1.5 flex-1 transition-all duration-300" data-tab="live">
-            <div class="nav-icon-bg p-2.5 rounded-2xl transition-all mb-1"><i data-lucide="fish" class="w-6 h-6"></i></div>
-            <span class="text-[9px] font-black tracking-tighter">LIVE</span>
-        </button>
-        <button onclick="switchTab('logs')" class="nav-item flex flex-col items-center gap-1.5 flex-1 transition-all duration-300" data-tab="logs">
-            <div class="nav-icon-bg p-2.5 rounded-2xl transition-all mb-1"><i data-lucide="line-chart" class="w-6 h-6"></i></div>
-            <span class="text-[9px] font-black tracking-tighter">LOGS</span>
-        </button>
-        <button onclick="switchTab('set')" class="nav-item flex flex-col items-center gap-1.5 flex-1 transition-all duration-300" data-tab="set">
-            <div class="nav-icon-bg p-2.5 rounded-2xl transition-all mb-1"><i data-lucide="settings" class="w-6 h-6"></i></div>
-            <span class="text-[9px] font-black tracking-tighter">SET</span>
-        </button>
-    </nav>
-
-    <!-- FLOATING CHAT INPUT -->
-    <div id="chat-input-container" class="max-w-2xl mx-auto active">
+    <!-- Floating Chat Input -->
+    <div id="chat-input-container">
         <div class="flex gap-3 bg-black/90 p-2 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-md">
-            <button onclick="document.getElementById('chat-file').click()" class="p-4 bg-white/5 border border-white/10 rounded-2xl text-slate-500 active:text-white">
-                <i data-lucide="camera" class="w-6 h-6"></i>
+            <button onclick="document.getElementById('chat-file').click()" class="p-4 bg-white/5 border border-white/10 rounded-2xl text-slate-400">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
             </button>
             <input id="chat-file" type="file" class="hidden" accept="image/*">
-            <input id="chat-input-text" type="text" placeholder="AIへ相談..." class="flex-1 bg-transparent px-4 text-sm outline-none text-white">
-            <button onclick="sendMessage()" class="bg-[#e11d48] px-6 rounded-2xl shadow-lg"><i data-lucide="send" class="w-6 h-6 text-white"></i></button>
+            <input id="chat-input-text" type="text" placeholder="AIへ相談..." class="flex-1 bg-transparent px-2 text-sm outline-none text-white">
+            <button onclick="sendMessage()" class="bg-[#e11d48] px-6 rounded-2xl">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
         </div>
     </div>
 
-    <!-- MODULE SCRIPTS -->
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 flex">
+        <button onclick="switchTab('chat')" class="nav-item active" data-tab="chat">
+            <div class="nav-icon-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+            <span class="text-[9px] font-black">CHAT</span>
+        </button>
+        <button onclick="switchTab('equip')" class="nav-item" data-tab="equip">
+            <div class="nav-icon-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></div>
+            <span class="text-[9px] font-black">EQUIP</span>
+        </button>
+        <button onclick="switchTab('live')" class="nav-item" data-tab="live">
+            <div class="nav-icon-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.44 14.92c1.33 1.33 1.4 3.53.16 4.96L19 21c-1.43 1.24-3.63 1.17-4.96-.16L12 18.73l-2.04 2.11c-1.33 1.33-3.53 1.4-4.96.16L3.5 19.5c-1.43-1.24-1.33-3.44 0-4.77L12 6l8.44 8.92z"></path><path d="M7 10h1v1H7z"></path></svg></div>
+            <span class="text-[9px] font-black">LIVE</span>
+        </button>
+        <button onclick="switchTab('logs')" class="nav-item" data-tab="logs">
+            <div class="nav-icon-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg></div>
+            <span class="text-[9px] font-black">LOGS</span>
+        </button>
+        <button onclick="switchTab('set')" class="nav-item" data-tab="set">
+            <div class="nav-icon-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
+            <span class="text-[9px] font-black">SET</span>
+        </button>
+    </nav>
+
+    <!-- App Logic -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        import { 
-            getFirestore, collection, addDoc, query, onSnapshot, 
-            deleteDoc, doc, updateDoc, Timestamp, setDoc 
-        } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, onSnapshot, deleteDoc, doc, updateDoc, Timestamp, setDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
         const configRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
         const firebaseConfig = JSON.parse(configRaw);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'aquarium-manager-rs-final';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rs-aqua-v3-standalone';
         const apiKey = ""; 
 
-        let state = {
-            user: null,
-            equipment: [],
-            livestock: [],
-            logs: [],
-            additives: [],
-            tankSettings: { volume: 25 }
-        };
+        let state = { user: null, equipment: [], livestock: [], logs: [], additives: [], tankSettings: { volume: 25 } };
 
-        // --- Core Functions ---
-        window.switchTab = (tabId) => {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        // --- Tab Switching ---
+        window.switchTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${id}`).classList.add('active');
+            document.querySelector(`[data-tab="${id}"]`).classList.add('active');
             
             const chatInput = document.getElementById('chat-input-container');
-            if (tabId === 'chat') chatInput.classList.add('active');
+            if (id === 'chat') chatInput.classList.add('active');
             else chatInput.classList.remove('active');
 
-            window.lucide.createIcons();
-            document.getElementById('main-scroll').scrollTop = 0;
+            document.getElementById('scroll-area').scrollTop = 0;
         };
 
-        window.toggleForm = (id) => {
+        window.toggleElement = (id) => {
             const el = document.getElementById(id);
             el.classList.toggle('hidden');
         };
 
-        // --- Data Handling ---
+        // --- Data Fetching ---
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                state.user = user;
-                initListeners();
-            } else {
-                await signInAnonymously(auth);
-            }
+            if (user) { state.user = user; initData(); }
+            else { await signInAnonymously(auth); }
         });
 
-        function initListeners() {
+        function initData() {
             const uid = state.user.uid;
-            
-            onSnapshot(query(collection(db, 'artifacts', appId, 'users', uid, 'equipment')), s => {
-                state.equipment = s.docs.map(d => ({id: d.id, ...d.data()}));
-                renderEquipment();
-            });
+            const sub = (col, fn) => onSnapshot(query(collection(db, 'artifacts', appId, 'users', uid, col)), s => {
+                let data = s.docs.map(d => ({id: d.id, ...d.data()}));
+                fn(data);
+            }, e => console.error(e));
 
-            onSnapshot(query(collection(db, 'artifacts', appId, 'users', uid, 'livestock')), s => {
-                state.livestock = s.docs.map(d => ({id: d.id, ...d.data()}));
-                renderLivestock();
+            sub('equipment', d => { state.equipment = d; renderEquipment(); });
+            sub('livestock', d => { state.livestock = d; renderLivestock(); });
+            sub('salinity_logs', d => { 
+                state.logs = d.map(l => ({...l, date: l.date?.toDate() || new Date()})).sort((a,b) => b.date - a.date);
+                renderLogs(); 
             });
-
-            onSnapshot(query(collection(db, 'artifacts', appId, 'users', uid, 'salinity_logs')), s => {
-                state.logs = s.docs.map(d => ({id: d.id, ...d.data(), date: d.data().date?.toDate() || new Date()}))
-                                .sort((a,b) => b.date - a.date);
-                renderLogs();
-            });
-
-            onSnapshot(query(collection(db, 'artifacts', appId, 'users', uid, 'additive_list')), s => {
-                state.additives = s.docs.map(d => ({id: d.id, ...d.data()}));
-                renderLogs(); // To update additive dropdowns
-                renderSettings();
-            });
-
+            sub('additive_list', d => { state.additives = d; renderSettings(); renderAdditiveInputs(); });
             onSnapshot(doc(db, 'artifacts', appId, 'users', uid, 'settings', 'tank'), d => {
                 if (d.exists()) {
                     state.tankSettings = d.data();
-                    document.getElementById('tank-volume-badge').innerText = `SYS: ${state.tankSettings.volume}L`;
-                    document.getElementById('set-tank-vol').value = state.tankSettings.volume;
+                    document.getElementById('tank-vol-display').innerText = `TANK: ${state.tankSettings.volume}L`;
+                    document.getElementById('set-vol').value = state.tankSettings.volume;
                 }
             });
         }
@@ -358,205 +368,178 @@
         function renderEquipment() {
             const list = document.getElementById('equip-list');
             list.innerHTML = state.equipment.map(e => `
-                <div class="glass-card p-4 flex justify-between items-center group active:bg-white/5 transition-colors">
+                <div class="glass-card p-4 flex justify-between items-center bg-white/[0.02]">
                     <div class="flex items-center gap-3 overflow-hidden">
-                        <div class="p-3 bg-white/5 rounded-xl text-[#e11d48]"><i data-lucide="box" class="w-5 h-5"></i></div>
+                        <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                            <span class="text-[4px] leading-tight text-center opacity-30 text-white"></span>
+                        </div>
                         <div class="overflow-hidden">
-                            <div class="text-[9px] font-black text-[#e11d48] uppercase tracking-widest">${e.category}</div>
-                            <div class="font-bold text-white truncate leading-tight">${e.name}</div>
-                            <div class="text-[9px] text-slate-500 font-bold mt-0.5 uppercase">SINCE: ${e.installDate}</div>
+                            <div class="text-[8px] font-black text-[#e11d48] uppercase tracking-widest">${e.category}</div>
+                            <div class="font-bold text-sm truncate">${e.name}</div>
                         </div>
                     </div>
-                    <button onclick="deleteDoc('equipment', '${e.id}')" class="p-3 text-slate-800 hover:text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                    <button onclick="removeItem('equipment', '${e.id}')" class="p-3 text-slate-800 active:text-red-500">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
                 </div>
             `).join('');
-            window.lucide.createIcons();
         }
 
         function renderLivestock() {
-            const categories = ["FISH", "CORALS", "OTHERS"];
-            categories.forEach(cat => {
-                const list = document.getElementById(`live-list-${cat.toLowerCase()}`);
-                const items = state.livestock.filter(l => (cat === 'OTHERS' && !['FISH', 'CORALS'].includes(l.type)) || l.type === cat);
-                list.innerHTML = `
-                    <div class="flex items-center gap-4 my-4">
-                        <span class="text-[10px] font-black tracking-[0.4em] text-slate-700 uppercase">${cat}</span>
-                        <div class="h-px flex-1 bg-white/5"></div>
-                    </div>
-                    ${items.map(l => `
-                        <div class="glass-card p-4 flex justify-between items-center active:bg-white/5">
-                            <div class="flex items-center gap-3">
-                                <div class="p-3 rounded-xl border ${cat==='CORALS'?'border-cyan-500/20 text-cyan-400':'border-[#e11d48]/20 text-[#e11d48]'}">
-                                    <i data-lucide="fish" class="w-5 h-5"></i>
+            const list = document.getElementById('live-list');
+            const cats = ["FISH", "CORALS", "OTHERS"];
+            list.innerHTML = cats.map(cat => {
+                const items = state.livestock.filter(i => i.type === cat || (cat === "OTHERS" && !["FISH","CORALS"].includes(i.type)));
+                return `
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4"><span class="text-[9px] font-black text-slate-600 tracking-widest uppercase">${cat}</span><div class="h-px flex-1 bg-white/5"></div></div>
+                        ${items.map(i => `
+                            <div class="glass-card p-4 flex justify-between items-center bg-white/[0.02]">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                                        <span class="text-[4px] opacity-20"></span>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-sm">${i.name}</div>
+                                        <div class="text-[8px] text-slate-500">EST: ${i.installDate}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="font-bold text-white truncate leading-tight">${l.name}</div>
-                                    <div class="text-[9px] text-slate-500 font-bold uppercase mt-1">EST: ${l.installDate}</div>
+                                <div class="flex gap-2">
+                                    <button onclick="removeItem('livestock', '${i.id}')" class="p-3 text-slate-800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                                 </div>
                             </div>
-                            <button onclick="deleteDoc('livestock', '${l.id}')" class="p-3 text-slate-800 hover:text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 `;
-            });
-            window.lucide.createIcons();
+            }).join('');
+        }
+
+        function renderAdditiveInputs() {
+            const area = document.getElementById('additive-inputs');
+            area.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="log-add-name" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
+                        <option value="">None</option>
+                        ${state.additives.map(a => `<option value="${a.name}">${a.name}</option>`).join('')}
+                    </select>
+                    <input id="log-add-drop" type="number" placeholder="Drops" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
+                </div>
+            `;
         }
 
         function renderLogs() {
-            const list = document.getElementById('log-list');
-            const recent = [...state.logs].slice(0, 14).reverse();
+            const list = document.getElementById('log-history');
+            const recent = [...state.logs].slice(0, 10).reverse();
 
-            // Chart SG
-            const sgChart = document.getElementById('chart-sg');
-            if (recent.length >= 2) {
-                const points = recent.map((l, i) => `${(i/(recent.length-1))*100},${100-((l.value-1.020)/0.01)*100}`).join(' ');
-                sgChart.innerHTML = `
-                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full">
-                        <polyline fill="none" stroke="#e11d48" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" points="${points}" style="filter: drop-shadow(0 0 8px rgba(225,29,72,0.5))" />
-                    </svg>
-                `;
-            }
+            // Minimal Chart Logic
+            const drawChart = (id, color, vals, min, max) => {
+                const el = document.getElementById(id);
+                if (vals.length < 2) { el.innerHTML = ''; return; }
+                const points = vals.map((v, i) => `${(i/(vals.length-1))*100},${100-((v-min)/(max-min))*100}`).join(' ');
+                el.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full"><polyline fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" points="${points}" style="filter: drop-shadow(0 0 5px ${color}88)" /></svg>`;
+            };
 
-            // Chart WC
-            const wcChart = document.getElementById('chart-wc');
-            wcChart.innerHTML = `
-                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
-                    <div class="border-t border-cyan-400 w-full flex justify-end pr-1 pt-1"><span class="text-[6px] font-black text-cyan-400">15L</span></div>
-                    <div class="border-t border-cyan-400 w-full opacity-50 flex justify-end pr-1 pt-1"><span class="text-[6px] font-black text-cyan-400">7.5L</span></div>
-                    <div class="border-t border-cyan-400 w-full opacity-20"></div>
-                </div>
-                <div class="flex items-end gap-1 h-full px-1 relative z-10">
-                    ${recent.map(l => {
-                        const h = (Math.min(l.waterChangeVolume || 0, 15) / 15) * 100;
-                        return `<div class="bg-cyan-500/40 flex-1 rounded-t-sm transition-all active:bg-cyan-400" style="height: ${h}%"></div>`;
-                    }).join('')}
-                </div>
-            `;
+            drawChart('chart-sg', '#e11d48', recent.map(l => l.value), 1.020, 1.030);
+            
+            const wcArea = document.getElementById('chart-wc');
+            wcArea.innerHTML = `<div class="flex items-end gap-1 h-full px-1">${recent.map(l => {
+                const h = (Math.min(l.waterChangeVolume || 0, 15) / 15) * 100;
+                return `<div class="bg-cyan-500/30 flex-1 rounded-t-sm" style="height: ${h}%"></div>`;
+            }).join('')}</div>`;
 
-            // List
             list.innerHTML = state.logs.map(l => `
-                <div class="glass-card p-5 bg-white/[0.01]">
-                    <div class="flex justify-between items-start">
+                <div class="glass-card p-4 bg-white/[0.01]">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <div class="text-[9px] text-slate-700 font-mono tracking-widest mb-2 uppercase">${l.date.toLocaleString()}</div>
-                            <div class="flex items-center gap-4">
-                                <div class="text-2xl font-mono font-black ${l.value >= 1.024 && l.value <= 1.026 ? 'text-white' : 'text-amber-500'}">${l.value.toFixed(3)}</div>
-                                ${l.waterChange ? `<div class="px-2 py-1 bg-cyan-500/10 text-cyan-400 text-[9px] font-black rounded-lg border border-cyan-500/20">WC: ${l.waterChangeVolume}L</div>` : ''}
+                            <div class="text-[8px] text-slate-700 font-mono mb-1 uppercase">${l.date.toLocaleString()}</div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-xl font-mono font-black ${l.value >= 1.024 && l.value <= 1.026 ? 'text-white' : 'text-amber-500'}">${l.value.toFixed(3)}</div>
+                                ${l.waterChange ? `<div class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[8px] font-black rounded border border-cyan-500/20 uppercase">WC: ${l.waterChangeVolume}L</div>` : ''}
                             </div>
                         </div>
-                        <button onclick="deleteDoc('salinity_logs', '${l.id}')" class="text-slate-800 hover:text-red-600 p-2"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        <button onclick="removeItem('salinity_logs', '${l.id}')" class="p-3 text-slate-800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     </div>
-                    ${l.additiveEntries?.length ? `
-                        <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/5">
-                            ${l.additiveEntries.map(ae => `<div class="text-[10px] text-slate-400 font-bold bg-white/5 px-2 py-1 rounded">${ae.name}: <span class="text-[#e11d48]">${ae.ml}ml</span></div>`).join('')}
-                        </div>
-                    ` : ''}
+                    ${l.additiveEntries?.map(ae => `<div class="mt-2 text-[10px] text-slate-500 font-bold">${ae.name}: <span class="text-[#e11d48]">${ae.ml}ml</span></div>`).join('') || ''}
                 </div>
             `).join('');
-            
-            // Additive slots in form
-            const addForm = document.getElementById('log-additives');
-            if (addForm) {
-                addForm.innerHTML = [0,1,2].map(idx => `
-                    <div class="grid grid-cols-2 gap-3">
-                        <select id="log-add-name-${idx}" class="bg-black border border-white/10 p-3 rounded-xl text-xs text-white">
-                            <option value="">None</option>
-                            ${state.additives.map(a => `<option value="${a.name}">${a.name}</option>`).join('')}
-                        </select>
-                        <input id="log-add-drop-${idx}" type="number" placeholder="Drops" class="bg-black border border-white/10 p-3 rounded-xl text-xs text-white">
-                    </div>
-                `).join('');
-            }
-
-            window.lucide.createIcons();
         }
 
         function renderSettings() {
-            const list = document.getElementById('additive-db-list');
+            const list = document.getElementById('add-list');
             list.innerHTML = state.additives.map(a => `
-                <div class="flex justify-between items-center p-5 bg-white/[0.01] rounded-2xl border border-white/5">
+                <div class="flex justify-between items-center p-4 bg-white/[0.01] rounded-xl border border-white/5">
                     <div>
-                        <div class="text-sm font-bold text-white tracking-tight">${a.name}</div>
-                        <div class="text-[10px] text-[#e11d48] font-black tracking-widest uppercase mt-2">Dose: ${a.dosePer10L}ml / 10L</div>
+                        <div class="text-sm font-bold">${a.name}</div>
+                        <div class="text-[9px] text-[#e11d48] font-black uppercase tracking-widest mt-1">Dose: ${a.dosePer10L}ml / 10L</div>
                     </div>
-                    <button onclick="deleteDoc('additive_list', '${a.id}')" class="text-slate-800 hover:text-red-600"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                    <button onclick="removeItem('additive_list', '${a.id}')" class="p-3 text-slate-800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                 </div>
             `).join('');
-            window.lucide.createIcons();
         }
 
-        // --- Interaction Handlers ---
+        // --- Handlers ---
         window.addEquipment = async () => {
             const name = document.getElementById('eq-name').value;
-            const category = document.getElementById('eq-cat').value;
-            const installDate = document.getElementById('eq-date').value;
-            if(!name) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'equipment'), { name, category, installDate, dateAdded: Timestamp.now() });
-            document.getElementById('equip-form').classList.add('hidden');
+            if (!name) return;
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'equipment'), {
+                name, category: document.getElementById('eq-cat').value,
+                installDate: document.getElementById('eq-date').value, dateAdded: Timestamp.now()
+            });
             document.getElementById('eq-name').value = '';
+            toggleElement('equip-form');
         };
 
         window.addLivestock = async () => {
             const name = document.getElementById('lv-name').value;
-            const type = document.getElementById('lv-cat').value;
-            const installDate = document.getElementById('lv-date').value;
-            if(!name) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'livestock'), { name, type, installDate, dateAdded: Timestamp.now() });
-            document.getElementById('live-form').classList.add('hidden');
+            if (!name) return;
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'livestock'), {
+                name, type: document.getElementById('lv-cat').value,
+                installDate: document.getElementById('lv-date').value, dateAdded: Timestamp.now()
+            });
             document.getElementById('lv-name').value = '';
+            toggleElement('live-form');
         };
 
         window.addLog = async () => {
-            const value = parseFloat(document.getElementById('log-sg').value);
-            const waterChange = document.getElementById('log-wc-check').checked;
-            const waterChangeVolume = parseFloat(document.getElementById('log-wc-vol').value) || 0;
-            const DROP_TO_ML = 0.05;
-            
-            const entries = [0,1,2].map(idx => ({
-                name: document.getElementById(`log-add-name-${idx}`).value,
-                drops: parseInt(document.getElementById(`log-add-drop-${idx}`).value) || 0
-            })).filter(e => e.name);
+            const entries = [];
+            const addName = document.getElementById('log-add-name').value;
+            const drops = parseInt(document.getElementById('log-add-drop').value) || 0;
+            if (addName) entries.push({ name: addName, drops, ml: (drops * DROP_TO_ML).toFixed(2) });
 
             await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'salinity_logs'), {
-                value, waterChange, waterChangeVolume,
-                additiveEntries: entries.map(e => ({...e, ml: (e.drops * DROP_TO_ML).toFixed(2)})),
+                value: parseFloat(document.getElementById('log-sg').value),
+                waterChange: document.getElementById('log-wc-check').checked,
+                waterChangeVolume: parseFloat(document.getElementById('log-wc-vol').value) || 0,
+                additiveEntries: entries,
                 date: Timestamp.now()
             });
-            document.getElementById('log-form').classList.add('hidden');
-            document.getElementById('log-wc-check').checked = false;
-            document.getElementById('log-wc-vol').value = '';
+            toggleElement('log-form');
         };
 
         window.saveTankSettings = async () => {
-            const volume = parseFloat(document.getElementById('set-tank-vol').value);
+            const volume = parseFloat(document.getElementById('set-vol').value);
             await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'settings', 'tank'), { volume });
         };
 
         window.addAdditiveToDB = async () => {
             const name = document.getElementById('add-name').value;
-            const dosePer10L = parseFloat(document.getElementById('add-dose').value);
-            if(!name) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'additive_list'), { name, dosePer10L });
+            if (!name) return;
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'additive_list'), {
+                name, dosePer10L: parseFloat(document.getElementById('add-dose').value)
+            });
             document.getElementById('add-name').value = '';
-            document.getElementById('add-dose').value = '';
         };
 
-        window.deleteDoc = async (col, id) => {
-            if(!confirm("削除しますか？")) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, col, id));
+        window.removeItem = async (col, id) => {
+            if (confirm("Remove?")) await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, col, id));
         };
 
         window.sendMessage = async () => {
-            const input = document.getElementById('chat-input-text');
-            const text = input.value.trim();
-            if(!text) return;
-
-            const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `<div class="flex justify-end"><div class="max-w-[85%] p-4 rounded-2xl text-sm bg-[#e11d48] text-white font-bold rounded-tr-none shadow-lg">${text}</div></div>`;
-            input.value = '';
-
-            const typingId = 'typing-' + Date.now();
-            chatBox.innerHTML += `<div id="${typingId}" class="text-[10px] font-mono text-[#e11d48] animate-pulse uppercase ml-2">Analyzing...</div>`;
+            const text = document.getElementById('chat-input-text').value.trim();
+            if (!text) return;
+            const box = document.getElementById('chat-messages');
+            box.innerHTML += `<div class="flex justify-end"><div class="max-w-[85%] p-4 rounded-2xl text-sm bg-[#e11d48] text-white font-bold rounded-tr-none shadow-lg">${text}</div></div>`;
+            document.getElementById('chat-input-text').value = '';
             
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
@@ -564,23 +547,15 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text }] }],
-                        systemInstruction: { parts: [{ text: "プロのアクアリストとして、Red Sea製などの機材や比重データに基づき日本語で回答してください。" }] }
+                        systemInstruction: { parts: [{ text: "アクアリストとして日本語で回答してください。" }] }
                     })
                 });
                 const data = await response.json();
-                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "エラーが発生しました。";
-                document.getElementById(typingId).remove();
-                chatBox.innerHTML += `<div class="flex justify-start"><div class="max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed bg-white/5 border border-white/10 rounded-tl-none">${aiText}</div></div>`;
-            } catch(e) {
-                document.getElementById(typingId).innerText = "ERROR.";
-            }
-            window.lucide.createIcons();
-            document.getElementById('main-scroll').scrollTop = document.getElementById('main-scroll').scrollHeight;
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "...";
+                box.innerHTML += `<div class="flex justify-start"><div class="max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 border border-white/10 rounded-tl-none">${reply}</div></div>`;
+            } catch(e) { console.error(e); }
+            document.getElementById('scroll-area').scrollTop = document.getElementById('scroll-area').scrollHeight;
         };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            window.lucide.createIcons();
-        });
     </script>
 </body>
 </html>
