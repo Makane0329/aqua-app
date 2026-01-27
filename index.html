@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- PWA / Full Screen Meta Tags -->
+    <!-- iPhone PWA / Full Screen Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -10,15 +10,11 @@
     <meta name="theme-color" content="#000000">
     <title>RS AQUA PRO</title>
 
-    <!-- Tailwind CSS CDN -->
+    <!-- External CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & Babel CDN -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -34,23 +30,26 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overscroll-behavior-y: none;
             min-height: 100vh;
+            /* 防止 iPhone 横向き時のズレ */
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(225, 29, 72, 0.4); border-radius: 10px; }
         
-        .safe-pt { padding-top: env(safe-area-inset-top); }
-        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
-        
         #root {
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
         }
-        /* Lucide icon fix for React hydration/updates */
-        .icon-container svg {
-            display: block;
+        .icon-container svg { display: block; }
+        
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        .animate-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -59,7 +58,7 @@
     <script type="text/babel" data-type="module">
         const { useState, useEffect, useRef, useMemo } = React;
 
-        // Firebase ESM Imports
+        // Firebase ESM Imports from CDN
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         import { 
@@ -67,24 +66,22 @@
             deleteDoc, doc, updateDoc, Timestamp, setDoc 
         } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-        // Firebase Setup
+        // Firebase Setup (GitHub Pages等で動かす際は実際のconfigに置き換えてください)
         const configRaw = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
         const firebaseConfig = JSON.parse(configRaw);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'aquarium-manager-rs-final';
-        const apiKey = ""; 
+        const apiKey = ""; // Gemini API Key
 
         const DROP_TO_ML = 0.05;
 
         // --- UI Components ---
-        // Reactの仮想DOMとLucideの直接的なDOM操作が競合しないように修正
         const Icon = ({ name, className = "w-5 h-5" }) => {
             const containerRef = useRef(null);
             useEffect(() => {
                 if (containerRef.current && window.lucide) {
-                    // Reactが関与しない形で子要素をクリアして再生成
                     containerRef.current.innerHTML = `<i data-lucide="${name}"></i>`;
                     window.lucide.createIcons({
                         attrs: { class: className },
@@ -92,7 +89,6 @@
                     });
                 }
             }, [name, className]);
-            // 空のspanを返すことでReactの更新対象から外す
             return <span ref={containerRef} className="icon-container inline-flex items-center justify-center"></span>;
         };
 
@@ -146,9 +142,7 @@
                 const init = async () => {
                     try {
                         await signInAnonymously(auth);
-                    } catch (e) {
-                        console.error("Auth failed", e);
-                    }
+                    } catch (e) { console.error("Auth failed", e); }
                 };
                 init();
                 const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -185,7 +179,7 @@
             );
 
             return (
-                <div className="flex flex-col h-screen bg-black text-slate-100 max-w-2xl mx-auto border-x border-white/5 safe-pt">
+                <div className="flex flex-col h-screen bg-black text-slate-100 max-w-2xl mx-auto border-x border-white/5 overflow-hidden">
                     <header className="px-6 py-6 bg-black border-b border-white/5 flex justify-between items-center z-20">
                         <h1 className="text-xl font-black flex items-center gap-2 tracking-tighter text-white">
                             <span className="text-[#e11d48]">RS</span> AQUA PRO
@@ -308,7 +302,7 @@
             };
 
             return (
-                <div className="p-6 space-y-8">
+                <div className="p-6 space-y-8 animate-in">
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-black text-white tracking-widest uppercase">EQUIPMENT</h2>
                         <Button onClick={() => setIsAdding(!isAdding)} variant="secondary" className="px-4 py-1.5 text-xs">ADD</Button>
@@ -316,12 +310,12 @@
                     {isAdding && (
                         <GlassCard className="p-6 border-[#e11d48]/40">
                             <form onSubmit={save} className="space-y-4">
-                                <input placeholder="製品名・型番 (Model Name)" className="w-full bg-black border border-white/10 p-4 rounded-xl text-sm" onChange={e => setFormData({...formData, name: e.target.value})} required />
+                                <input placeholder="名称・型番 (Model Name)" className="w-full bg-black border border-white/10 p-4 rounded-xl text-sm" onChange={e => setFormData({...formData, name: e.target.value})} required />
                                 <div className="grid grid-cols-2 gap-4">
-                                    <select className="bg-black border border-white/10 p-4 rounded-xl text-sm" onChange={e => setFormData({...formData, category: e.target.value})}>
+                                    <select className="bg-black border border-white/10 p-4 rounded-xl text-sm text-white" onChange={e => setFormData({...formData, category: e.target.value})}>
                                         {["スキマー", "ポンプ", "照明", "ろ過装置", "ヒーター", "クーラー", "ライブロック", "その他"].map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
-                                    <input type="date" className="bg-black border border-white/10 p-4 rounded-xl text-sm" value={formData.installDate} onChange={e => setFormData({...formData, installDate: e.target.value})} />
+                                    <input type="date" className="bg-black border border-white/10 p-4 rounded-xl text-sm text-white" value={formData.installDate} onChange={e => setFormData({...formData, installDate: e.target.value})} />
                                 </div>
                                 <Button type="submit" className="w-full">REGISTER</Button>
                             </form>
@@ -332,13 +326,13 @@
                             <GlassCard key={item.id} className="p-4 flex justify-between items-center group">
                                 <div className="flex items-center gap-3 overflow-hidden">
                                     <CompactThumbnail name={item.name} show={showImageId === item.id} />
-                                    {!showImageId || showImageId !== item.id ? (
+                                    {(!showImageId || showImageId !== item.id) && (
                                         <div className="p-3 bg-white/5 rounded-xl text-[#e11d48]"><Icon name="box" /></div>
-                                    ) : null}
+                                    )}
                                     <div className="overflow-hidden">
                                         <div className="text-[9px] font-black text-[#e11d48] uppercase tracking-widest">{item.category}</div>
                                         <div className="font-bold text-white truncate leading-tight">{item.name}</div>
-                                        <div className="text-[9px] text-slate-500 font-bold mt-0.5">SINCE: {item.installDate}</div>
+                                        <div className="text-[9px] text-slate-500 font-bold mt-0.5 uppercase">EST: {item.installDate}</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -381,20 +375,20 @@
             };
 
             return (
-                <div className="p-6 space-y-10">
+                <div className="p-6 space-y-10 animate-in">
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-black text-white tracking-widest uppercase">LIVESTOCK</h2>
                         <Button onClick={() => setIsAdding(!isAdding)} variant="secondary" className="px-4 py-1.5 text-xs">ADD</Button>
                     </div>
                     {(isAdding || editingId) && (
-                        <GlassCard className="p-6 border-[#e11d48]/40">
+                        <GlassCard className="p-6 border-[#e11d48]/40 bg-[#050505]">
                             <form onSubmit={save} className="space-y-4">
-                                <input placeholder="名称 (Name)" value={formData.name} className="w-full bg-black border border-white/10 p-4 rounded-xl text-sm" onChange={e => setFormData({...formData, name: e.target.value})} required />
+                                <input placeholder="名称 (Species Name)" value={formData.name} className="w-full bg-black border border-white/10 p-4 rounded-xl text-sm" onChange={e => setFormData({...formData, name: e.target.value})} required />
                                 <div className="grid grid-cols-2 gap-4">
-                                    <select className="bg-black border border-white/10 p-4 rounded-xl text-sm" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                                    <select className="bg-black border border-white/10 p-4 rounded-xl text-sm text-white" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
                                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
-                                    <input type="date" className="bg-black border border-white/10 p-4 rounded-xl text-sm" value={formData.installDate} onChange={e => setFormData({...formData, installDate: e.target.value})} />
+                                    <input type="date" className="bg-black border border-white/10 p-4 rounded-xl text-sm text-white" value={formData.installDate} onChange={e => setFormData({...formData, installDate: e.target.value})} />
                                 </div>
                                 <div className="flex gap-2">
                                     <Button type="submit" className="flex-1">SAVE</Button>
@@ -404,7 +398,7 @@
                         </GlassCard>
                     )}
                     {categories.map(cat => (
-                        <div key={cat} className="space-y-4" key={cat}>
+                        <div key={cat} className="space-y-4">
                             <div className="flex items-center gap-4">
                                 <span className="text-[10px] font-black tracking-[0.4em] text-slate-700 uppercase">{cat}</span>
                                 <div className="h-px flex-1 bg-white/5"></div>
@@ -414,11 +408,11 @@
                                     <GlassCard key={item.id} className="p-4 flex justify-between items-center group hover:bg-white/[0.03]">
                                         <div className="flex items-center gap-3 overflow-hidden">
                                             <CompactThumbnail name={item.name} show={showImageId === item.id} />
-                                            {!showImageId || showImageId !== item.id ? (
+                                            {(!showImageId || showImageId !== item.id) && (
                                                 <div className={`p-3 rounded-xl border ${cat === 'CORALS' ? 'border-cyan-500/20 text-cyan-400' : 'border-[#e11d48]/20 text-[#e11d48]'}`}>
                                                     <Icon name="fish" />
                                                 </div>
-                                            ) : null}
+                                            )}
                                             <div className="overflow-hidden">
                                                 <div className="font-bold text-white truncate leading-tight">{item.name}</div>
                                                 <div className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">EST: {item.installDate}</div>
@@ -467,7 +461,7 @@
             }, [logs]);
 
             return (
-                <div className="p-6 space-y-8">
+                <div className="p-6 space-y-8 animate-in">
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-black text-white tracking-widest uppercase">WATER LOGS</h2>
                         <Button onClick={() => setIsLogging(!isLogging)} variant="secondary" className="px-4 py-2 text-xs">ENTRY</Button>
@@ -487,14 +481,14 @@
                                         </div>
                                     </div>
                                     {formData.waterChange && (
-                                        <div className="flex items-center gap-4">
-                                            <input type="number" placeholder="Volume (L)" className="flex-1 bg-black border border-white/10 p-4 rounded-xl text-sm" onChange={e => setFormData({...formData, waterChangeVolume: e.target.value})} />
+                                        <div className="flex items-center gap-4 animate-in">
+                                            <input type="number" placeholder="Volume (L)" className="flex-1 bg-black border border-white/10 p-4 rounded-xl text-sm text-white" onChange={e => setFormData({...formData, waterChangeVolume: e.target.value})} />
                                             <span className="text-xs font-black text-slate-500">Liters</span>
                                         </div>
                                     )}
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black tracking-widest text-slate-600 mb-2 block">添加剤 (Max 3)</label>
+                                    <label className="text-[10px] font-black tracking-widest text-slate-600 mb-2 block uppercase">添加剤 (Max 3)</label>
                                     {formData.entries.map((entry, idx) => (
                                         <div key={idx} className="p-4 bg-white/5 rounded-2xl border border-white/5 grid grid-cols-2 gap-3">
                                             <select className="bg-black border border-white/10 p-3 rounded-xl text-xs text-white" onChange={e => { const n = [...formData.entries]; n[idx].name = e.target.value; setFormData({...formData, entries: n}); }}>
@@ -517,7 +511,7 @@
                                     <polyline fill="none" stroke="#e11d48" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" points={charts.sgPoints} className="drop-shadow-[0_0_15px_rgba(225,29,72,0.4)]" />
                                     {charts.sgPoints.split(' ').map((p, i) => { const [x, y] = p.split(','); return <circle key={i} cx={x} cy={y} r="5" fill="#000" stroke="#e11d48" strokeWidth="3" />; })}
                                 </svg>
-                                <div className="flex justify-between text-[8px] mt-6 text-slate-700 font-black uppercase"><span>Low (1.020)</span><span>Ideal</span><span>High (1.030)</span></div>
+                                <div className="flex justify-between text-[8px] mt-6 text-slate-700 font-black uppercase tracking-widest"><span>Low (1.020)</span><span>Ideal</span><span>High (1.030)</span></div>
                             </GlassCard>
                             <GlassCard className="p-6 bg-black border-white/5 relative">
                                 <div className="text-[10px] font-black text-cyan-400 mb-6 tracking-widest uppercase text-center">Water Change (水換え量)</div>
@@ -530,7 +524,7 @@
                                     {charts.data.map((log, i) => (
                                         <div key={i} className="flex-1 flex flex-col items-center group relative z-10">
                                             <div className="bg-cyan-500/40 w-full rounded-t-sm transition-all group-hover:bg-cyan-400" style={{ height: `${(Math.min(log.waterChangeVolume || 0, 15) / 15) * 100}%`, minHeight: log.waterChangeVolume > 0 ? '2px' : '0' }} />
-                                            <div className="text-[6px] text-slate-800 mt-2 font-black">{log.date.getDate()}</div>
+                                            <div className="text-[6px] text-slate-800 mt-2 font-black font-mono">{log.date.getDate()}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -539,7 +533,7 @@
                     )}
                     <div className="space-y-4">
                         {logs.map(log => (
-                            <GlassCard key={log.id} className="p-5 bg-white/[0.01]">
+                            <GlassCard key={log.id} className="p-5 bg-white/[0.01] border-white/5">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <div className="text-[9px] text-slate-700 font-mono mb-2 uppercase">{log.date.toLocaleString()}</div>
@@ -575,7 +569,7 @@
                 setNewAdd({ name: '', dosePer10L: 1 });
             };
             return (
-                <div className="p-6 space-y-12">
+                <div className="p-6 space-y-12 animate-in">
                     <h2 className="text-xl font-black text-white tracking-widest uppercase">SETTINGS</h2>
                     <section className="space-y-4">
                         <label className="text-[10px] font-black tracking-widest text-slate-700 uppercase">System Total Volume (L)</label>
@@ -588,13 +582,13 @@
                         <label className="text-[10px] font-black tracking-widest text-slate-700 uppercase">Additive Database</label>
                         <GlassCard className="p-6 border-white/5 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                <input placeholder="名称 (Product Name)" value={newAdd.name} onChange={e => setNewAdd({...newAdd, name: e.target.value})} className="bg-black border border-white/10 p-4 rounded-xl text-sm" />
+                                <input placeholder="名称 (Product Name)" value={newAdd.name} onChange={e => setNewAdd({...newAdd, name: e.target.value})} className="bg-black border border-white/10 p-4 rounded-xl text-sm text-white" />
                                 <div className="flex items-center gap-2 bg-black rounded-xl border border-white/10 px-4">
                                     <input type="number" step="0.1" value={newAdd.dosePer10L} onChange={e => setNewAdd({...newAdd, dosePer10L: e.target.value})} className="bg-transparent w-full text-sm outline-none text-white" />
                                     <span className="text-[9px] text-slate-700 font-black uppercase">ml / 10L</span>
                                 </div>
                             </div>
-                            <Button onClick={addAdditive} className="w-full text-sm py-4 uppercase">Update Database</Button>
+                            <Button onClick={addAdditive} className="w-full text-sm py-4 uppercase tracking-widest">Update Database</Button>
                             <div className="space-y-3 pt-8 border-t border-white/5">
                                 {additives.map(a => (
                                     <div key={a.id} className="flex justify-between items-center p-5 bg-white/[0.01] rounded-2xl border border-white/5">
@@ -609,7 +603,7 @@
                         </GlassCard>
                     </section>
                     <div className="p-8 bg-white/5 rounded-3xl border border-white/5 flex gap-5 text-[10px] italic text-slate-600 leading-relaxed shadow-inner">
-                        <Icon name="shield-alert" className="text-[#e11d48]" />
+                        <Icon name="shield-alert" className="text-[#e11d48] shrink-0" />
                         <p>Telemetry & Configuration. iPhoneから写真を撮影してAI相談が可能です。水槽情報に基づき管理をサポートします。</p>
                     </div>
                 </div>
