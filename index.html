@@ -45,7 +45,7 @@
             background-color: rgba(8, 8, 8, 0.98);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            z-index: 1000; /* 確実に最前面へ */
+            z-index: 1000;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -54,7 +54,7 @@
             flex: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 120px; /* ナビと入力欄のスペース */
+            padding-bottom: 120px;
         }
 
         .tab-content { display: none; }
@@ -66,7 +66,7 @@
             color: white;
             font-weight: bold;
             border-radius: 0.75rem;
-            min-height: 44px; /* Apple標準の最小タップサイズ */
+            min-height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -149,8 +149,8 @@
         <section id="tab-chat" class="tab-content active space-y-6 pb-20">
             <div id="chat-messages" class="space-y-4">
                 <div class="flex justify-start">
-                    <div class="max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 border border-white/10 rounded-tl-none">
-                        Ready. 25Lタンクのデータに基づき解析を開始します。画像も送れます。
+                    <div class="max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 border border-white/10 rounded-tl-none shadow-lg">
+                        Ready. 25Lタンク（30cmキューブ想定）のデータに基づき解析を開始します。画像も送れます。
                     </div>
                 </div>
             </div>
@@ -160,12 +160,12 @@
         <section id="tab-equip" class="tab-content space-y-6">
             <div class="flex justify-between items-center px-2">
                 <h2 class="text-xl font-black uppercase tracking-widest">Equipment</h2>
-                <button onclick="toggleElement('equip-form')" class="p-2 bg-white/5 rounded-lg">
+                <button onclick="toggleElement('equip-form')" class="p-2 bg-white/5 rounded-lg active:bg-white/10">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
             </div>
             <div id="equip-form" class="hidden glass-card p-5 border-[#e11d48]/40 space-y-4">
-                <input id="eq-name" placeholder="Name / Model" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none">
+                <input id="eq-name" placeholder="Name / Model" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none text-white">
                 <div class="grid grid-cols-2 gap-3">
                     <select id="eq-cat" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
                         <option>スキマー</option><option>ポンプ</option><option>照明</option><option>ろ過装置</option>
@@ -182,12 +182,12 @@
         <section id="tab-live" class="tab-content space-y-8">
             <div class="flex justify-between items-center px-2">
                 <h2 class="text-xl font-black uppercase tracking-widest">Livestock</h2>
-                <button onclick="toggleElement('live-form')" class="p-2 bg-white/5 rounded-lg">
+                <button onclick="toggleElement('live-form')" class="p-2 bg-white/5 rounded-lg active:bg-white/10">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
             </div>
             <div id="live-form" class="hidden glass-card p-5 border-[#e11d48]/40 space-y-4">
-                <input id="lv-name" placeholder="Name / Species" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none">
+                <input id="lv-name" placeholder="Name / Species" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm outline-none text-white">
                 <div class="grid grid-cols-2 gap-3">
                     <select id="lv-cat" class="bg-black border border-white/10 p-4 rounded-xl text-xs text-white">
                         <option value="FISH">FISH</option><option value="CORALS">CORALS</option><option value="OTHERS">OTHERS</option>
@@ -203,7 +203,7 @@
         <section id="tab-logs" class="tab-content space-y-8">
             <div class="flex justify-between items-center px-2">
                 <h2 class="text-xl font-black uppercase tracking-widest">Logs</h2>
-                <button onclick="toggleElement('log-form')" class="p-2 bg-white/5 rounded-lg">
+                <button onclick="toggleElement('log-form')" class="p-2 bg-white/5 rounded-lg active:bg-white/10">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
             </div>
@@ -216,12 +216,12 @@
                 <div class="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-cyan-400 uppercase">Water Change</span>
-                        <input type="checkbox" id="log-wc-check" class="w-6 h-6 rounded bg-black">
+                        <input type="checkbox" id="log-wc-check" class="w-6 h-6 rounded bg-black border-white/20">
                     </div>
                     <input id="log-wc-vol" type="number" placeholder="Liters" class="w-full bg-black border border-white/10 p-3 rounded-lg text-sm text-white">
                 </div>
                 <div id="additive-inputs" class="space-y-2"></div>
-                <button onclick="addLog()" class="btn-rs w-full py-4 uppercase">Submit telemetry</button>
+                <button onclick="addLog()" class="btn-rs w-full py-4 uppercase tracking-widest">Submit telemetry</button>
             </div>
 
             <div class="space-y-4">
@@ -255,9 +255,12 @@
                         <input id="add-name" placeholder="Name" class="bg-black border border-white/10 p-3 rounded-lg text-sm text-white">
                         <input id="add-dose" type="number" step="0.1" placeholder="ml/10L" class="bg-black border border-white/10 p-3 rounded-lg text-sm text-white">
                     </div>
-                    <button onclick="addAdditiveToDB()" class="btn-rs w-full text-xs">ADD TO DATABASE</button>
+                    <button onclick="addAdditiveToDB()" class="btn-rs w-full text-xs uppercase tracking-widest">Add to Database</button>
                     <div id="add-list" class="space-y-2 pt-4 border-t border-white/5"></div>
                 </div>
+            </div>
+            <div class="px-2 pt-10">
+                <button onclick="clearLocalStorage()" class="w-full p-4 border border-red-900/50 rounded-xl text-red-500 text-xs font-bold uppercase tracking-widest active:bg-red-950/20 transition-all">Clear Local Cache</button>
             </div>
         </section>
     </main>
@@ -270,14 +273,14 @@
             </button>
             <input id="chat-file" type="file" class="hidden" accept="image/*">
             <input id="chat-input-text" type="text" placeholder="AIへ相談..." class="flex-1 bg-transparent px-2 text-sm outline-none text-white">
-            <button onclick="sendMessage()" class="bg-[#e11d48] px-6 rounded-2xl">
+            <button onclick="sendMessage()" class="bg-[#e11d48] px-6 rounded-2xl active:scale-95 transition-all shadow-lg shadow-rose-900/20">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
         </div>
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 flex">
+    <nav class="fixed bottom-0 left-0 right-0 flex shadow-2xl">
         <button onclick="switchTab('chat')" class="nav-item active" data-tab="chat">
             <div class="nav-icon-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
             <span class="text-[9px] font-black">CHAT</span>
@@ -311,10 +314,54 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rs-aqua-v3-standalone';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rs-aqua-pro-local-v1';
         const apiKey = ""; 
 
-        let state = { user: null, equipment: [], livestock: [], logs: [], additives: [], tankSettings: { volume: 25 } };
+        // --- State Management ---
+        let state = { 
+            user: null, 
+            equipment: [], 
+            livestock: [], 
+            logs: [], 
+            additives: [], 
+            tankSettings: { volume: 25 } 
+        };
+
+        const STORAGE_KEY = `aqua_pro_local_state_${appId}`;
+
+        // LocalStorage Logic
+        function saveStateToLocal() {
+            const dataToSave = {
+                equipment: state.equipment,
+                livestock: state.livestock,
+                logs: state.logs,
+                additives: state.additives,
+                tankSettings: state.tankSettings
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        }
+
+        function loadStateFromLocal() {
+            const localData = localStorage.getItem(STORAGE_KEY);
+            if (localData) {
+                const parsed = JSON.parse(localData);
+                state.equipment = parsed.equipment || [];
+                state.livestock = parsed.livestock || [];
+                state.logs = (parsed.logs || []).map(l => ({...l, date: new Date(l.date)}));
+                state.additives = parsed.additives || [];
+                state.tankSettings = parsed.tankSettings || { volume: 25 };
+                
+                // Initial UI Render from Local Data
+                refreshUI();
+            }
+        }
+
+        window.clearLocalStorage = () => {
+            if(confirm("ローカルのキャッシュデータを削除しますか？（クラウド上のデータは削除されません）")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
 
         // --- Tab Switching ---
         window.switchTab = (id) => {
@@ -335,18 +382,24 @@
             el.classList.toggle('hidden');
         };
 
-        // --- Data Fetching ---
+        // --- Data Fetching & Sync ---
         onAuthStateChanged(auth, async (user) => {
-            if (user) { state.user = user; initData(); }
-            else { await signInAnonymously(auth); }
+            loadStateFromLocal(); // クラウド同期前にローカルデータを読み込む
+            if (user) { 
+                state.user = user; 
+                initCloudSync(); 
+            } else { 
+                await signInAnonymously(auth); 
+            }
         });
 
-        function initData() {
+        function initCloudSync() {
             const uid = state.user.uid;
             const sub = (col, fn) => onSnapshot(query(collection(db, 'artifacts', appId, 'users', uid, col)), s => {
                 let data = s.docs.map(d => ({id: d.id, ...d.data()}));
                 fn(data);
-            }, e => console.error(e));
+                saveStateToLocal(); // クラウドからデータが来たらローカルにミラーリング
+            }, e => console.warn("Sync error (using local):", e));
 
             sub('equipment', d => { state.equipment = d; renderEquipment(); });
             sub('livestock', d => { state.livestock = d; renderLivestock(); });
@@ -355,13 +408,28 @@
                 renderLogs(); 
             });
             sub('additive_list', d => { state.additives = d; renderSettings(); renderAdditiveInputs(); });
+            
             onSnapshot(doc(db, 'artifacts', appId, 'users', uid, 'settings', 'tank'), d => {
                 if (d.exists()) {
                     state.tankSettings = d.data();
-                    document.getElementById('tank-vol-display').innerText = `TANK: ${state.tankSettings.volume}L`;
-                    document.getElementById('set-vol').value = state.tankSettings.volume;
+                    saveStateToLocal();
+                    refreshTankUI();
                 }
             });
+        }
+
+        function refreshUI() {
+            renderEquipment();
+            renderLivestock();
+            renderLogs();
+            renderSettings();
+            renderAdditiveInputs();
+            refreshTankUI();
+        }
+
+        function refreshTankUI() {
+            document.getElementById('tank-vol-display').innerText = `TANK: ${state.tankSettings.volume}L`;
+            document.getElementById('set-vol').value = state.tankSettings.volume;
         }
 
         // --- Renderers ---
@@ -431,7 +499,7 @@
             const list = document.getElementById('log-history');
             const recent = [...state.logs].slice(0, 10).reverse();
 
-            // Minimal Chart Logic
+            // Chart Logic
             const drawChart = (id, color, vals, min, max) => {
                 const el = document.getElementById(id);
                 if (vals.length < 2) { el.innerHTML = ''; return; }
@@ -481,9 +549,16 @@
         window.addEquipment = async () => {
             const name = document.getElementById('eq-name').value;
             if (!name) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'equipment'), {
+            const item = {
                 name, category: document.getElementById('eq-cat').value,
-                installDate: document.getElementById('eq-date').value, dateAdded: Timestamp.now()
+                installDate: document.getElementById('eq-date').value, dateAdded: new Date()
+            };
+            // Local Update
+            state.equipment.push(item);
+            saveStateToLocal(); renderEquipment();
+            // Cloud Update
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'equipment'), {
+                ...item, dateAdded: Timestamp.now()
             });
             document.getElementById('eq-name').value = '';
             toggleElement('equip-form');
@@ -492,9 +567,16 @@
         window.addLivestock = async () => {
             const name = document.getElementById('lv-name').value;
             if (!name) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'livestock'), {
+            const item = {
                 name, type: document.getElementById('lv-cat').value,
-                installDate: document.getElementById('lv-date').value, dateAdded: Timestamp.now()
+                installDate: document.getElementById('lv-date').value, dateAdded: new Date()
+            };
+            // Local Update
+            state.livestock.push(item);
+            saveStateToLocal(); renderLivestock();
+            // Cloud Update
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'livestock'), {
+                ...item, dateAdded: Timestamp.now()
             });
             document.getElementById('lv-name').value = '';
             toggleElement('live-form');
@@ -504,34 +586,55 @@
             const entries = [];
             const addName = document.getElementById('log-add-name').value;
             const drops = parseInt(document.getElementById('log-add-drop').value) || 0;
+            const DROP_TO_ML = 0.05;
             if (addName) entries.push({ name: addName, drops, ml: (drops * DROP_TO_ML).toFixed(2) });
 
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'salinity_logs'), {
+            const logEntry = {
                 value: parseFloat(document.getElementById('log-sg').value),
                 waterChange: document.getElementById('log-wc-check').checked,
                 waterChangeVolume: parseFloat(document.getElementById('log-wc-vol').value) || 0,
                 additiveEntries: entries,
-                date: Timestamp.now()
+                date: new Date()
+            };
+            // Local Update
+            state.logs.unshift(logEntry);
+            saveStateToLocal(); renderLogs();
+            // Cloud Update
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'salinity_logs'), {
+                ...logEntry, date: Timestamp.now()
             });
             toggleElement('log-form');
         };
 
         window.saveTankSettings = async () => {
             const volume = parseFloat(document.getElementById('set-vol').value);
+            state.tankSettings.volume = volume;
+            saveStateToLocal();
+            refreshTankUI();
             await setDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, 'settings', 'tank'), { volume });
         };
 
         window.addAdditiveToDB = async () => {
             const name = document.getElementById('add-name').value;
+            const dose = parseFloat(document.getElementById('add-dose').value) || 1;
             if (!name) return;
-            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'additive_list'), {
-                name, dosePer10L: parseFloat(document.getElementById('add-dose').value)
-            });
+            const item = { name, dosePer10L: dose };
+            // Local Update
+            state.additives.push(item);
+            saveStateToLocal(); renderSettings(); renderAdditiveInputs();
+            // Cloud Update
+            await addDoc(collection(db, 'artifacts', appId, 'users', state.user.uid, 'additive_list'), item);
             document.getElementById('add-name').value = '';
         };
 
         window.removeItem = async (col, id) => {
-            if (confirm("Remove?")) await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, col, id));
+            if (confirm("Remove?")) {
+                // Local filter (Note: id only exists for cloud-synced items, simple state sync handles local-only)
+                state[col] = state[col].filter(i => i.id !== id);
+                saveStateToLocal();
+                refreshUI();
+                if(id && state.user) await deleteDoc(doc(db, 'artifacts', appId, 'users', state.user.uid, col, id));
+            }
         };
 
         window.sendMessage = async () => {
@@ -547,12 +650,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ role: "user", parts: [{ text }] }],
-                        systemInstruction: { parts: [{ text: "アクアリストとして日本語で回答してください。" }] }
+                        systemInstruction: { parts: [{ text: "プロのアクアリストとして、Red Sea製などの機材や比重データに基づき日本語で回答してください。30cmキューブ水槽（25L）の管理に詳しいです。" }] }
                     })
                 });
                 const data = await response.json();
                 const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "...";
-                box.innerHTML += `<div class="flex justify-start"><div class="max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 border border-white/10 rounded-tl-none">${reply}</div></div>`;
+                box.innerHTML += `<div class="flex justify-start"><div class="max-w-[85%] p-4 rounded-2xl text-sm bg-white/5 border border-white/10 rounded-tl-none shadow-md">${reply}</div></div>`;
             } catch(e) { console.error(e); }
             document.getElementById('scroll-area').scrollTop = document.getElementById('scroll-area').scrollHeight;
         };
