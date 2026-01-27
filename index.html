@@ -37,7 +37,6 @@
         .active-tab { color: var(--rs-red); }
         .active-tab svg { filter: drop-shadow(0 0 4px var(--rs-red)); }
         
-        /* スクロールエリア */
         .content-area {
             height: calc(100dvh - 64px - 64px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
             overflow-y: auto;
@@ -54,6 +53,7 @@
             padding: 12px;
             border-radius: 12px;
             outline: none;
+            width: 100%;
         }
         input:focus { border-color: var(--rs-cyan); }
 
@@ -64,14 +64,27 @@
             border-radius: 16px;
         }
 
-        /* Modal Animation */
+        .ai-gradient {
+            background: linear-gradient(135deg, #4f46e5, #9333ea, #db2777);
+            background-size: 200% 200%;
+            animation: moveGradient 4s ease infinite;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         #modal-container { transition: opacity 0.3s ease; }
         #modal-content { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .loading-pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="safe-top safe-bottom">
 
-    <!-- App Header -->
     <header class="px-6 py-4 flex justify-between items-center glass border-b border-white/5 sticky top-0 z-50">
         <div>
             <h1 class="text-xs font-black tracking-[0.2em] text-gray-500 uppercase">Marine System</h1>
@@ -84,7 +97,6 @@
         <div id="tank-name-display" class="text-[10px] text-cyan-400 font-mono bg-cyan-950/30 px-3 py-1 rounded-full border border-cyan-800/50">--</div>
     </header>
 
-    <!-- Main Content -->
     <main id="app-content" class="content-area px-5 py-6">
         <!-- JS injects here -->
     </main>
@@ -92,7 +104,7 @@
     <!-- Modal Overlay -->
     <div id="modal-container" class="fixed inset-0 z-[100] hidden">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
-        <div id="modal-content" class="absolute bottom-0 left-0 right-0 glass rounded-t-3xl border-t border-white/10 p-8 transform translate-y-full">
+        <div id="modal-content" class="absolute bottom-0 left-0 right-0 glass rounded-t-3xl border-t border-white/10 p-8 transform translate-y-full max-h-[95dvh] overflow-y-auto">
             <div id="modal-body"></div>
         </div>
     </div>
@@ -123,7 +135,11 @@
 
     <script>
         const DEFAULT_STATE = {
-            settings: { tankName: "30cm Cube", volume: 27 },
+            settings: { 
+                tankName: "30cm Cube", 
+                volume: 27,
+                additives: ["カルシウム", "マグネシウム", "KHアップ"]
+            },
             equipment: [
                 { id: 1, name: "ReefLED 50", category: "LIGHT", date: "2025-01-10" },
                 { id: 2, name: "ライブロック", category: "ROCK", date: "2025-01-10" }
@@ -132,23 +148,59 @@
                 { id: 1, name: "カクレクマノミ", category: "FISH", note: "ペア" }
             ],
             logs: [
-                { date: "2026-01-20", salinity: 1.023, waterChange: 5 },
-                { date: "2026-01-23", salinity: 1.024, waterChange: 0 },
-                { date: "2026-01-25", salinity: 1.025, waterChange: 8 }
+                { id: 1, date: "2026-01-20", salinity: 1.023, waterChange: 5, additives: [] },
+                { id: 2, date: "2026-01-23", salinity: 1.024, waterChange: 0, additives: [{name: "カルシウム", drops: 20}] },
+                { id: 3, date: "2026-01-25", salinity: 1.025, waterChange: 8, additives: [] }
             ],
             chatHistory: []
         };
 
-        let state = JSON.parse(localStorage.getItem('aqua_pro_v2')) || DEFAULT_STATE;
+        let state = JSON.parse(localStorage.getItem('aqua_pro_v6')) || DEFAULT_STATE;
         let currentPage = 'LOGS';
         const apiKey = "";
+        let isAiThinking = false;
+        let selectedImageBase64 = null;
 
+        // --- Core Helpers ---
         function save() {
-            localStorage.setItem('aqua_pro_v2', JSON.stringify(state));
+            localStorage.setItem('aqua_pro_v6', JSON.stringify(state));
             document.getElementById('tank-name-display').innerText = `${state.settings.tankName} / ${state.settings.volume}L`;
         }
 
-        // --- Custom Modal System ---
+        async function callGemini(prompt, systemPrompt = "", imageBase64 = null) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        ...(imageBase64 ? [{ inlineData: { mimeType: "image/png", data: imageBase64.split(',')[1] } }] : [])
+                    ]
+                }],
+                systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined
+            };
+
+            const fetchWithRetry = async (retries = 5, delay = 1000) => {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    if (retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchWithRetry(retries - 1, delay * 2);
+                    }
+                    throw error;
+                }
+            };
+
+            const data = await fetchWithRetry();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "回答を生成できませんでした。";
+        }
+
         function openModal(contentHtml) {
             const container = document.getElementById('modal-container');
             const content = document.getElementById('modal-content');
@@ -168,7 +220,6 @@
             setTimeout(() => container.classList.add('hidden'), 300);
         }
 
-        // --- Router ---
         function router(page) {
             currentPage = page;
             render();
@@ -193,24 +244,41 @@
         function renderChat(el) {
             el.innerHTML = `
                 <div class="flex flex-col h-full relative">
-                    <div id="chat-messages" class="flex-1 space-y-6 pb-24">
+                    <div id="chat-messages" class="flex-1 space-y-6 pb-32">
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">AI</div>
                             <div class="bg-white/5 p-4 rounded-2xl rounded-tl-none text-sm leading-relaxed border border-white/5">
-                                AQUA CONTROL PRO へようこそ。水槽のデータに基づき、最適なメンテナンスプランをご提案します。
+                                こんにちは。アクアリウムに関するお悩みは何でもお任せください。
                             </div>
                         </div>
                         ${state.chatHistory.map(m => `
                             <div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} gap-3">
                                 ${m.role === 'model' ? '<div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">AI</div>' : ''}
                                 <div class="p-4 rounded-2xl ${m.role === 'user' ? 'bg-red-600 rounded-tr-none' : 'bg-white/5 rounded-tl-none border border-white/5'} text-sm leading-relaxed max-w-[85%]">
+                                    ${m.image ? `<img src="${m.image}" class="rounded-lg mb-2 max-h-48">` : ''}
                                     ${m.text}
                                 </div>
                             </div>
                         `).join('')}
+                        ${isAiThinking ? `
+                            <div class="flex gap-3 loading-pulse">
+                                <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">AI</div>
+                                <div class="bg-white/5 p-4 rounded-2xl rounded-tl-none text-xs border border-white/5 italic text-gray-400">分析中...</div>
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="fixed bottom-24 left-5 right-5 z-40">
+                        ${selectedImageBase64 ? `
+                            <div class="relative inline-block mb-2">
+                                <img src="${selectedImageBase64}" class="w-16 h-16 rounded-lg border-2 border-cyan-400 object-cover">
+                                <button onclick="clearImage()" class="absolute -top-2 -right-2 bg-red-600 rounded-full w-5 h-5 text-[10px] flex items-center justify-center">×</button>
+                            </div>
+                        ` : ''}
                         <div class="glass p-2 rounded-2xl border border-white/10 flex gap-2 shadow-2xl">
+                            <input type="file" id="image-upload" class="hidden" accept="image/*" onchange="handleImageSelect(event)">
+                            <button onclick="document.getElementById('image-upload').click()" class="w-12 h-12 rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </button>
                             <input id="chat-input" type="text" class="flex-1 bg-transparent border-none p-3 text-sm" placeholder="AIに相談する...">
                             <button onclick="sendChat()" class="bg-red-600 w-12 h-12 rounded-xl flex items-center justify-center btn-press">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
@@ -226,58 +294,47 @@
         async function sendChat() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
-            if(!text) return;
-            state.chatHistory.push({ role: 'user', text });
-            input.value = '';
-            renderChat(document.getElementById('app-content'));
-
-            const systemPrompt = `あなたはマリンアクアリウムの専門家です。
-                水槽名: ${state.settings.tankName} (${state.settings.volume}L)
-                設備: ${state.equipment.map(e => e.name).join(', ')}
-                生体: ${state.lives.map(l => l.name).join(', ')}
-                最新ログ: ${JSON.stringify(state.logs.slice(-2))}
-                これらに基づき、高級ホテルのコンシェルジュのような丁寧な口調で回答してください。`;
-
+            if(!text && !selectedImageBase64) return;
+            const currentImg = selectedImageBase64;
+            state.chatHistory.push({ role: 'user', text: text || "画像を分析してください", image: currentImg });
+            input.value = ''; selectedImageBase64 = null;
+            isAiThinking = true; renderChat(document.getElementById('app-content'));
+            const systemPrompt = `水槽コンシェルジュ。水槽: ${state.settings.tankName}, ${state.settings.volume}L. 丁寧な敬語。`;
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
-                const data = await res.json();
-                state.chatHistory.push({ role: 'model', text: data.candidates[0].content.parts[0].text });
+                const response = await callGemini(text || "分析中...", systemPrompt, currentImg);
+                state.chatHistory.push({ role: 'model', text: response });
                 save();
-                render();
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { state.chatHistory.push({ role: 'model', text: "エラーが発生しました。" }); }
+            finally { isAiThinking = false; renderChat(document.getElementById('app-content')); }
         }
+
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (re) => { selectedImageBase64 = re.target.result; renderChat(document.getElementById('app-content')); };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() { selectedImageBase64 = null; renderChat(document.getElementById('app-content')); }
 
         function renderEquip(el) {
             el.innerHTML = `
                 <div class="space-y-6">
                     <div class="flex justify-between items-end">
                         <h2 class="text-2xl font-bold tracking-tight">EQUIPMENT</h2>
-                        <span class="text-cyan-400 text-[10px] font-mono mb-1">SYSTEMS ONLINE</span>
+                        <button onclick="aiSetupReview()" class="ai-gradient px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase flex items-center gap-2">✨ 診断</button>
                     </div>
                     <div class="grid gap-4">
                         ${state.equipment.map(e => `
-                            <div class="card p-4 flex items-center justify-between group">
+                            <div class="card p-4 flex items-center justify-between">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5">
                                         <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </div>
-                                    <div>
-                                        <div class="font-bold">${e.name}</div>
-                                        <div class="text-[10px] text-gray-500 uppercase tracking-widest">${e.category} • ${e.date}</div>
-                                    </div>
+                                    <div><div class="font-bold">${e.name}</div><div class="text-[10px] text-gray-500 uppercase">${e.category}</div></div>
                                 </div>
-                                <button onclick="deleteItem('equipment', ${e.id})" class="text-gray-700 hover:text-red-500 p-2 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
+                                <button onclick="deleteItem('equipment', ${e.id})" class="text-gray-700 hover:text-red-500 p-2">×</button>
                             </div>
                         `).join('')}
                     </div>
@@ -286,21 +343,31 @@
             `;
         }
 
+        async function aiSetupReview() {
+            openModal(`<div class="loading-pulse py-8 text-center text-xs">分析中...</div>`);
+            const prompt = `水量${state.settings.volume}L, 設備${state.equipment.map(e=>e.name)}.`;
+            try {
+                const response = await callGemini(prompt, "システムレビュー担当。");
+                openModal(`<div class="space-y-4"><h3 class="text-lg font-bold">✨ AI診断</h3><div class="text-sm text-gray-300 whitespace-pre-wrap">${response}</div><button onclick="closeModal()" class="w-full bg-white/10 py-4 rounded-xl font-bold mt-4">閉じる</button></div>`);
+            } catch (e) { closeModal(); }
+        }
+
         function renderLives(el) {
             el.innerHTML = `
                 <div class="space-y-6">
                     <div class="flex justify-between items-end">
                         <h2 class="text-2xl font-bold tracking-tight">LIVES</h2>
-                        <span class="text-red-500 text-[10px] font-mono mb-1">BIOTA STATUS</span>
+                        <button onclick="aiCompatibilityCheck()" class="ai-gradient px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase">✨ 相性診断</button>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         ${state.lives.map(l => `
-                            <div class="card p-5 relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-16 h-16 bg-red-600/10 rounded-bl-full -mr-8 -mt-8"></div>
-                                <div class="text-[9px] text-cyan-400 font-bold mb-1 tracking-tighter opacity-70">${l.category}</div>
+                            <div class="card p-5 relative">
+                                <div class="text-[9px] text-cyan-400 font-bold mb-1 opacity-70 uppercase tracking-tighter">${l.category}</div>
                                 <div class="font-bold text-lg leading-tight mb-2">${l.name}</div>
-                                <div class="text-[10px] text-gray-500">${l.note || 'No notes'}</div>
-                                <button onclick="deleteItem('lives', ${l.id})" class="mt-4 text-[10px] text-red-900 font-bold uppercase tracking-widest">Remove</button>
+                                <div class="flex items-center justify-between mt-auto">
+                                    <button onclick="aiLifeProfile(${l.id})" class="text-[9px] font-bold text-gray-400 hover:text-white uppercase border border-white/10 px-2 py-1 rounded">✨ ガイド</button>
+                                    <button onclick="deleteItem('lives', ${l.id})" class="text-red-900 p-1">×</button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -309,9 +376,28 @@
             `;
         }
 
+        async function aiLifeProfile(id) {
+            const life = state.lives.find(l=>l.id===id);
+            openModal(`<div class="loading-pulse py-8 text-center text-xs">検索中...</div>`);
+            try {
+                const response = await callGemini(`${life.name}の飼育ガイド。`, "海洋生物学者として回答。");
+                openModal(`<div class="space-y-4"><h3 class="text-lg font-bold">✨ ${life.name} ガイド</h3><div class="text-sm text-gray-300 whitespace-pre-wrap">${response}</div><button onclick="closeModal()" class="w-full bg-white/10 py-4 rounded-xl font-bold mt-4">閉じる</button></div>`);
+            } catch (e) { closeModal(); }
+        }
+
+        async function aiCompatibilityCheck() {
+            openModal(`<div class="loading-pulse py-8 text-center text-xs">診断中...</div>`);
+            try {
+                const response = await callGemini(`生体リスト: ${state.lives.map(l=>l.name).join(', ')}.`, "相性分析。");
+                openModal(`<div class="space-y-4"><h3 class="text-lg font-bold">相性診断</h3><div class="text-sm text-gray-300 whitespace-pre-wrap">${response}</div><button onclick="closeModal()" class="w-full bg-white/10 py-4 rounded-xl font-bold mt-4">閉じる</button></div>`);
+            } catch (e) { closeModal(); }
+        }
+
         function renderLogs(el) {
             const maxSal = 1.030, minSal = 1.020;
-            const points = state.logs.slice(-7).map((l, i) => {
+            const logData = [...state.logs].sort((a,b) => new Date(a.date) - new Date(b.date));
+            const recentLogs = logData.slice(-7);
+            const points = recentLogs.map((l, i) => {
                 const x = (i / 6) * 100;
                 const y = 100 - ((l.salinity - minSal) / (maxSal - minSal) * 100);
                 return `${x},${y}`;
@@ -319,211 +405,191 @@
 
             el.innerHTML = `
                 <div class="space-y-8">
+                    <!-- Prominent New Log Button at top -->
+                    <button onclick="showLogForm()" class="w-full bg-red-600 py-5 rounded-2xl font-black tracking-[0.3em] text-sm btn-press shadow-2xl shadow-red-600/20 sticky top-0 z-10 uppercase">
+                        + NEW LOG ENTRY
+                    </button>
+
                     <div class="flex justify-between items-end">
                         <h2 class="text-2xl font-bold tracking-tight">ANALYTICS</h2>
-                        <span class="text-gray-500 text-[10px] font-mono mb-1">${new Date().toLocaleDateString()}</span>
+                        <button onclick="aiMaintenancePlan()" class="ai-gradient px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase">✨ トレンド分析</button>
                     </div>
 
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Salinity Trace</span>
-                            <span class="text-xs text-cyan-400 font-mono">1.020 - 1.030 SG</span>
-                        </div>
                         <div class="card p-6 h-40 relative">
                             <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="w-full h-full overflow-visible">
-                                <defs>
-                                    <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="var(--rs-cyan)" />
-                                        <stop offset="100%" stop-color="transparent" stop-opacity="0" />
-                                    </linearGradient>
-                                </defs>
-                                <path d="M ${points} V 100 H 0 Z" fill="url(#lineGrad)" opacity="0.1" />
                                 <path d="M ${points}" fill="none" stroke="var(--rs-cyan)" stroke-width="2" vector-effect="non-scaling-stroke" />
-                                ${state.logs.slice(-7).map((l, i) => `
-                                    <circle cx="${(i/6)*100}" cy="${100 - ((l.salinity - minSal) / (maxSal - minSal) * 100)}" r="1.5" fill="white" />
-                                `).join('')}
+                                ${recentLogs.map((l, i) => `<circle cx="${(i/6)*100}" cy="${100 - ((l.salinity - minSal) / (maxSal - minSal) * 100)}" r="1.5" fill="white" />`).join('')}
                             </svg>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                         <div class="card p-4">
-                            <div class="text-[9px] text-gray-500 uppercase font-bold tracking-widest mb-1">Avg Water Change</div>
-                            <div class="text-2xl font-bold flex items-baseline gap-1">5.2 <span class="text-xs text-gray-500">L/wk</span></div>
-                         </div>
-                         <div class="card p-4">
-                            <div class="text-[9px] text-gray-500 uppercase font-bold tracking-widest mb-1">Status</div>
-                            <div class="text-2xl font-bold text-green-500 flex items-center gap-2">
-                                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                Stable
-                            </div>
-                         </div>
-                    </div>
-
-                    <div class="card p-6 space-y-5">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-[0.2em]">Dosing Calculator</h3>
-                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center"><h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Maintenance History</h3></div>
+                        <div class="space-y-3">
+                            ${state.logs.slice().reverse().map(l => `
+                                <div class="card p-4 flex justify-between items-center" onclick="showLogForm(${l.id})">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-1"><span class="text-xs font-bold text-gray-400 font-mono">${l.date}</span><span class="text-xs px-2 py-0.5 rounded bg-cyan-900/30 text-cyan-400 font-bold">SG ${l.salinity}</span></div>
+                                        <div class="flex flex-wrap gap-2 text-[10px]">
+                                            ${l.waterChange > 0 ? `<span class="text-red-400">WC: ${l.waterChange}L</span>` : ''}
+                                            ${l.additives?.map(a => `<span class="text-gray-500">${a.name}: ${a.drops}滴 (${(a.drops * 0.05).toFixed(2)}ml)</span>`).join('') || ''}
+                                        </div>
+                                    </div>
+                                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                                </div>
+                            `).join('')}
                         </div>
-                        <div class="flex gap-4 items-center">
-                            <div class="flex-1">
-                                <label class="text-[9px] text-gray-500 block mb-2 font-bold uppercase tracking-widest">Base (ml/10L)</label>
-                                <input type="number" id="dose-base" class="w-full text-lg font-bold bg-white/5 border-white/10" value="1.0" step="0.1" oninput="calcDose()">
-                            </div>
-                            <div class="flex-1 text-right">
-                                <label class="text-[9px] text-gray-500 block mb-2 font-bold uppercase tracking-widest">Required Dose</label>
-                                <div id="dose-result" class="text-3xl font-black text-red-500">0.0<span class="text-xs ml-1">ml</span></div>
-                            </div>
-                        </div>
-                        <div class="pt-4 border-t border-white/5 flex justify-between items-center">
-                            <span class="text-[10px] text-gray-500 uppercase tracking-widest">Equivalent Drops</span>
-                            <span id="dose-drops" class="text-lg font-bold text-white font-mono">0</span>
-                        </div>
-                    </div>
-
-                    <button onclick="showAddLogModal()" class="w-full bg-red-600 py-4 rounded-2xl font-bold tracking-widest text-xs btn-press">NEW LOG ENTRY</button>
-                </div>
-            `;
-            calcDose();
-        }
-
-        function calcDose() {
-            const base = parseFloat(document.getElementById('dose-base')?.value || 0);
-            const resultMl = (state.settings.volume / 10) * base;
-            const drops = Math.round(resultMl / 0.05);
-            if(document.getElementById('dose-result')) {
-                document.getElementById('dose-result').innerHTML = `${resultMl.toFixed(1)}<span class="text-xs ml-1">ml</span>`;
-                document.getElementById('dose-drops').innerText = drops;
-            }
-        }
-
-        function renderSettings(el) {
-            el.innerHTML = `
-                <div class="space-y-8">
-                    <h2 class="text-2xl font-bold tracking-tight uppercase">Settings</h2>
-                    <div class="card p-6 space-y-6">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Tank Identifier</label>
-                                <input type="text" id="set-name" class="w-full" value="${state.settings.tankName}">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Total Volume (Liters)</label>
-                                <input type="number" id="set-vol" class="w-full" value="${state.settings.volume}">
-                            </div>
-                        </div>
-                        <button onclick="updateSettings()" class="w-full bg-cyan-600 py-4 rounded-2xl font-bold tracking-widest text-xs btn-press">SYNC CONFIGURATION</button>
-                    </div>
-
-                    <div class="pt-20 text-center">
-                        <button onclick="resetData()" class="text-red-900 text-[10px] font-bold uppercase tracking-[0.3em]">Purge System Data</button>
                     </div>
                 </div>
             `;
         }
 
-        // --- Action Modals ---
+        async function aiMaintenancePlan() {
+            openModal(`<div class="loading-pulse py-8 text-center text-xs text-gray-500 uppercase">Analyzing trends...</div>`);
+            try {
+                const response = await callGemini(`水量${state.settings.volume}L, ログ${JSON.stringify(state.logs.slice(-3))}.`, "メンテ担当。");
+                openModal(`<div class="space-y-4"><h3 class="text-lg font-bold">✨ トレンド診断</h3><div class="text-sm text-gray-300 whitespace-pre-wrap">${response}</div><button onclick="closeModal()" class="w-full bg-white/10 py-4 rounded-xl font-bold mt-4">了解</button></div>`);
+            } catch (e) { closeModal(); }
+        }
 
-        function showAddEquipModal() {
+        // --- Log Form ---
+        function showLogForm(id = null) {
+            const entry = id ? state.logs.find(l => l.id === id) : { date: new Date().toISOString().split('T')[0], salinity: 1.024, waterChange: 0, additives: [] };
+            const ads = entry.additives || [];
+            
             openModal(`
-                <h3 class="text-xl font-bold mb-6">New Equipment</h3>
-                <div class="space-y-4">
-                    <input type="text" id="m-name" placeholder="Device Name (e.g. Skimmer)" class="w-full">
-                    <select id="m-cat" class="w-full">
-                        <option value="LIGHT">LIGHTING</option>
-                        <option value="PUMP">WATER FLOW</option>
-                        <option value="FILTER">FILTRATION</option>
-                        <option value="ROCK">AQUASCAPE</option>
-                        <option value="OTHER">OTHERS</option>
-                    </select>
-                    <button onclick="addEquipAction()" class="w-full bg-red-600 py-4 rounded-xl font-bold mt-4 btn-press">CONFIRM ADD</button>
+                <h3 class="text-xl font-bold mb-6 tracking-tight">${id ? 'Edit Entry' : 'New Maintenance Log'}</h3>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-[10px] font-bold text-gray-500 uppercase block mb-1 tracking-widest">Date</label><input type="date" id="l-date" value="${entry.date}"></div>
+                        <div><label class="text-[10px] font-bold text-gray-500 uppercase block mb-1 tracking-widest">Salinity SG</label><input type="number" id="l-sal" step="0.001" value="${entry.salinity}"></div>
+                    </div>
+                    <div><label class="text-[10px] font-bold text-gray-500 uppercase block mb-1 tracking-widest">Water Change (L)</label><input type="number" id="l-wc" value="${entry.waterChange}"></div>
+                    
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase block tracking-widest">Additives (3 Slots)</label>
+                        ${[0, 1, 2].map(i => `
+                            <div class="flex gap-2 items-center">
+                                <select id="l-an-${i}" class="flex-1">
+                                    <option value="">- 選択 -</option>
+                                    ${state.settings.additives.map(name => `<option value="${name}" ${ads[i]?.name === name ? 'selected' : ''}>${name}</option>`).join('')}
+                                </select>
+                                <div class="w-32 relative">
+                                    <input type="number" id="l-av-${i}" placeholder="滴" class="pr-8" value="${ads[i]?.drops || ''}" oninput="updateMlHint(${i})">
+                                    <span class="absolute right-3 top-3 text-[10px] text-gray-500">滴</span>
+                                </div>
+                            </div>
+                            <div id="ml-hint-${i}" class="text-[9px] text-right text-gray-600 mt-[-8px]">
+                                ${ads[i] ? (ads[i].drops * 0.05).toFixed(2) + ' ml' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        ${id ? `<button onclick="deleteItem('logs', ${id}); closeModal();" class="flex-1 bg-red-900/50 text-red-500 py-4 rounded-xl font-bold text-xs uppercase tracking-widest">Delete</button>` : ''}
+                        <button onclick="saveLog(${id})" class="flex-[2] bg-red-600 py-4 rounded-xl font-bold text-xs uppercase tracking-widest btn-press">Record Entry</button>
+                    </div>
                 </div>
             `);
         }
 
+        function updateMlHint(i) {
+            const drops = document.getElementById(`l-av-${i}`).value;
+            const hint = document.getElementById(`ml-hint-${i}`);
+            if(drops) {
+                hint.innerText = (parseFloat(drops) * 0.05).toFixed(2) + ' ml';
+            } else {
+                hint.innerText = '';
+            }
+        }
+
+        function saveLog(id) {
+            const date = document.getElementById('l-date').value, sal = parseFloat(document.getElementById('l-sal').value), wc = parseFloat(document.getElementById('l-wc').value), additives = [];
+            for(let i=0; i<3; i++){
+                const name = document.getElementById(`l-an-${i}`).value, drops = parseFloat(document.getElementById(`l-av-${i}`).value);
+                if(name && !isNaN(drops)) additives.push({ name, drops });
+            }
+            if(id) { const idx = state.logs.findIndex(l => l.id === id); state.logs[idx] = { id, date, salinity: sal, waterChange: wc, additives }; }
+            else { state.logs.push({ id: Date.now(), date, salinity: sal, waterChange: wc, additives }); }
+            save(); closeModal(); render();
+        }
+
+        function renderSettings(el) {
+            el.innerHTML = `
+                <div class="space-y-8 pb-20">
+                    <h2 class="text-2xl font-bold tracking-tight uppercase">Settings</h2>
+                    <div class="card p-6 space-y-6">
+                        <div class="space-y-4">
+                            <div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Tank Identifier</label><input type="text" id="set-name" value="${state.settings.tankName}"></div>
+                            <div><label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Total Volume (L)</label><input type="number" id="set-vol" value="${state.settings.volume}"></div>
+                        </div>
+                        <button onclick="updateSettings()" class="w-full bg-cyan-600 py-4 rounded-2xl font-bold tracking-widest text-xs btn-press">SYNC CONFIG</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Additives Management</h3>
+                        <div class="card p-4 space-y-4">
+                            <div class="flex gap-2">
+                                <input type="text" id="new-additive-name" placeholder="添加剤名 (例: KH)" class="flex-1">
+                                <button onclick="addAdditiveType()" class="bg-white text-black px-4 rounded-xl text-xs font-bold">ADD</button>
+                            </div>
+                            <div class="space-y-2">
+                                ${state.settings.additives.map((name, idx) => `
+                                    <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                                        <span class="text-sm">${name}</span>
+                                        <button onclick="removeAdditiveType(${idx})" class="text-red-900 p-1 text-xs">Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-10 text-center"><button onclick="resetData()" class="text-red-900 text-[10px] font-bold tracking-[0.3em]">Purge System Data</button></div>
+                </div>
+            `;
+        }
+
+        function addAdditiveType() {
+            const name = document.getElementById('new-additive-name').value.trim();
+            if(name) {
+                state.settings.additives.push(name);
+                save(); render();
+            }
+        }
+
+        function removeAdditiveType(idx) {
+            state.settings.additives.splice(idx, 1);
+            save(); render();
+        }
+
+        function updateSettings() { state.settings.tankName = document.getElementById('set-name').value; state.settings.volume = parseFloat(document.getElementById('set-vol').value); save(); render(); alert('UPDATED'); }
+
+        function showAddEquipModal() {
+            openModal(`<h3 class="text-xl font-bold mb-6">New Equipment</h3><div class="space-y-4"><input type="text" id="m-name" placeholder="Device Name"><select id="m-cat"><option value="LIGHT">LIGHTING</option><option value="PUMP">WATER FLOW</option><option value="FILTER">FILTRATION</option><option value="ROCK">AQUASCAPE</option><option value="OTHER">OTHERS</option></select><button onclick="addEquipAction()" class="w-full bg-red-600 py-4 rounded-xl font-bold mt-4">CONFIRM</button></div>`);
+        }
+
         function addEquipAction() {
-            const name = document.getElementById('m-name').value;
-            const cat = document.getElementById('m-cat').value;
+            const name = document.getElementById('m-name').value, cat = document.getElementById('m-cat').value;
             if(!name) return;
             state.equipment.push({ id: Date.now(), name, category: cat, date: new Date().toISOString().split('T')[0] });
             save(); closeModal(); render();
         }
 
         function showAddLiveModal() {
-            openModal(`
-                <h3 class="text-xl font-bold mb-6">Add Biota</h3>
-                <div class="space-y-4">
-                    <input type="text" id="m-name" placeholder="Species Name" class="w-full">
-                    <select id="m-cat" class="w-full">
-                        <option value="FISH">FISH</option>
-                        <option value="CORAL">CORALS</option>
-                        <option value="INVERTS">INVERTEBRATES</option>
-                    </select>
-                    <textarea id="m-note" placeholder="Note..." class="w-full h-24"></textarea>
-                    <button onclick="addLiveAction()" class="w-full bg-red-600 py-4 rounded-xl font-bold mt-4 btn-press">ADD TO SYSTEM</button>
-                </div>
-            `);
+            openModal(`<h3 class="text-xl font-bold mb-6">Add Biota</h3><div class="space-y-4"><input type="text" id="m-name" placeholder="Species Name"><select id="m-cat"><option value="FISH">FISH</option><option value="CORAL">CORALS</option><option value="INVERTS">INVERTEBRATES</option></select><textarea id="m-note" placeholder="Note..." class="h-24"></textarea><button onclick="addLiveAction()" class="w-full bg-red-600 py-4 rounded-xl font-bold mt-4">ADD TO SYSTEM</button></div>`);
         }
 
         function addLiveAction() {
-            const name = document.getElementById('m-name').value;
-            const cat = document.getElementById('m-cat').value;
-            const note = document.getElementById('m-note').value;
+            const name = document.getElementById('m-name').value, cat = document.getElementById('m-cat').value, note = document.getElementById('m-note').value;
             if(!name) return;
             state.lives.push({ id: Date.now(), name, category: cat, note });
             save(); closeModal(); render();
         }
 
-        function showAddLogModal() {
-            openModal(`
-                <h3 class="text-xl font-bold mb-6">New Log Entry</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Salinity (SG)</label>
-                        <input type="number" id="m-sal" step="0.001" value="1.024" class="w-full">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Water Change (L)</label>
-                        <input type="number" id="m-wc" value="0" class="w-full">
-                    </div>
-                    <button onclick="addLogAction()" class="w-full bg-red-600 py-4 rounded-xl font-bold mt-4 btn-press">RECORD DATA</button>
-                </div>
-            `);
-        }
-
-        function addLogAction() {
-            const sal = parseFloat(document.getElementById('m-sal').value);
-            const wc = parseFloat(document.getElementById('m-wc').value);
-            state.logs.push({ date: new Date().toISOString().split('T')[0], salinity: sal, waterChange: wc });
-            save(); closeModal(); render();
-        }
-
-        // --- Utils ---
-        function updateSettings() {
-            state.settings.tankName = document.getElementById('set-name').value;
-            state.settings.volume = parseFloat(document.getElementById('set-vol').value);
-            save();
-            render();
-            // Show custom mini-toast instead of alert if possible, but alert is fine for now
-            alert('CONFIGURATION UPDATED');
-        }
-
-        function deleteItem(type, id) {
-            state[type] = state[type].filter(i => i.id !== id);
-            save(); render();
-        }
-
-        function resetData() {
-            if(confirm('SYSTEM PURGE: Are you sure?')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        window.onload = () => {
-            router('LOGS');
-            save();
-        };
+        function deleteItem(type, id) { state[type] = state[type].filter(i => i.id !== id); save(); render(); }
+        function resetData() { if(confirm('PURGE DATA?')) { localStorage.clear(); location.reload(); } }
+        window.onload = () => { router('LOGS'); save(); };
     </script>
 </body>
 </html>
