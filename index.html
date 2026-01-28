@@ -28,10 +28,8 @@
             background: linear-gradient(180deg, #0F172A 0%, #020617 100%);
             color: #E2E8F0;
             min-height: 100dvh;
-            /* Header height + safe area */
             padding-top: calc(70px + env(safe-area-inset-top)); 
-            /* Nav height + safe area + Input area */
-            padding-bottom: calc(160px + env(safe-area-inset-bottom));
+            padding-bottom: calc(140px + env(safe-area-inset-bottom)); /* Bottom padding for nav + input */
             -webkit-font-smoothing: antialiased;
         }
         
@@ -43,24 +41,29 @@
             padding-top: max(10px, env(safe-area-inset-top));
         }
 
-        /* Fixed Bottom Nav */
-        nav {
+        /* Fixed Bottom Nav Container */
+        .bottom-container {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 50;
             background: rgba(15, 23, 42, 0.98);
             border-top: 1px solid rgba(255,255,255,0.05);
             padding-bottom: env(safe-area-inset-bottom);
-            z-index: 50;
-            height: 80px; /* Fixed height for calculations */
         }
 
-        /* Fixed Chat Input Area - Pinned above Nav */
-        .chat-input-area {
-            position: fixed;
-            left: 0; right: 0;
-            /* Bottom = Nav Height + Safe Area */
-            bottom: calc(80px + env(safe-area-inset-bottom)); 
-            z-index: 40;
+        /* Chat Input Area (Inside Bottom Container) */
+        .chat-input-wrapper {
             padding: 10px 16px;
-            background: linear-gradient(to top, rgba(15, 23, 42, 1) 40%, rgba(15, 23, 42, 0));
+            background: rgba(15, 23, 42, 0.5);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Navigation Bar (Inside Bottom Container) */
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 60px;
         }
 
         .card-glass {
@@ -115,20 +118,11 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
                     <p class="text-slate-200 leading-relaxed">
-                        Gemini 1.5 Flashです。あなたの水槽データに基づきアドバイスします。
+                        Gemini 1.5 Flashです。API接続準備完了。
                     </p>
                 </div>
             </div>
-            
-            <div class="chat-input-area">
-                <div class="bg-slate-800/90 backdrop-blur-xl border border-white/20 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-2xl ring-1 ring-black/20">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-400" placeholder="AIに相談...">
-                    <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                </div>
-            </div>
-        </section>
+            </section>
 
         <section id="tab-equip" class="tab-content space-y-4">
             <div class="flex justify-between items-center px-1">
@@ -255,8 +249,17 @@
         </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 z-50 pt-2 h-[80px]">
-        <div class="flex justify-around items-start max-w-lg mx-auto px-2">
+    <div class="bottom-container">
+        <div id="chat-wrapper" class="chat-input-wrapper">
+            <div class="bg-slate-800/90 backdrop-blur-xl border border-white/20 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-xl ring-1 ring-black/20">
+                <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-400" placeholder="Ask AI...">
+                <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <nav class="nav-bar max-w-lg mx-auto px-2">
             <button onclick="switchTab('chat')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="chat">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">CHAT</span>
@@ -277,8 +280,8 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">SET</span>
             </button>
-        </div>
-    </nav>
+        </nav>
+    </div>
 
     <div id="modal-equip" class="fixed inset-0 bg-ocean-dark/95 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-xl">
         <div class="card-glass w-full max-w-sm p-8 space-y-6">
@@ -334,9 +337,9 @@
         };
         let editState = { type: null, index: null };
 
-        const save = () => { localStorage.setItem('aquaControlV9', JSON.stringify(state)); renderAll(); };
+        const save = () => { localStorage.setItem('aquaControlV10', JSON.stringify(state)); renderAll(); };
         const init = () => {
-            const data = localStorage.getItem('aquaControlV9');
+            const data = localStorage.getItem('aquaControlV10');
             if (data) state = JSON.parse(data);
             syncSettingsToUI(); renderAll(); switchTab('chat');
         };
@@ -348,6 +351,12 @@
                 b.classList.remove('nav-active', 'text-marine-blue'); b.classList.add('text-slate-500');
                 if(b.dataset.tab === tabId) { b.classList.remove('text-slate-500'); b.classList.add('nav-active'); }
             });
+            
+            // Only show chat input when on chat tab (optional preference)
+            const chatWrapper = document.getElementById('chat-wrapper');
+            if(tabId === 'chat') chatWrapper.style.display = 'block';
+            else chatWrapper.style.display = 'none';
+            
             window.scrollTo(0,0);
         };
 
@@ -364,19 +373,19 @@
             }
         };
 
-        // --- MODAL & EDIT LOGIC ---
         window.openModal = (id) => {
             document.getElementById(id).classList.remove('hidden');
             editState = { type: null, index: null };
+            const today = new Date().toISOString().split('T')[0];
             if(id === 'modal-equip') {
                 document.getElementById('modal-equip-title').textContent = "New Equipment";
                 document.getElementById('in-eq-name').value = "";
-                document.getElementById('in-eq-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('in-eq-date').value = today;
             }
             if(id === 'modal-lives') {
                 document.getElementById('modal-lives-title').textContent = "New Livestock";
                 document.getElementById('in-lv-name').value = "";
-                document.getElementById('in-lv-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('in-lv-date').value = today;
             }
         };
 
@@ -544,7 +553,6 @@
         };
         window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
-        // --- ENHANCED STREAMING (TYPEWRITER EFFECT) ---
         window.handleChat = async () => {
             const input = document.getElementById('chat-input'); 
             const txt = input.value.trim(); 
@@ -557,7 +565,7 @@
             const aiId = 'ai-' + Date.now();
             history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] typing-cursor leading-relaxed"></div></div>`;
             
-            // Auto Scroll
+            const scrollArea = document.getElementById('tab-chat');
             const targetPos = document.body.scrollHeight;
             window.scrollTo({ top: targetPos, behavior: 'smooth' });
             
@@ -568,15 +576,15 @@
             const typeWriter = setInterval(() => {
                 if(charQueue.length > 0) {
                     aiEl.innerHTML += charQueue.shift();
-                    // Scroll if near bottom
+                    // Auto scroll
                     if((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 150) {
-                         window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
                     }
                 } else if(!isStreaming) {
                     clearInterval(typeWriter);
                     aiEl.classList.remove('typing-cursor');
                 }
-            }, 30); // 30ms delay per char
+            }, 30);
 
             try {
                 const genAI = new GoogleGenerativeAI(state.settings.apiKey); 
@@ -590,7 +598,7 @@
                 isStreaming = false;
             } catch (e) { 
                 clearInterval(typeWriter);
-                aiEl.innerText = "Error: Check API Key."; 
+                aiEl.innerText = "Error: " + e.message || e.toString();
             }
         };
 
