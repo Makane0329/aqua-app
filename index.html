@@ -12,14 +12,13 @@
             theme: {
                 extend: {
                     colors: {
-                        'ocean-dark': '#0F172A', /* Slate 900 */
-                        'ocean-deep': '#020617', /* Slate 950 */
-                        'marine-blue': '#38BDF8', /* Sky 400 */
-                        'coral-pink': '#FB7185', /* Rose 400 */
-                        'glass-surface': 'rgba(30, 41, 59, 0.6)', /* Slightly darker for better contrast */
+                        'ocean-dark': '#0F172A',
+                        'marine-blue': '#38BDF8',
+                        'coral-pink': '#FB7185',
+                        'glass-surface': 'rgba(30, 41, 59, 0.7)',
                         'glass-border': 'rgba(255, 255, 255, 0.1)',
                     },
-                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'] }
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'] }
                 }
             }
         }
@@ -29,24 +28,36 @@
             background: linear-gradient(180deg, #0F172A 0%, #020617 100%);
             color: #E2E8F0;
             min-height: 100dvh;
-            /* Header height + padding */
-            padding-top: calc(80px + env(safe-area-inset-top)); 
-            /* Nav height + padding */
-            padding-bottom: calc(100px + env(safe-area-inset-bottom));
+            /* Header height + safe area */
+            padding-top: calc(70px + env(safe-area-inset-top)); 
+            /* Nav height + safe area */
+            padding-bottom: calc(90px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
         }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         
-        .glass-nav {
-            background: rgba(15, 23, 42, 0.85);
+        /* Fixed Header with proper safe area handling */
+        header {
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-top: max(10px, env(safe-area-inset-top)); /* Push content down */
+            height: auto;
         }
+
+        /* Fixed Bottom Nav with proper safe area handling */
+        nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: env(safe-area-inset-bottom); /* Extend background to bottom edge */
+            height: auto;
+        }
+
         .card-glass {
             background: var(--tw-glass-surface);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--tw-glass-border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             border-radius: 20px;
         }
         .input-elegant {
@@ -57,59 +68,52 @@
         }
         .input-elegant:focus { border-color: #38BDF8 !important; background: rgba(2, 6, 23, 0.8) !important; outline: none; }
         
-        /* Chat Input Specific Styles */
-        #chat-input-container {
-            background: rgba(15, 23, 42, 0.95); /* Darker background */
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly more visible border */
-        }
-        #chat-input::placeholder { color: #94A3B8; /* Lighter placeholder */ opacity: 1; }
+        .toggle-checkbox { appearance: none; width: 40px; height: 24px; background: #334155; border-radius: 12px; position: relative; transition: 0.3s; }
+        .toggle-checkbox:checked { background: #38BDF8; }
+        .toggle-checkbox::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-checkbox:checked::after { transform: translateX(16px); }
 
         .btn-ocean { background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%); color: white; border: none; }
         .btn-coral { background: linear-gradient(135deg, #FB7185 0%, #F43F5E 100%); color: white; border: none; }
-        .tab-content { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
+        .tab-content { display: none; opacity: 0; transform: translateY(5px); transition: opacity 0.3s ease, transform 0.3s ease; }
         .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
-        .stream-cursor::after { content: ''; display: inline-block; width: 6px; height: 6px; background: #38BDF8; border-radius: 50%; margin-left: 4px; animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        .chart-label { font-size: 9px; fill: #94A3B8; font-family: sans-serif; }
-        .nav-active { color: #38BDF8 !important; position: relative; }
-        .nav-active::after { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #38BDF8; border-radius: 50%; box-shadow: 0 0 8px #38BDF8; }
+        .stream-cursor::after { content: '●'; color: #38BDF8; margin-left: 2px; animation: blink 1s infinite; font-size: 10px; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .nav-active { color: #38BDF8 !important; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="overflow-x-hidden">
 
-    <header class="fixed top-0 left-0 right-0 px-6 py-4 flex justify-between items-center z-50 bg-ocean-dark/80 backdrop-blur-md border-b border-white/5 h-[80px]">
+    <header class="fixed top-0 left-0 right-0 px-6 pb-3 z-50 flex justify-between items-end">
         <div>
-            <h1 class="text-xs font-medium text-marine-blue tracking-[0.2em] uppercase opacity-80">Marine Suite</h1>
-            <p class="text-2xl font-light tracking-tight text-white">Aqua Control</p>
+            <h1 class="text-[10px] font-bold text-marine-blue tracking-[0.2em] uppercase opacity-90">Marine Suite</h1>
+            <p class="text-xl font-light tracking-tight text-white">Aqua Control</p>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="text-[10px] text-slate-400 font-medium tracking-wide">AI CONNECTED</span>
-            <div class="w-2 h-2 rounded-full bg-marine-blue shadow-[0_0_10px_rgba(56,189,248,0.5)] animate-pulse"></div>
+        <div class="flex items-center gap-2 mb-1">
+            <span class="text-[9px] text-slate-400 font-medium tracking-wide">AI ACTIVE</span>
+            <div class="w-1.5 h-1.5 rounded-full bg-marine-blue shadow-[0_0_8px_#38BDF8] animate-pulse"></div>
         </div>
     </header>
 
     <main class="p-5 space-y-8">
 
-        <section id="tab-chat" class="tab-content active relative h-full">
-            <div id="chat-history" class="h-[calc(100dvh-200px)] overflow-y-auto space-y-5 pb-4 scroll-smooth pr-1">
-                <div class="card-glass p-5 flex gap-3 items-start">
-                    <div class="min-w-[24px] mt-1">
-                        <svg class="w-6 h-6 text-marine-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <section id="tab-chat" class="tab-content active h-full">
+            <div id="chat-history" class="pb-24 space-y-4 text-sm">
+                <div class="card-glass p-4 flex gap-3">
+                    <div class="min-w-[20px] mt-1 text-marine-blue">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
-                    <div>
-                        <p class="text-sm text-slate-300 leading-relaxed">
-                            こんにちは。Gemini 2.5 Flashです。<br>
-                            水質、機材、生体の状態に基づいた最適なアドバイスを提供します。
-                        </p>
-                    </div>
+                    <p class="text-slate-200 leading-relaxed">
+                        Gemini 2.5 Flashです。あなたの水槽データ（最新ログ・生体・機材）を認識しています。
+                    </p>
                 </div>
             </div>
             
             <div class="fixed left-4 right-4 z-40" style="bottom: calc(100px + env(safe-area-inset-bottom));">
-                <div id="chat-input-container" class="p-2 pl-4 flex gap-2 items-center rounded-[20px] shadow-lg">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none" placeholder="AIに相談する...">
-                    <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center transition-transform active:scale-95">
+                <div class="bg-ocean-dark/90 backdrop-blur-xl border border-white/10 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-xl">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-500" placeholder="AIに相談...">
+                    <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                 </div>
@@ -118,96 +122,96 @@
 
         <section id="tab-equip" class="tab-content space-y-4">
             <div class="flex justify-between items-center px-1">
-                <h2 class="text-lg font-light text-white tracking-wide">Equipment</h2>
-                <button onclick="openModal('modal-equip')" class="text-xs text-marine-blue font-bold uppercase tracking-wider bg-marine-blue/10 px-3 py-1.5 rounded-full">+ Add Item</button>
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest">Equipment</h2>
+                <button onclick="openModal('modal-equip')" class="text-[10px] bg-marine-blue/20 text-marine-blue font-bold px-3 py-1.5 rounded-full border border-marine-blue/30">+ ADD</button>
             </div>
             <div id="equip-list" class="grid gap-3"></div>
         </section>
 
         <section id="tab-lives" class="tab-content space-y-4">
             <div class="flex justify-between items-center px-1">
-                <h2 class="text-lg font-light text-white tracking-wide">Livestock</h2>
-                <button onclick="openModal('modal-lives')" class="text-xs text-marine-blue font-bold uppercase tracking-wider bg-marine-blue/10 px-3 py-1.5 rounded-full">+ Add Life</button>
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest">Livestock</h2>
+                <button onclick="openModal('modal-lives')" class="text-[10px] bg-marine-blue/20 text-marine-blue font-bold px-3 py-1.5 rounded-full border border-marine-blue/30">+ ADD</button>
             </div>
             <div id="lives-list" class="grid gap-3"></div>
         </section>
 
-        <section id="tab-logs" class="tab-content space-y-8 pb-20">
+        <section id="tab-logs" class="tab-content space-y-8 pb-10">
             <div class="card-glass p-6 space-y-6">
-                <div class="flex items-center gap-2 mb-2">
-                    <div class="w-1 h-4 bg-coral-pink rounded-full"></div>
-                    <h3 class="text-sm font-bold text-slate-200 uppercase tracking-widest">New Entry</h3>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-1 h-4 bg-coral-pink rounded-full"></div>
+                        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-widest">Daily Log</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-marine-blue font-bold">Water Change</span>
+                        <input type="checkbox" id="wc-toggle" class="toggle-checkbox" onchange="toggleWaterChange(this)">
+                    </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div id="wc-fields" class="grid grid-cols-2 gap-4 hidden bg-marine-blue/5 p-4 rounded-xl border border-marine-blue/10">
                     <div class="space-y-2">
-                        <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Salinity (SG)</label>
-                        <input type="number" id="log-sg" step="0.001" class="input-elegant w-full text-center font-mono" placeholder="1.025">
+                        <label class="text-[10px] text-marine-blue font-bold uppercase tracking-wider">Salinity</label>
+                        <input type="number" id="log-sg" step="0.001" class="input-elegant w-full text-center font-mono text-marine-blue font-bold" placeholder="1.025">
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Water Change (L)</label>
-                        <input type="number" id="log-wc" class="input-elegant w-full text-center font-mono" placeholder="10">
+                        <label class="text-[10px] text-marine-blue font-bold uppercase tracking-wider">Volume (L)</label>
+                        <input type="number" id="log-wc" class="input-elegant w-full text-center font-mono text-marine-blue font-bold" placeholder="5">
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Additives Dosing</label>
+                    <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Additives (Drops)</label>
                     <div id="dose-slots" class="space-y-3">
                         <div class="flex gap-3">
-                            <select id="log-add-type-1" class="input-elegant flex-1 text-xs appearance-none"></select>
-                            <input type="number" id="log-add-val-1" class="input-elegant w-20 text-center font-mono" placeholder="Drop">
+                            <select id="log-add-type-1" class="input-elegant flex-1 text-xs"></select>
+                            <input type="number" id="log-add-val-1" class="input-elegant w-20 text-center font-mono" placeholder="0">
                         </div>
                         <div class="flex gap-3">
-                            <select id="log-add-type-2" class="input-elegant flex-1 text-xs appearance-none"></select>
-                            <input type="number" id="log-add-val-2" class="input-elegant w-20 text-center font-mono" placeholder="Drop">
-                        </div>
-                        <div class="flex gap-3">
-                            <select id="log-add-type-3" class="input-elegant flex-1 text-xs appearance-none"></select>
-                            <input type="number" id="log-add-val-3" class="input-elegant w-20 text-center font-mono" placeholder="Drop">
+                            <select id="log-add-type-2" class="input-elegant flex-1 text-xs"></select>
+                            <input type="number" id="log-add-val-2" class="input-elegant w-20 text-center font-mono" placeholder="0">
                         </div>
                     </div>
                 </div>
 
-                <button onclick="saveLog()" class="w-full h-12 btn-coral rounded-xl text-xs font-bold uppercase tracking-[0.2em] transition-transform active:scale-[0.98]">Save Record</button>
+                <button onclick="saveLog()" class="w-full h-12 btn-coral rounded-xl text-xs font-bold uppercase tracking-[0.2em] active:scale-[0.98] transition-transform shadow-lg shadow-coral-pink/20">Record Log</button>
             </div>
 
             <div class="space-y-6">
                 <div class="space-y-2">
                     <div class="flex justify-between items-end px-2">
-                        <h4 class="text-xs font-bold text-coral-pink uppercase tracking-widest">Salinity Trend</h4>
-                        <span class="text-[10px] text-slate-500 font-mono">1.015 - 1.035 SG</span>
+                        <h4 class="text-[10px] font-bold text-coral-pink uppercase tracking-widest">Salinity (SG)</h4>
+                        <span class="text-[9px] text-slate-500 font-mono">Target: 1.025</span>
                     </div>
-                    <div class="card-glass p-4 h-48 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-b from-coral-pink/5 to-transparent pointer-events-none"></div>
-                        <svg id="svg-chart-sg" class="w-full h-full relative z-10" preserveAspectRatio="none"></svg>
+                    <div class="card-glass p-4 h-40 relative overflow-hidden">
+                        <svg id="svg-chart-sg" class="w-full h-full" preserveAspectRatio="none"></svg>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <div class="flex justify-between items-end px-2">
-                        <h4 class="text-xs font-bold text-marine-blue uppercase tracking-widest">Water Change Volume</h4>
-                        <span class="text-[10px] text-slate-500 font-mono">0 - 15 L</span>
+                        <h4 class="text-[10px] font-bold text-marine-blue uppercase tracking-widest">Water Change (L)</h4>
+                        <span class="text-[9px] text-slate-500 font-mono">Total Volume</span>
                     </div>
-                    <div class="card-glass p-4 h-40 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-b from-marine-blue/5 to-transparent pointer-events-none"></div>
-                        <svg id="svg-chart-wc" class="w-full h-full relative z-10" preserveAspectRatio="none"></svg>
+                    <div class="card-glass p-4 h-32 relative overflow-hidden">
+                        <svg id="svg-chart-wc" class="w-full h-full" preserveAspectRatio="none"></svg>
                     </div>
                 </div>
             </div>
 
             <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Recent Logs</h4>
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">History</h4>
                 <div id="logs-history" class="space-y-3"></div>
             </div>
         </section>
 
         <section id="tab-set" class="tab-content space-y-8">
             <div class="space-y-4">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Configuration</h3>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Settings</h3>
                 <div class="card-glass p-6 space-y-5">
                     <div class="space-y-2">
                         <label class="text-[10px] text-slate-500 uppercase tracking-wider">Gemini API Key</label>
-                        <input type="password" id="set-api-key" class="input-elegant w-full text-xs font-mono" placeholder="sk-...">
+                        <input type="password" id="set-api-key" class="input-elegant w-full text-xs font-mono">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
@@ -224,47 +228,51 @@
 
             <div class="space-y-4">
                 <div class="flex justify-between items-center px-1">
-                    <h3 class="text-xs font-bold text-marine-blue uppercase tracking-widest">Additives List</h3>
-                    <button onclick="addAdditiveField()" class="text-[10px] text-marine-blue border border-marine-blue/30 px-2 py-1 rounded hover:bg-marine-blue/10">Edit List</button>
+                    <h3 class="text-xs font-bold text-marine-blue uppercase tracking-widest">Additives</h3>
+                    <button onclick="addAdditiveField()" class="text-[10px] text-marine-blue border border-marine-blue/30 px-2 py-1 rounded hover:bg-marine-blue/10">Edit</button>
                 </div>
                 <div id="additive-inputs" class="space-y-3"></div>
             </div>
 
             <div class="pt-8 border-t border-white/5 flex flex-col items-center gap-6">
-                <button onclick="exportData()" class="text-xs text-slate-400 font-medium hover:text-white transition-colors border-b border-transparent hover:border-white">Export Backup (JSON)</button>
-                <button onclick="clearAllData()" class="text-[10px] text-coral-pink/70 font-bold uppercase tracking-widest hover:text-coral-pink">Factory Reset</button>
+                <div class="flex gap-4 w-full">
+                    <button onclick="exportData()" class="flex-1 h-10 rounded-lg border border-white/10 text-xs text-slate-300">Export JSON</button>
+                    <input type="file" id="import-file" class="hidden" onchange="importData(this)">
+                    <button onclick="document.getElementById('import-file').click()" class="flex-1 h-10 rounded-lg border border-white/10 text-xs text-marine-blue font-bold">Import JSON</button>
+                </div>
+                <button onclick="clearAllData()" class="text-[10px] text-coral-pink/50 font-bold uppercase tracking-widest hover:text-coral-pink">Reset App</button>
             </div>
         </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav z-[100] h-[90px] pb-4">
-        <div class="flex justify-around items-center h-full max-w-lg mx-auto px-2 safe-bottom">
-            <button onclick="switchTab('chat')" class="nav-btn text-slate-500 flex flex-col items-center gap-1.5 w-16" data-tab="chat">
+    <nav class="fixed bottom-0 left-0 right-0 z-[100] pt-2">
+        <div class="flex justify-around items-start max-w-lg mx-auto px-2">
+            <button onclick="switchTab('chat')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="chat">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">CHAT</span>
             </button>
-            <button onclick="switchTab('equip')" class="nav-btn text-slate-500 flex flex-col items-center gap-1.5 w-16" data-tab="equip">
+            <button onclick="switchTab('equip')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="equip">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">EQUIP</span>
             </button>
-            <button onclick="switchTab('lives')" class="nav-btn text-slate-500 flex flex-col items-center gap-1.5 w-16" data-tab="lives">
+            <button onclick="switchTab('lives')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="lives">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">LIVES</span>
             </button>
-            <button onclick="switchTab('logs')" class="nav-btn text-slate-500 flex flex-col items-center gap-1.5 w-16" data-tab="logs">
+            <button onclick="switchTab('logs')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="logs">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">LOGS</span>
             </button>
-            <button onclick="switchTab('set')" class="nav-btn text-slate-500 flex flex-col items-center gap-1.5 w-16" data-tab="set">
+            <button onclick="switchTab('set')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="set">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">SET</span>
             </button>
         </div>
     </nav>
 
-    <div id="modal-equip" class="fixed inset-0 bg-ocean-deep/90 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-md">
+    <div id="modal-equip" class="fixed inset-0 bg-ocean-dark/95 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-xl">
         <div class="card-glass w-full max-w-sm p-8 space-y-6">
-            <h2 class="text-lg font-light text-white text-center">Add Equipment</h2>
+            <h2 class="text-lg font-light text-white text-center uppercase tracking-widest">New Equipment</h2>
             <input type="text" id="in-eq-name" class="input-elegant w-full" placeholder="Model Name">
             <select id="in-eq-cat" class="input-elegant w-full">
                 <option value="Lighting">Lighting</option>
@@ -275,24 +283,24 @@
             </select>
             <input type="date" id="in-eq-date" class="input-elegant w-full">
             <div class="flex gap-4 pt-2">
-                <button onclick="closeModal('modal-equip')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs uppercase tracking-wider">Cancel</button>
-                <button onclick="addEquipment()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase tracking-wider">Save</button>
+                <button onclick="closeModal('modal-equip')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs font-bold uppercase">Cancel</button>
+                <button onclick="addEquipment()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-lives" class="fixed inset-0 bg-ocean-deep/90 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-md">
+    <div id="modal-lives" class="fixed inset-0 bg-ocean-dark/95 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-xl">
         <div class="card-glass w-full max-w-sm p-8 space-y-6">
-            <h2 class="text-lg font-light text-white text-center">Add Livestock</h2>
+            <h2 class="text-lg font-light text-white text-center uppercase tracking-widest">New Livestock</h2>
             <input type="text" id="in-lv-name" class="input-elegant w-full" placeholder="Species Name">
             <select id="in-lv-cat" class="input-elegant w-full">
                 <option value="FISH">Fish</option>
                 <option value="CORAL">Coral</option>
-                <option value="OTHER">Invertebrates / Other</option>
+                <option value="OTHER">Inverts / Other</option>
             </select>
             <div class="flex gap-4 pt-2">
-                <button onclick="closeModal('modal-lives')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs uppercase tracking-wider">Cancel</button>
-                <button onclick="addLivestock()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase tracking-wider">Save</button>
+                <button onclick="closeModal('modal-lives')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs font-bold uppercase">Cancel</button>
+                <button onclick="addLivestock()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
             </div>
         </div>
     </div>
@@ -308,9 +316,9 @@
             equipment: [], livestock: [], logs: []
         };
 
-        const save = () => { localStorage.setItem('aquaControlV6', JSON.stringify(state)); renderAll(); };
+        const save = () => { localStorage.setItem('aquaControlV7', JSON.stringify(state)); renderAll(); };
         const init = () => {
-            const data = localStorage.getItem('aquaControlV6');
+            const data = localStorage.getItem('aquaControlV7');
             if (data) state = JSON.parse(data);
             syncSettingsToUI(); renderAll(); switchTab('chat');
         };
@@ -323,6 +331,19 @@
                 if(b.dataset.tab === tabId) { b.classList.remove('text-slate-500'); b.classList.add('nav-active'); }
             });
             window.scrollTo(0,0);
+        };
+
+        window.toggleWaterChange = (el) => {
+            const fields = document.getElementById('wc-fields');
+            if(el.checked) {
+                fields.classList.remove('hidden');
+                if(!document.getElementById('log-sg').value) document.getElementById('log-sg').value = 1.025;
+                if(!document.getElementById('log-wc').value) document.getElementById('log-wc').value = 5;
+            } else {
+                fields.classList.add('hidden');
+                document.getElementById('log-sg').value = '';
+                document.getElementById('log-wc').value = '';
+            }
         };
 
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
@@ -345,7 +366,11 @@
             document.getElementById('lives-list').innerHTML = sorted.map((l, idx) => `
                 <div class="card-glass p-3 flex items-center gap-3">
                     <div class="w-1 h-8 rounded-full ${l.category==='FISH'?'bg-coral-pink':l.category==='CORAL'?'bg-marine-blue':'bg-slate-500'}"></div>
-                    <div class="flex-1"><p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${l.category}</p><p class="text-sm font-medium text-white">${l.name}</p></div>
+                    <div class="flex-1">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${l.category}</p>
+                        <p class="text-sm font-medium text-white">${l.name}</p>
+                        <p class="text-[9px] text-slate-500 mt-0.5 font-mono">Added: ${l.date || 'Unknown'}</p>
+                    </div>
                     <button onclick="deleteItem('livestock', ${state.livestock.indexOf(l)})" class="text-xs text-slate-600">×</button>
                 </div>
             `).join('');
@@ -385,7 +410,7 @@
                     svg.innerHTML += `<polyline points="${poly}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" /><polygon points="${points[0].x},${h} ${poly} ${points[points.length-1].x},${h}" fill="${color}" fill-opacity="0.1" />`;
                 }
                 points.forEach(p => {
-                    svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#0F172A" stroke="${color}" stroke-width="2" /><text x="${p.x}" y="${h-5}" class="chart-label" text-anchor="middle" transform="rotate(-90, ${p.x}, ${h-5})" dy="-5">${p.date}</text>`;
+                    svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#0F172A" stroke="${color}" stroke-width="2" /><text x="${p.x}" y="${h-5}" class="text-[8px] fill-slate-500" text-anchor="middle" transform="rotate(-90, ${p.x}, ${h-5})" dy="-5">${p.date}</text>`;
                 });
             };
             const logs = state.logs.slice(-10);
@@ -394,14 +419,20 @@
         }
 
         window.saveLog = () => {
-            const sg = document.getElementById('log-sg').value; const wc = document.getElementById('log-wc').value; const doses = [];
-            for(let i=1; i<=3; i++) {
+            const isWC = document.getElementById('wc-toggle').checked;
+            const sg = isWC ? document.getElementById('log-sg').value : null;
+            const wc = isWC ? document.getElementById('log-wc').value : null;
+            const doses = [];
+            for(let i=1; i<=2; i++) {
                 const typeIdx = document.getElementById(`log-add-type-${i}`).value; const val = document.getElementById(`log-add-val-${i}`).value;
                 if(val > 0 && typeIdx !== "") doses.push({ name: state.settings.additiveNames[typeIdx], val: parseInt(val) });
             }
             if(!sg && !wc && doses.length === 0) return;
-            state.logs.push({ date: new Date().toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}), sg: sg || null, wc: wc || null, additives: doses });
-            ['log-sg', 'log-wc', 'log-add-val-1', 'log-add-val-2', 'log-add-val-3'].forEach(id => document.getElementById(id).value = ""); save();
+            state.logs.push({ date: new Date().toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}), sg, wc, additives: doses });
+            // Reset
+            document.getElementById('wc-toggle').checked = false; toggleWaterChange(document.getElementById('wc-toggle'));
+            ['log-add-val-1', 'log-add-val-2'].forEach(id => document.getElementById(id).value = "");
+            save();
         };
 
         window.addEquipment = () => {
@@ -411,7 +442,8 @@
         };
         window.addLivestock = () => {
             const name = document.getElementById('in-lv-name').value; const cat = document.getElementById('in-lv-cat').value; if(!name) return;
-            state.livestock.push({name, category:cat}); save(); closeModal('modal-lives'); document.getElementById('in-lv-name').value = "";
+            state.livestock.push({name, category:cat, date: new Date().toISOString().split('T')[0]}); 
+            save(); closeModal('modal-lives'); document.getElementById('in-lv-name').value = "";
         };
         window.deleteItem = (key, idx) => { if(confirm('Remove?')) { state[key].splice(idx, 1); save(); } };
 
@@ -428,32 +460,40 @@
         window.removeAdditive = (i) => { state.settings.additiveNames.splice(i, 1); save(); renderAdditiveConfig(); };
         function updateAdditiveSelects() {
             const opts = state.settings.additiveNames.map((n, i) => `<option value="${i}">${n}</option>`).join('');
-            [1,2,3].forEach(i => { const el = document.getElementById(`log-add-type-${i}`); const v = el.value; el.innerHTML = `<option value="">Select...</option>` + opts; el.value = v; });
+            [1,2].forEach(i => { const el = document.getElementById(`log-add-type-${i}`); const v = el.value; el.innerHTML = `<option value="">Select...</option>` + opts; el.value = v; });
         }
         ['set-api-key', 'set-volume', 'set-start-date'].forEach(id => {
             document.getElementById(id).onchange = (e) => { const k = id.replace('set-', '').replace('api-key', 'apiKey').replace('start-date', 'startDate'); state.settings[k] = e.target.value; save(); };
         });
 
+        // Migration Support
+        window.exportData = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'})); a.download = 'aqua_backup.json'; a.click(); };
+        window.importData = (input) => {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => { try { state = JSON.parse(e.target.result); save(); alert('Data Restored!'); location.reload(); } catch(err) { alert('Invalid JSON'); } };
+            reader.readAsText(file);
+        };
+        window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
+
         window.handleChat = async () => {
             const input = document.getElementById('chat-input'); const txt = input.value.trim(); if(!txt || !state.settings.apiKey) return;
             const history = document.getElementById('chat-history');
-            history.innerHTML += `<div class="flex justify-end"><div class="bg-marine-blue text-ocean-deep p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${txt}</div></div>`;
+            history.innerHTML += `<div class="flex justify-end"><div class="bg-marine-blue text-ocean-dark p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${txt}</div></div>`;
             input.value = "";
             const aiId = 'ai-' + Date.now();
             history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] stream-cursor leading-relaxed">...</div></div>`;
-            history.scrollTop = history.scrollHeight;
+            const scrollArea = document.getElementById('tab-chat');
+            history.scrollIntoView({ behavior: 'smooth', block: 'end' });
             try {
                 const genAI = new GoogleGenerativeAI(state.settings.apiKey); const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely.`;
                 const res = await model.generateContentStream([ctx, txt]);
                 const el = document.getElementById(aiId); el.innerText = ""; let full = "";
-                for await (const chunk of res.stream) { full += chunk.text(); el.innerText = full; history.scrollTop = history.scrollHeight; }
+                for await (const chunk of res.stream) { full += chunk.text(); el.innerText = full; }
                 el.classList.remove('stream-cursor');
             } catch (e) { document.getElementById(aiId).innerText = "Error: Check API Key."; }
         };
-
-        window.exportData = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'})); a.download = 'aqua_backup.json'; a.click(); };
-        window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
         init(); window.addEventListener('resize', renderCharts);
     </script>
