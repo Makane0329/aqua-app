@@ -16,13 +16,10 @@
                         'ocean-deep': '#020617', /* Slate 950 */
                         'marine-blue': '#38BDF8', /* Sky 400 */
                         'coral-pink': '#FB7185', /* Rose 400 */
-                        'sea-foam': '#CCFBF1', /* Teal 100 */
-                        'glass-surface': 'rgba(30, 41, 59, 0.4)',
-                        'glass-border': 'rgba(255, 255, 255, 0.08)',
+                        'glass-surface': 'rgba(30, 41, 59, 0.6)', /* Slightly darker for better contrast */
+                        'glass-border': 'rgba(255, 255, 255, 0.1)',
                     },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'] }
                 }
             }
         }
@@ -30,69 +27,50 @@
     <style>
         body {
             background: linear-gradient(180deg, #0F172A 0%, #020617 100%);
-            color: #E2E8F0; /* Slate 200 */
+            color: #E2E8F0;
             min-height: 100dvh;
-            padding-top: env(safe-area-inset-top);
+            /* Header height + padding */
+            padding-top: calc(80px + env(safe-area-inset-top)); 
+            /* Nav height + padding */
             padding-bottom: calc(100px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
         }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         
-        /* Glassmorphism Navigation */
         .glass-nav {
             background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
-
-        /* Premium Card Style */
         .card-glass {
             background: var(--tw-glass-surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--tw-glass-border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             border-radius: 20px;
         }
-
-        /* Inputs */
         .input-elegant {
             background: rgba(2, 6, 23, 0.6) !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #F8FAFC !important;
-            height: 48px;
-            border-radius: 12px;
-            padding: 0 16px;
-            font-size: 16px !important;
+            color: #F8FAFC !important; height: 48px; border-radius: 12px; padding: 0 16px; font-size: 16px !important;
             transition: all 0.2s ease;
         }
-        .input-elegant:focus {
-            border-color: #38BDF8 !important;
-            background: rgba(2, 6, 23, 0.8) !important;
-            outline: none;
+        .input-elegant:focus { border-color: #38BDF8 !important; background: rgba(2, 6, 23, 0.8) !important; outline: none; }
+        
+        /* Chat Input Specific Styles */
+        #chat-input-container {
+            background: rgba(15, 23, 42, 0.95); /* Darker background */
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly more visible border */
         }
+        #chat-input::placeholder { color: #94A3B8; /* Lighter placeholder */ opacity: 1; }
 
-        /* Buttons */
-        .btn-ocean {
-            background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
-            border: none;
-        }
-        .btn-coral {
-            background: linear-gradient(135deg, #FB7185 0%, #F43F5E 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
-            border: none;
-        }
-
-        /* Animations */
+        .btn-ocean { background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%); color: white; border: none; }
+        .btn-coral { background: linear-gradient(135deg, #FB7185 0%, #F43F5E 100%); color: white; border: none; }
         .tab-content { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; }
         .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
         .stream-cursor::after { content: ''; display: inline-block; width: 6px; height: 6px; background: #38BDF8; border-radius: 50%; margin-left: 4px; animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        
         .chart-label { font-size: 9px; fill: #94A3B8; font-family: sans-serif; }
         .nav-active { color: #38BDF8 !important; position: relative; }
         .nav-active::after { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: #38BDF8; border-radius: 50%; box-shadow: 0 0 8px #38BDF8; }
@@ -100,7 +78,7 @@
 </head>
 <body class="overflow-x-hidden">
 
-    <header class="px-6 py-5 flex justify-between items-center sticky top-0 z-50 mix-blend-screen">
+    <header class="fixed top-0 left-0 right-0 px-6 py-4 flex justify-between items-center z-50 bg-ocean-dark/80 backdrop-blur-md border-b border-white/5 h-[80px]">
         <div>
             <h1 class="text-xs font-medium text-marine-blue tracking-[0.2em] uppercase opacity-80">Marine Suite</h1>
             <p class="text-2xl font-light tracking-tight text-white">Aqua Control</p>
@@ -113,8 +91,8 @@
 
     <main class="p-5 space-y-8">
 
-        <section id="tab-chat" class="tab-content active space-y-4">
-            <div id="chat-history" class="h-[60dvh] overflow-y-auto space-y-5 pb-4 scroll-smooth pr-1">
+        <section id="tab-chat" class="tab-content active relative h-full">
+            <div id="chat-history" class="h-[calc(100dvh-200px)] overflow-y-auto space-y-5 pb-4 scroll-smooth pr-1">
                 <div class="card-glass p-5 flex gap-3 items-start">
                     <div class="min-w-[24px] mt-1">
                         <svg class="w-6 h-6 text-marine-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -128,9 +106,9 @@
                 </div>
             </div>
             
-            <div class="fixed bottom-24 left-5 right-5 z-40">
-                <div class="card-glass p-2 pl-4 flex gap-2 items-center backdrop-blur-xl">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-500" placeholder="AIに相談する...">
+            <div class="fixed left-4 right-4 z-40" style="bottom: calc(100px + env(safe-area-inset-bottom));">
+                <div id="chat-input-container" class="p-2 pl-4 flex gap-2 items-center rounded-[20px] shadow-lg">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none" placeholder="AIに相談する...">
                     <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center transition-transform active:scale-95">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
@@ -259,8 +237,8 @@
         </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass-nav z-[100]">
-        <div class="flex justify-around items-center h-[90px] max-w-lg mx-auto px-2 safe-bottom pb-2">
+    <nav class="fixed bottom-0 left-0 right-0 glass-nav z-[100] h-[90px] pb-4">
+        <div class="flex justify-around items-center h-full max-w-lg mx-auto px-2 safe-bottom">
             <button onclick="switchTab('chat')" class="nav-btn text-slate-500 flex flex-col items-center gap-1.5 w-16" data-tab="chat">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span class="text-[9px] font-medium tracking-wide">CHAT</span>
@@ -326,36 +304,23 @@
         import { GoogleGenerativeAI } from "@google/generative-ai";
 
         let state = {
-            settings: {
-                apiKey: '',
-                volume: 30,
-                startDate: new Date().toISOString().split('T')[0],
-                additiveNames: ['Foundation A', 'Foundation B', 'Foundation C']
-            },
-            equipment: [],
-            livestock: [],
-            logs: []
+            settings: { apiKey: '', volume: 30, startDate: new Date().toISOString().split('T')[0], additiveNames: ['Foundation A', 'Foundation B', 'Foundation C'] },
+            equipment: [], livestock: [], logs: []
         };
 
-        const save = () => { localStorage.setItem('aquaControlV5', JSON.stringify(state)); renderAll(); };
+        const save = () => { localStorage.setItem('aquaControlV6', JSON.stringify(state)); renderAll(); };
         const init = () => {
-            const data = localStorage.getItem('aquaControlV5');
+            const data = localStorage.getItem('aquaControlV6');
             if (data) state = JSON.parse(data);
-            syncSettingsToUI();
-            renderAll();
-            switchTab('chat');
+            syncSettingsToUI(); renderAll(); switchTab('chat');
         };
 
         window.switchTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabId}`).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('nav-active', 'text-marine-blue');
-                b.classList.add('text-slate-500');
-                if(b.dataset.tab === tabId) {
-                    b.classList.remove('text-slate-500');
-                    b.classList.add('nav-active');
-                }
+                b.classList.remove('nav-active', 'text-marine-blue'); b.classList.add('text-slate-500');
+                if(b.dataset.tab === tabId) { b.classList.remove('text-slate-500'); b.classList.add('nav-active'); }
             });
             window.scrollTo(0,0);
         };
@@ -363,25 +328,13 @@
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // --- RENDER ---
-        function renderAll() {
-            renderEquipment();
-            renderLivestock();
-            renderLogs();
-            renderCharts();
-            updateAdditiveSelects();
-        }
+        function renderAll() { renderEquipment(); renderLivestock(); renderLogs(); renderCharts(); updateAdditiveSelects(); }
 
         function renderEquipment() {
             document.getElementById('equip-list').innerHTML = state.equipment.map((e, idx) => `
                 <div class="card-glass p-4 flex justify-between items-center group">
-                    <div>
-                        <p class="text-[9px] text-marine-blue font-bold uppercase tracking-widest mb-1">${e.category}</p>
-                        <p class="text-sm font-medium text-slate-200">${e.name}</p>
-                    </div>
-                    <button onclick="deleteItem('equipment', ${idx})" class="text-slate-600 hover:text-coral-pink transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"/></svg>
-                    </button>
+                    <div><p class="text-[9px] text-marine-blue font-bold uppercase tracking-widest mb-1">${e.category}</p><p class="text-sm font-medium text-slate-200">${e.name}</p></div>
+                    <button onclick="deleteItem('equipment', ${idx})" class="text-slate-600 hover:text-coral-pink transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"/></svg></button>
                 </div>
             `).join('');
         }
@@ -392,10 +345,7 @@
             document.getElementById('lives-list').innerHTML = sorted.map((l, idx) => `
                 <div class="card-glass p-3 flex items-center gap-3">
                     <div class="w-1 h-8 rounded-full ${l.category==='FISH'?'bg-coral-pink':l.category==='CORAL'?'bg-marine-blue':'bg-slate-500'}"></div>
-                    <div class="flex-1">
-                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${l.category}</p>
-                        <p class="text-sm font-medium text-white">${l.name}</p>
-                    </div>
+                    <div class="flex-1"><p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">${l.category}</p><p class="text-sm font-medium text-white">${l.name}</p></div>
                     <button onclick="deleteItem('livestock', ${state.livestock.indexOf(l)})" class="text-xs text-slate-600">×</button>
                 </div>
             `).join('');
@@ -421,156 +371,91 @@
 
         function renderCharts() {
             const draw = (svg, data, min, max, color) => {
-                svg.innerHTML = '';
-                if(data.length === 0) return;
-                const w = svg.clientWidth || 300;
-                const h = svg.clientHeight || 150;
-                const pad = 10;
-                const range = max - min;
-                
-                // Grid
-                svg.innerHTML += `<line x1="${pad}" y1="0" x2="${pad}" y2="${h}" stroke="#334155" stroke-width="0.5" stroke-dasharray="2,2"/>`;
-                svg.innerHTML += `<line x1="${pad}" y1="${h}" x2="${w}" y2="${h}" stroke="#334155" stroke-width="0.5"/>`;
-
+                svg.innerHTML = ''; if(data.length === 0) return;
+                const w = svg.clientWidth || 300; const h = svg.clientHeight || 150; const pad = 10; const range = max - min;
+                svg.innerHTML += `<line x1="${pad}" y1="0" x2="${pad}" y2="${h}" stroke="#334155" stroke-width="0.5" stroke-dasharray="2,2"/><line x1="${pad}" y1="${h}" x2="${w}" y2="${h}" stroke="#334155" stroke-width="0.5"/>`;
                 const points = data.map((d, i) => {
                     const x = pad + (i / (Math.max(data.length-1, 1))) * (w - pad*2);
                     const val = Math.min(Math.max(parseFloat(d.val), min), max);
                     const y = h - ((val - min) / range) * h;
                     return {x, y, date: d.date.split(' ')[0]};
                 });
-
                 if(points.length > 1) {
                     const poly = points.map(p => `${p.x},${p.y}`).join(' ');
-                    svg.innerHTML += `<polyline points="${poly}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" />`;
-                    // Gradient Fill Area
-                    const area = `${points[0].x},${h} ` + poly + ` ${points[points.length-1].x},${h}`;
-                    svg.innerHTML += `<polygon points="${area}" fill="${color}" fill-opacity="0.1" />`;
+                    svg.innerHTML += `<polyline points="${poly}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" /><polygon points="${points[0].x},${h} ${poly} ${points[points.length-1].x},${h}" fill="${color}" fill-opacity="0.1" />`;
                 }
-
                 points.forEach(p => {
-                    svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#0F172A" stroke="${color}" stroke-width="2" />`;
-                    svg.innerHTML += `<text x="${p.x}" y="${h-5}" class="chart-label" text-anchor="middle" transform="rotate(-90, ${p.x}, ${h-5})" dy="-5">${p.date}</text>`;
+                    svg.innerHTML += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#0F172A" stroke="${color}" stroke-width="2" /><text x="${p.x}" y="${h-5}" class="chart-label" text-anchor="middle" transform="rotate(-90, ${p.x}, ${h-5})" dy="-5">${p.date}</text>`;
                 });
             };
-
             const logs = state.logs.slice(-10);
-            draw(document.getElementById('svg-chart-sg'), logs.filter(l=>l.sg).map(l=>({val:l.sg, date:l.date})), 1.015, 1.035, '#FB7185'); // Coral
-            draw(document.getElementById('svg-chart-wc'), logs.filter(l=>l.wc).map(l=>({val:l.wc, date:l.date})), 0, 15, '#38BDF8'); // Marine Blue
+            draw(document.getElementById('svg-chart-sg'), logs.filter(l=>l.sg).map(l=>({val:l.sg, date:l.date})), 1.015, 1.035, '#FB7185');
+            draw(document.getElementById('svg-chart-wc'), logs.filter(l=>l.wc).map(l=>({val:l.wc, date:l.date})), 0, 15, '#38BDF8');
         }
 
-        // --- ACTIONS ---
         window.saveLog = () => {
-            const sg = document.getElementById('log-sg').value;
-            const wc = document.getElementById('log-wc').value;
-            const doses = [];
+            const sg = document.getElementById('log-sg').value; const wc = document.getElementById('log-wc').value; const doses = [];
             for(let i=1; i<=3; i++) {
-                const typeIdx = document.getElementById(`log-add-type-${i}`).value;
-                const val = document.getElementById(`log-add-val-${i}`).value;
-                if(val > 0) doses.push({ name: state.settings.additiveNames[typeIdx], val: parseInt(val) });
+                const typeIdx = document.getElementById(`log-add-type-${i}`).value; const val = document.getElementById(`log-add-val-${i}`).value;
+                if(val > 0 && typeIdx !== "") doses.push({ name: state.settings.additiveNames[typeIdx], val: parseInt(val) });
             }
             if(!sg && !wc && doses.length === 0) return;
-
-            state.logs.push({
-                date: new Date().toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}),
-                sg: sg || null, wc: wc || null, additives: doses
-            });
-
-            ['log-sg', 'log-wc', 'log-add-val-1', 'log-add-val-2', 'log-add-val-3'].forEach(id => document.getElementById(id).value = "");
-            save();
+            state.logs.push({ date: new Date().toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}), sg: sg || null, wc: wc || null, additives: doses });
+            ['log-sg', 'log-wc', 'log-add-val-1', 'log-add-val-2', 'log-add-val-3'].forEach(id => document.getElementById(id).value = ""); save();
         };
 
         window.addEquipment = () => {
-            const name = document.getElementById('in-eq-name').value;
-            const cat = document.getElementById('in-eq-cat').value;
-            if(!name) return;
+            const name = document.getElementById('in-eq-name').value; const cat = document.getElementById('in-eq-cat').value; if(!name) return;
             state.equipment.push({name, category:cat, date: document.getElementById('in-eq-date').value || new Date().toISOString().split('T')[0]});
             save(); closeModal('modal-equip'); document.getElementById('in-eq-name').value = "";
         };
-
         window.addLivestock = () => {
-            const name = document.getElementById('in-lv-name').value;
-            const cat = document.getElementById('in-lv-cat').value;
-            if(!name) return;
-            state.livestock.push({name, category:cat});
-            save(); closeModal('modal-lives'); document.getElementById('in-lv-name').value = "";
+            const name = document.getElementById('in-lv-name').value; const cat = document.getElementById('in-lv-cat').value; if(!name) return;
+            state.livestock.push({name, category:cat}); save(); closeModal('modal-lives'); document.getElementById('in-lv-name').value = "";
         };
-
         window.deleteItem = (key, idx) => { if(confirm('Remove?')) { state[key].splice(idx, 1); save(); } };
 
-        // --- SETTINGS ---
         function syncSettingsToUI() {
-            document.getElementById('set-api-key').value = state.settings.apiKey;
-            document.getElementById('set-volume').value = state.settings.volume;
-            document.getElementById('set-start-date').value = state.settings.startDate;
-            renderAdditiveConfig();
+            document.getElementById('set-api-key').value = state.settings.apiKey; document.getElementById('set-volume').value = state.settings.volume; document.getElementById('set-start-date').value = state.settings.startDate; renderAdditiveConfig();
         }
-
         function renderAdditiveConfig() {
             document.getElementById('additive-inputs').innerHTML = state.settings.additiveNames.map((name, i) => `
-                <div class="flex gap-2">
-                    <input type="text" class="input-elegant flex-1 text-xs" value="${name}" onchange="updateAdditiveName(${i}, this.value)">
-                    <button onclick="removeAdditive(${i})" class="text-coral-pink p-2">×</button>
-                </div>
-            `).join('');
-            updateAdditiveSelects();
+                <div class="flex gap-2"><input type="text" class="input-elegant flex-1 text-xs" value="${name}" onchange="updateAdditiveName(${i}, this.value)"><button onclick="removeAdditive(${i})" class="text-coral-pink p-2">×</button></div>
+            `).join(''); updateAdditiveSelects();
         }
-
         window.updateAdditiveName = (i, val) => { state.settings.additiveNames[i] = val; save(); };
         window.addAdditiveField = () => { state.settings.additiveNames.push('New Additive'); save(); renderAdditiveConfig(); };
         window.removeAdditive = (i) => { state.settings.additiveNames.splice(i, 1); save(); renderAdditiveConfig(); };
-
         function updateAdditiveSelects() {
             const opts = state.settings.additiveNames.map((n, i) => `<option value="${i}">${n}</option>`).join('');
-            [1,2,3].forEach(i => {
-                const el = document.getElementById(`log-add-type-${i}`);
-                const v = el.value;
-                el.innerHTML = `<option value="">Select...</option>` + opts;
-                el.value = v;
-            });
+            [1,2,3].forEach(i => { const el = document.getElementById(`log-add-type-${i}`); const v = el.value; el.innerHTML = `<option value="">Select...</option>` + opts; el.value = v; });
         }
-
         ['set-api-key', 'set-volume', 'set-start-date'].forEach(id => {
-            document.getElementById(id).onchange = (e) => {
-                const k = id.replace('set-', '').replace('api-key', 'apiKey').replace('start-date', 'startDate');
-                state.settings[k] = e.target.value; save();
-            };
+            document.getElementById(id).onchange = (e) => { const k = id.replace('set-', '').replace('api-key', 'apiKey').replace('start-date', 'startDate'); state.settings[k] = e.target.value; save(); };
         });
 
-        // --- GEMINI ---
         window.handleChat = async () => {
-            const input = document.getElementById('chat-input');
-            const txt = input.value.trim();
-            if(!txt || !state.settings.apiKey) return;
-            
+            const input = document.getElementById('chat-input'); const txt = input.value.trim(); if(!txt || !state.settings.apiKey) return;
             const history = document.getElementById('chat-history');
             history.innerHTML += `<div class="flex justify-end"><div class="bg-marine-blue text-ocean-deep p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${txt}</div></div>`;
             input.value = "";
-            
             const aiId = 'ai-' + Date.now();
             history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] stream-cursor leading-relaxed">...</div></div>`;
             history.scrollTop = history.scrollHeight;
-
             try {
-                const genAI = new GoogleGenerativeAI(state.settings.apiKey);
-                const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+                const genAI = new GoogleGenerativeAI(state.settings.apiKey); const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely.`;
                 const res = await model.generateContentStream([ctx, txt]);
-                const el = document.getElementById(aiId); el.innerText = "";
-                let full = "";
+                const el = document.getElementById(aiId); el.innerText = ""; let full = "";
                 for await (const chunk of res.stream) { full += chunk.text(); el.innerText = full; history.scrollTop = history.scrollHeight; }
                 el.classList.remove('stream-cursor');
             } catch (e) { document.getElementById(aiId).innerText = "Error: Check API Key."; }
         };
 
-        window.exportData = () => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'}));
-            a.download = 'aqua_backup.json'; a.click();
-        };
+        window.exportData = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'})); a.download = 'aqua_backup.json'; a.click(); };
         window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
-        init();
-        window.addEventListener('resize', renderCharts);
+        init(); window.addEventListener('resize', renderCharts);
     </script>
 </body>
 </html>
