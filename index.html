@@ -29,7 +29,7 @@
             color: #E2E8F0;
             min-height: 100dvh;
             padding-top: calc(70px + env(safe-area-inset-top)); 
-            padding-bottom: calc(90px + env(safe-area-inset-bottom));
+            padding-bottom: calc(150px + env(safe-area-inset-bottom)); /* Expanded for fixed input */
             -webkit-font-smoothing: antialiased;
         }
         
@@ -43,10 +43,20 @@
 
         /* Fixed Bottom Nav */
         nav {
-            background: rgba(15, 23, 42, 0.98); /* Less transparent for readability */
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: rgba(15, 23, 42, 0.98);
             border-top: 1px solid rgba(255,255,255,0.05);
             padding-bottom: env(safe-area-inset-bottom);
+            z-index: 50;
+        }
+
+        /* Fixed Chat Input Area */
+        .chat-input-area {
+            position: fixed;
+            left: 0; right: 0;
+            bottom: calc(90px + env(safe-area-inset-bottom)); /* Position exactly above Nav */
+            z-index: 40;
+            padding: 10px 16px;
+            background: linear-gradient(to top, rgba(15, 23, 42, 1) 20%, rgba(15, 23, 42, 0));
         }
 
         .card-glass {
@@ -73,7 +83,7 @@
         .btn-coral { background: linear-gradient(135deg, #FB7185 0%, #F43F5E 100%); color: white; border: none; }
         .tab-content { display: none; opacity: 0; transform: translateY(5px); transition: opacity 0.3s ease, transform 0.3s ease; }
         .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
-        .stream-cursor::after { content: '●'; color: #38BDF8; margin-left: 2px; animation: blink 1s infinite; font-size: 10px; }
+        .typing-cursor::after { content: '●'; color: #38BDF8; animation: blink 1s infinite; font-size: 10px; margin-left: 2px; }
         @keyframes blink { 50% { opacity: 0; } }
         .nav-active { color: #38BDF8 !important; }
         .hidden { display: none !important; }
@@ -95,7 +105,7 @@
     <main class="p-5 space-y-8">
 
         <section id="tab-chat" class="tab-content active h-full relative">
-            <div id="chat-history" class="pb-32 space-y-4 text-sm min-h-[50dvh]">
+            <div id="chat-history" class="space-y-4 text-sm min-h-[50dvh]">
                 <div class="card-glass p-4 flex gap-3">
                     <div class="min-w-[20px] mt-1 text-marine-blue">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -106,9 +116,9 @@
                 </div>
             </div>
             
-            <div class="fixed left-0 right-0 px-4 pt-2 pb-2 z-40 bg-gradient-to-t from-ocean-dark via-ocean-dark/95 to-transparent" style="bottom: calc(90px + env(safe-area-inset-bottom));">
-                <div class="bg-slate-800/90 backdrop-blur-xl border border-white/10 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-xl">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-400" placeholder="AIに相談...">
+            <div class="chat-input-area">
+                <div class="bg-slate-800/90 backdrop-blur-xl border border-white/20 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-2xl ring-1 ring-black/20">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-400" placeholder="Ask AI...">
                     <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
@@ -241,7 +251,7 @@
         </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 z-[100] pt-2">
+    <nav class="fixed bottom-0 left-0 right-0 z-50 pt-2 h-[90px]">
         <div class="flex justify-around items-start max-w-lg mx-auto px-2">
             <button onclick="switchTab('chat')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="chat">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -268,7 +278,7 @@
 
     <div id="modal-equip" class="fixed inset-0 bg-ocean-dark/95 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-xl">
         <div class="card-glass w-full max-w-sm p-8 space-y-6">
-            <h2 class="text-lg font-light text-white text-center uppercase tracking-widest">New Equipment</h2>
+            <h2 class="text-lg font-light text-white text-center uppercase tracking-widest" id="modal-equip-title">New Equipment</h2>
             <input type="text" id="in-eq-name" class="input-elegant w-full" placeholder="Model Name">
             <select id="in-eq-cat" class="input-elegant w-full">
                 <option value="Lighting">Lighting</option>
@@ -277,17 +287,20 @@
                 <option value="Filter">Filtration</option>
                 <option value="Other">Other</option>
             </select>
-            <input type="date" id="in-eq-date" class="input-elegant w-full">
+            <div class="space-y-1">
+                <label class="text-[9px] text-slate-400 font-bold uppercase">Date Added</label>
+                <input type="date" id="in-eq-date" class="input-elegant w-full text-center">
+            </div>
             <div class="flex gap-4 pt-2">
                 <button onclick="closeModal('modal-equip')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs font-bold uppercase">Cancel</button>
-                <button onclick="addEquipment()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
+                <button onclick="saveEquipment()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
             </div>
         </div>
     </div>
 
     <div id="modal-lives" class="fixed inset-0 bg-ocean-dark/95 z-[200] hidden p-6 flex items-center justify-center backdrop-blur-xl">
         <div class="card-glass w-full max-w-sm p-8 space-y-6">
-            <h2 class="text-lg font-light text-white text-center uppercase tracking-widest">New Livestock</h2>
+            <h2 class="text-lg font-light text-white text-center uppercase tracking-widest" id="modal-lives-title">New Livestock</h2>
             <input type="text" id="in-lv-name" class="input-elegant w-full" placeholder="Species Name">
             <select id="in-lv-cat" class="input-elegant w-full">
                 <option value="FISH">Fish</option>
@@ -300,7 +313,7 @@
             </div>
             <div class="flex gap-4 pt-2">
                 <button onclick="closeModal('modal-lives')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs font-bold uppercase">Cancel</button>
-                <button onclick="addLivestock()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
+                <button onclick="saveLivestock()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
             </div>
         </div>
     </div>
@@ -315,10 +328,11 @@
             settings: { apiKey: '', volume: 30, startDate: new Date().toISOString().split('T')[0], additiveNames: ['Foundation A', 'Foundation B', 'Foundation C'] },
             equipment: [], livestock: [], logs: []
         };
+        let editState = { type: null, index: null }; // Track editing status
 
-        const save = () => { localStorage.setItem('aquaControlV8', JSON.stringify(state)); renderAll(); };
+        const save = () => { localStorage.setItem('aquaControlV9', JSON.stringify(state)); renderAll(); };
         const init = () => {
-            const data = localStorage.getItem('aquaControlV8');
+            const data = localStorage.getItem('aquaControlV9');
             if (data) state = JSON.parse(data);
             syncSettingsToUI(); renderAll(); switchTab('chat');
         };
@@ -346,11 +360,42 @@
             }
         };
 
+        // --- MODAL & EDIT LOGIC ---
         window.openModal = (id) => {
             document.getElementById(id).classList.remove('hidden');
-            if(id === 'modal-lives') document.getElementById('in-lv-date').value = new Date().toISOString().split('T')[0];
-            if(id === 'modal-equip') document.getElementById('in-eq-date').value = new Date().toISOString().split('T')[0];
+            editState = { type: null, index: null }; // Reset edit state
+            // Reset inputs
+            if(id === 'modal-equip') {
+                document.getElementById('modal-equip-title').textContent = "New Equipment";
+                document.getElementById('in-eq-name').value = "";
+                document.getElementById('in-eq-date').value = new Date().toISOString().split('T')[0];
+            }
+            if(id === 'modal-lives') {
+                document.getElementById('modal-lives-title').textContent = "New Livestock";
+                document.getElementById('in-lv-name').value = "";
+                document.getElementById('in-lv-date').value = new Date().toISOString().split('T')[0];
+            }
         };
+
+        window.editItem = (type, index) => {
+            editState = { type, index };
+            if(type === 'equip') {
+                const item = state.equipment[index];
+                document.getElementById('modal-equip-title').textContent = "Edit Equipment";
+                document.getElementById('in-eq-name').value = item.name;
+                document.getElementById('in-eq-cat').value = item.category;
+                document.getElementById('in-eq-date').value = item.date;
+                document.getElementById('modal-equip').classList.remove('hidden');
+            } else if(type === 'lives') {
+                const item = state.livestock[index];
+                document.getElementById('modal-lives-title').textContent = "Edit Livestock";
+                document.getElementById('in-lv-name').value = item.name;
+                document.getElementById('in-lv-cat').value = item.category;
+                document.getElementById('in-lv-date').value = item.date;
+                document.getElementById('modal-lives').classList.remove('hidden');
+            }
+        };
+
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         function renderAll() { renderEquipment(); renderLivestock(); renderLogs(); renderCharts(); updateAdditiveSelects(); }
@@ -358,16 +403,26 @@
         function renderEquipment() {
             document.getElementById('equip-list').innerHTML = state.equipment.map((e, idx) => `
                 <div class="card-glass p-4 flex justify-between items-center group">
-                    <div><p class="text-[9px] text-marine-blue font-bold uppercase tracking-widest mb-1">${e.category}</p><p class="text-sm font-medium text-slate-200">${e.name}</p></div>
-                    <button onclick="deleteItem('equipment', ${idx})" class="text-slate-600 hover:text-coral-pink transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"/></svg></button>
+                    <div class="flex-1">
+                        <p class="text-[9px] text-marine-blue font-bold uppercase tracking-widest mb-1">${e.category}</p>
+                        <p class="text-sm font-medium text-slate-200">${e.name}</p>
+                        <p class="text-[9px] text-slate-500 mt-1 font-mono">Installed: ${e.date || 'Unknown'}</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="editItem('equip', ${idx})" class="text-slate-400 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <button onclick="deleteItem('equipment', ${idx})" class="text-slate-600 hover:text-coral-pink"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/></svg></button>
+                    </div>
                 </div>
             `).join('');
         }
 
         function renderLivestock() {
             const priority = { 'FISH': 0, 'CORAL': 1, 'OTHER': 2 };
-            const sorted = [...state.livestock].sort((a, b) => priority[a.category] - priority[b.category]);
-            document.getElementById('lives-list').innerHTML = sorted.map((l, idx) => `
+            // Sort, but we need to keep original index for editing/deleting. 
+            // Simple approach: Render by index, but just sort display? 
+            // For now, let's keep original order to simplify index management for edit/delete.
+            // If sorting is required, we need a mapping. Let's just render naturally for stability.
+            document.getElementById('lives-list').innerHTML = state.livestock.map((l, idx) => `
                 <div class="card-glass p-3 flex items-center gap-3">
                     <div class="w-1 h-8 rounded-full ${l.category==='FISH'?'bg-coral-pink':l.category==='CORAL'?'bg-marine-blue':'bg-slate-500'}"></div>
                     <div class="flex-1">
@@ -375,7 +430,10 @@
                         <p class="text-sm font-medium text-white">${l.name}</p>
                         <p class="text-[9px] text-slate-500 mt-0.5 font-mono">Added: ${l.date || 'Unknown'}</p>
                     </div>
-                    <button onclick="deleteItem('livestock', ${state.livestock.indexOf(l)})" class="text-xs text-slate-600">×</button>
+                    <div class="flex gap-3 pr-2">
+                        <button onclick="editItem('lives', ${idx})" class="text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                        <button onclick="deleteItem('livestock', ${idx})" class="text-slate-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -438,20 +496,36 @@
             save();
         };
 
-        window.addEquipment = () => {
-            const name = document.getElementById('in-eq-name').value; const cat = document.getElementById('in-eq-cat').value; if(!name) return;
-            state.equipment.push({name, category:cat, date: document.getElementById('in-eq-date').value || new Date().toISOString().split('T')[0]});
-            save(); closeModal('modal-equip'); document.getElementById('in-eq-name').value = "";
+        window.saveEquipment = () => {
+            const name = document.getElementById('in-eq-name').value; 
+            const cat = document.getElementById('in-eq-cat').value; 
+            const date = document.getElementById('in-eq-date').value || new Date().toISOString().split('T')[0];
+            if(!name) return;
+
+            const item = {name, category:cat, date};
+            if(editState.type === 'equip' && editState.index !== null) {
+                state.equipment[editState.index] = item;
+            } else {
+                state.equipment.push(item);
+            }
+            save(); closeModal('modal-equip');
         };
-        // Updated addLivestock to read date
-        window.addLivestock = () => {
+
+        window.saveLivestock = () => {
             const name = document.getElementById('in-lv-name').value; 
             const cat = document.getElementById('in-lv-cat').value;
             const date = document.getElementById('in-lv-date').value || new Date().toISOString().split('T')[0];
             if(!name) return;
-            state.livestock.push({name, category:cat, date: date}); 
-            save(); closeModal('modal-lives'); document.getElementById('in-lv-name').value = "";
+
+            const item = {name, category:cat, date};
+            if(editState.type === 'lives' && editState.index !== null) {
+                state.livestock[editState.index] = item;
+            } else {
+                state.livestock.push(item);
+            }
+            save(); closeModal('modal-lives');
         };
+        
         window.deleteItem = (key, idx) => { if(confirm('Remove?')) { state[key].splice(idx, 1); save(); } };
 
         function syncSettingsToUI() {
@@ -482,26 +556,59 @@
         };
         window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
+        // --- ENHANCED STREAMING (TYPEWRITER EFFECT) ---
         window.handleChat = async () => {
-            const input = document.getElementById('chat-input'); const txt = input.value.trim(); if(!txt || !state.settings.apiKey) return;
+            const input = document.getElementById('chat-input'); 
+            const txt = input.value.trim(); 
+            if(!txt || !state.settings.apiKey) return;
+            
             const history = document.getElementById('chat-history');
             history.innerHTML += `<div class="flex justify-end"><div class="bg-marine-blue text-ocean-dark p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${txt}</div></div>`;
             input.value = "";
-            const aiId = 'ai-' + Date.now();
-            history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] stream-cursor leading-relaxed">...</div></div>`;
-            // Scroll to bottom
-            const chatSection = document.getElementById('tab-chat');
-            const targetPos = history.scrollHeight + 200; // Add extra to clear input
-            history.scrollTop = targetPos;
             
+            const aiId = 'ai-' + Date.now();
+            // Start with a typing cursor
+            history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] typing-cursor leading-relaxed"></div></div>`;
+            
+            // Scroll to bottom
+            const bottom = document.body.scrollHeight;
+            window.scrollTo({ top: bottom, behavior: 'smooth' });
+            
+            const aiEl = document.getElementById(aiId);
+            let charQueue = [];
+            let isStreaming = true;
+
+            // Typewriter Interval
+            const typeWriter = setInterval(() => {
+                if(charQueue.length > 0) {
+                    const nextChar = charQueue.shift();
+                    aiEl.innerHTML += nextChar; // Using innerHTML to handle possible markdown/newlines if we parse them, but for now raw text
+                    // Auto scroll if near bottom
+                    if((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
+                    }
+                } else if(!isStreaming) {
+                    clearInterval(typeWriter);
+                    aiEl.classList.remove('typing-cursor');
+                }
+            }, 30); // 30ms per char speed
+
             try {
-                const genAI = new GoogleGenerativeAI(state.settings.apiKey); const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+                const genAI = new GoogleGenerativeAI(state.settings.apiKey); 
+                const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely.`;
                 const res = await model.generateContentStream([ctx, txt]);
-                const el = document.getElementById(aiId); el.innerText = ""; let full = "";
-                for await (const chunk of res.stream) { full += chunk.text(); el.innerText = full; history.scrollTop = history.scrollHeight; }
-                el.classList.remove('stream-cursor');
-            } catch (e) { document.getElementById(aiId).innerText = "Error: Check API Key."; }
+                
+                for await (const chunk of res.stream) {
+                    const chunkText = chunk.text();
+                    // Split into chars and push to queue
+                    charQueue.push(...chunkText.split(''));
+                }
+                isStreaming = false; // Mark network done
+            } catch (e) { 
+                clearInterval(typeWriter);
+                aiEl.innerText = "Error: Check API Key."; 
+            }
         };
 
         init(); window.addEventListener('resize', renderCharts);
