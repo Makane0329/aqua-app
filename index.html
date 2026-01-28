@@ -28,29 +28,25 @@
             background: linear-gradient(180deg, #0F172A 0%, #020617 100%);
             color: #E2E8F0;
             min-height: 100dvh;
-            /* Header height + safe area */
             padding-top: calc(70px + env(safe-area-inset-top)); 
-            /* Nav height + safe area */
             padding-bottom: calc(90px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
         }
         
-        /* Fixed Header with proper safe area handling */
+        /* Fixed Header */
         header {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-top: max(10px, env(safe-area-inset-top)); /* Push content down */
-            height: auto;
+            padding-top: max(10px, env(safe-area-inset-top));
         }
 
-        /* Fixed Bottom Nav with proper safe area handling */
+        /* Fixed Bottom Nav */
         nav {
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.98); /* Less transparent for readability */
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: env(safe-area-inset-bottom); /* Extend background to bottom edge */
-            height: auto;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .card-glass {
@@ -98,21 +94,21 @@
 
     <main class="p-5 space-y-8">
 
-        <section id="tab-chat" class="tab-content active h-full">
-            <div id="chat-history" class="pb-24 space-y-4 text-sm">
+        <section id="tab-chat" class="tab-content active h-full relative">
+            <div id="chat-history" class="pb-32 space-y-4 text-sm min-h-[50dvh]">
                 <div class="card-glass p-4 flex gap-3">
                     <div class="min-w-[20px] mt-1 text-marine-blue">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
                     <p class="text-slate-200 leading-relaxed">
-                        Gemini 2.5 Flashです。あなたの水槽データ（最新ログ・生体・機材）を認識しています。
+                        Gemini 2.5 Flashです。あなたの水槽データに基づきアドバイスします。
                     </p>
                 </div>
             </div>
             
-            <div class="fixed left-4 right-4 z-40" style="bottom: calc(100px + env(safe-area-inset-bottom));">
-                <div class="bg-ocean-dark/90 backdrop-blur-xl border border-white/10 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-xl">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-500" placeholder="AIに相談...">
+            <div class="fixed left-0 right-0 px-4 pt-2 pb-2 z-40 bg-gradient-to-t from-ocean-dark via-ocean-dark/95 to-transparent" style="bottom: calc(90px + env(safe-area-inset-bottom));">
+                <div class="bg-slate-800/90 backdrop-blur-xl border border-white/10 p-2 pl-4 flex gap-2 items-center rounded-2xl shadow-xl">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent border-none text-white text-base focus:outline-none placeholder-slate-400" placeholder="AIに相談...">
                     <button onclick="handleChat()" class="btn-ocean w-10 h-10 rounded-xl flex items-center justify-center active:scale-95 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
@@ -298,6 +294,10 @@
                 <option value="CORAL">Coral</option>
                 <option value="OTHER">Inverts / Other</option>
             </select>
+            <div class="space-y-1">
+                <label class="text-[9px] text-slate-400 font-bold uppercase">Date Added</label>
+                <input type="date" id="in-lv-date" class="input-elegant w-full text-center">
+            </div>
             <div class="flex gap-4 pt-2">
                 <button onclick="closeModal('modal-lives')" class="flex-1 h-12 rounded-xl border border-slate-600 text-slate-300 text-xs font-bold uppercase">Cancel</button>
                 <button onclick="addLivestock()" class="flex-1 h-12 rounded-xl btn-ocean text-xs font-bold uppercase">Save</button>
@@ -316,9 +316,9 @@
             equipment: [], livestock: [], logs: []
         };
 
-        const save = () => { localStorage.setItem('aquaControlV7', JSON.stringify(state)); renderAll(); };
+        const save = () => { localStorage.setItem('aquaControlV8', JSON.stringify(state)); renderAll(); };
         const init = () => {
-            const data = localStorage.getItem('aquaControlV7');
+            const data = localStorage.getItem('aquaControlV8');
             if (data) state = JSON.parse(data);
             syncSettingsToUI(); renderAll(); switchTab('chat');
         };
@@ -346,7 +346,11 @@
             }
         };
 
-        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+        window.openModal = (id) => {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'modal-lives') document.getElementById('in-lv-date').value = new Date().toISOString().split('T')[0];
+            if(id === 'modal-equip') document.getElementById('in-eq-date').value = new Date().toISOString().split('T')[0];
+        };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         function renderAll() { renderEquipment(); renderLivestock(); renderLogs(); renderCharts(); updateAdditiveSelects(); }
@@ -429,7 +433,6 @@
             }
             if(!sg && !wc && doses.length === 0) return;
             state.logs.push({ date: new Date().toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}), sg, wc, additives: doses });
-            // Reset
             document.getElementById('wc-toggle').checked = false; toggleWaterChange(document.getElementById('wc-toggle'));
             ['log-add-val-1', 'log-add-val-2'].forEach(id => document.getElementById(id).value = "");
             save();
@@ -440,9 +443,13 @@
             state.equipment.push({name, category:cat, date: document.getElementById('in-eq-date').value || new Date().toISOString().split('T')[0]});
             save(); closeModal('modal-equip'); document.getElementById('in-eq-name').value = "";
         };
+        // Updated addLivestock to read date
         window.addLivestock = () => {
-            const name = document.getElementById('in-lv-name').value; const cat = document.getElementById('in-lv-cat').value; if(!name) return;
-            state.livestock.push({name, category:cat, date: new Date().toISOString().split('T')[0]}); 
+            const name = document.getElementById('in-lv-name').value; 
+            const cat = document.getElementById('in-lv-cat').value;
+            const date = document.getElementById('in-lv-date').value || new Date().toISOString().split('T')[0];
+            if(!name) return;
+            state.livestock.push({name, category:cat, date: date}); 
             save(); closeModal('modal-lives'); document.getElementById('in-lv-name').value = "";
         };
         window.deleteItem = (key, idx) => { if(confirm('Remove?')) { state[key].splice(idx, 1); save(); } };
@@ -466,7 +473,6 @@
             document.getElementById(id).onchange = (e) => { const k = id.replace('set-', '').replace('api-key', 'apiKey').replace('start-date', 'startDate'); state.settings[k] = e.target.value; save(); };
         });
 
-        // Migration Support
         window.exportData = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'})); a.download = 'aqua_backup.json'; a.click(); };
         window.importData = (input) => {
             const file = input.files[0]; if(!file) return;
@@ -483,14 +489,17 @@
             input.value = "";
             const aiId = 'ai-' + Date.now();
             history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] stream-cursor leading-relaxed">...</div></div>`;
-            const scrollArea = document.getElementById('tab-chat');
-            history.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            // Scroll to bottom
+            const chatSection = document.getElementById('tab-chat');
+            const targetPos = history.scrollHeight + 200; // Add extra to clear input
+            history.scrollTop = targetPos;
+            
             try {
                 const genAI = new GoogleGenerativeAI(state.settings.apiKey); const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely.`;
                 const res = await model.generateContentStream([ctx, txt]);
                 const el = document.getElementById(aiId); el.innerText = ""; let full = "";
-                for await (const chunk of res.stream) { full += chunk.text(); el.innerText = full; }
+                for await (const chunk of res.stream) { full += chunk.text(); el.innerText = full; history.scrollTop = history.scrollHeight; }
                 el.classList.remove('stream-cursor');
             } catch (e) { document.getElementById(aiId).innerText = "Error: Check API Key."; }
         };
