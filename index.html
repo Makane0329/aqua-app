@@ -168,7 +168,7 @@
             <div id="loading-indicator" class="hidden flex justify-start pl-2">
                 <div class="card-glass p-4 rounded-2xl rounded-bl-sm flex items-center gap-3">
                     <div class="dot-flashing mx-2"></div>
-                    <span class="text-xs text-slate-400 animate-pulse">Thinking...</span>
+                    <span class="text-xs text-slate-400 animate-pulse">Thinking (Gemini 3.0)...</span>
                 </div>
             </div>
         </section>
@@ -673,7 +673,7 @@
         function renderChatHistory() {
             const historyEl = document.getElementById('chat-history');
             // Keep default welcome msg, append stored
-            const defaults = historyEl.innerHTML.split('')[0] + '';
+            const defaults = historyEl.innerHTML.split('</div>')[0] + '</div>';
             
             let html = defaults;
             state.chatHistory.forEach(msg => {
@@ -739,7 +739,8 @@
                 const genAI = new GoogleGenerativeAI(state.settings.apiKey); 
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely using Markdown.`;
                 
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: ctx }); 
+                // --- FIX: Model Name Updated to Gemini 3.0 Flash Preview ---
+                const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction: ctx }); 
                 
                 let promptParts = [];
                 if(txt) promptParts.push(txt);
