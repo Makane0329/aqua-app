@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-    <title>Aqua Control Pro v2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Aqua Control Pro v2.1</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,11 +22,16 @@
                     fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
                     animation: {
                         'bounce-slight': 'bounce-slight 1s infinite',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards', /* アニメーション定義を追加 */
                     },
                     keyframes: {
                         'bounce-slight': {
                             '0%, 100%': { transform: 'translateY(-2px)' },
                             '50%': { transform: 'translateY(2px)' },
+                        },
+                        'fadeIn': { /* アニメーション詳細 */
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
                 }
@@ -39,7 +44,7 @@
             color: #E2E8F0;
             min-height: 100dvh;
             padding-top: calc(70px + env(safe-area-inset-top)); 
-            padding-bottom: calc(100px + env(safe-area-inset-bottom)); /* 入力欄が大きくなる可能性があるので余白調整 */
+            padding-bottom: calc(100px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
         }
         
@@ -61,7 +66,6 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Chat Input Area - 改行対応のためレイアウト調整 */
         .chat-input-wrapper {
             padding: 10px 12px;
             background: rgba(15, 23, 42, 0.5);
@@ -98,17 +102,15 @@
         }
         .input-elegant:focus { border-color: #38BDF8 !important; background: rgba(2, 6, 23, 0.8) !important; outline: none; }
         
-        /* Chat Textarea Styling */
         textarea#chat-input {
             min-height: 44px;
-            max-height: 120px; /* 伸びすぎ防止 */
+            max-height: 120px;
             resize: none;
             line-height: 1.4;
             padding-top: 10px;
             padding-bottom: 10px;
         }
 
-        /* Loading Dots Animation */
         .dot-flashing {
             position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #38BDF8; color: #38BDF8;
             animation: dot-flashing 1s infinite linear alternate;
@@ -137,6 +139,9 @@
         .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
         .nav-active { color: #38BDF8 !important; }
         .hidden { display: none !important; }
+        
+        /* 修正: フェードイン用のクラスを追加 */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
 </head>
 <body class="overflow-x-hidden">
@@ -163,7 +168,7 @@
                         <p>Aqua Controlへようこそ。<br>水槽の状態や生体について、またログの記録について何でも聞いてください。</p>
                     </div>
                 </div>
-                </div>
+            </div>
             
             <div id="loading-indicator" class="hidden flex justify-start pl-2">
                 <div class="card-glass p-4 rounded-2xl rounded-bl-sm flex items-center gap-3">
@@ -289,14 +294,12 @@
     <div class="bottom-container">
         <div id="chat-wrapper" class="chat-input-wrapper">
             <input type="file" id="chat-image" accept="image/*" class="hidden" onchange="handleImageSelect(this)">
-            
             <div id="image-preview-area" class="hidden px-2 pb-2">
                 <div class="relative inline-block">
                     <img id="img-preview" src="" class="h-16 w-16 object-cover rounded-lg border border-white/20">
                     <button onclick="clearImage()" class="absolute -top-2 -right-2 bg-coral-pink text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-md">×</button>
                 </div>
             </div>
-
             <div class="bg-slate-800/90 backdrop-blur-xl border border-white/20 p-2 pl-2 flex gap-2 items-end rounded-2xl shadow-xl ring-1 ring-black/20">
                 <button onclick="document.getElementById('chat-image').click()" class="text-slate-400 hover:text-marine-blue p-2 mb-1">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -307,7 +310,6 @@
                 </button>
             </div>
         </div>
-
         <nav class="nav-bar max-w-lg mx-auto px-2">
             <button onclick="switchTab('chat')" class="nav-btn text-slate-500 flex flex-col items-center gap-1 w-16" data-tab="chat">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -384,7 +386,7 @@
             equipment: [], 
             livestock: [], 
             logs: [],
-            chatHistory: [] // New: Chat History
+            chatHistory: [] 
         };
         let editState = { type: null, index: null };
         let selectedImageBase64 = null;
@@ -394,13 +396,11 @@
             const data = localStorage.getItem('aquaControlV20');
             if (data) state = JSON.parse(data);
             
-            // 下位互換性: 古いデータにchatHistoryがない場合の対応
             if(!state.chatHistory) state.chatHistory = [];
 
             syncSettingsToUI(); renderAll(); renderChatHistory(); switchTab('chat');
         };
 
-        // Textarea Auto Resize
         const chatInput = document.getElementById('chat-input');
         chatInput.addEventListener('input', function() {
             this.style.height = 'auto';
@@ -419,7 +419,7 @@
             });
             const chatWrapper = document.getElementById('chat-wrapper');
             chatWrapper.style.display = (tabId === 'chat') ? 'block' : 'none';
-            if(tabId === 'logs') setTimeout(renderCharts, 50);
+            if(tabId === 'logs') setTimeout(renderCharts, 100); /* レンダリング遅延を微調整 */
             if(tabId === 'chat') window.scrollTo(0, document.body.scrollHeight);
             else window.scrollTo(0,0);
         };
@@ -437,10 +437,9 @@
             }
         };
 
-        // --- Additives Logic ---
         window.updateMl = (idx) => {
             const drops = document.getElementById(`log-add-val-${idx}`).value;
-            const ml = (drops * 0.05).toFixed(2); // 1 drop = 0.05ml approx
+            const ml = (drops * 0.05).toFixed(2); 
             document.getElementById(`log-ml-${idx}`).innerText = ml + 'ml';
         };
 
@@ -588,7 +587,6 @@
             save(); closeModal('modal-equip');
         };
 
-        // --- SORT Logic Added Here ---
         window.saveLivestock = () => {
             const name = document.getElementById('in-lv-name').value; 
             const cat = document.getElementById('in-lv-cat').value;
@@ -602,7 +600,6 @@
                 state.livestock.push(item); 
             }
             
-            // Auto Sort: FISH -> CORAL -> OTHER
             const sortOrder = { 'FISH': 1, 'CORAL': 2, 'OTHER': 3 };
             state.livestock.sort((a, b) => {
                 return (sortOrder[a.category] || 4) - (sortOrder[b.category] || 4);
@@ -641,7 +638,6 @@
         };
         window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
-        // --- Image Handling ---
         window.handleImageSelect = (input) => {
             const file = input.files[0];
             if(file) {
@@ -672,24 +668,23 @@
         // --- Chat Render Logic (History) ---
         function renderChatHistory() {
             const historyEl = document.getElementById('chat-history');
-            // Keep default welcome msg, append stored
             const defaults = historyEl.innerHTML.split('</div>')[0] + '</div>';
             
             let html = defaults;
             state.chatHistory.forEach(msg => {
                 if(msg.role === 'user') {
-                    html += `<div class="flex justify-end flex-col items-end gap-2 fade-in">`;
+                    // 修正: w-fullを追加してフレックス縮小を防止
+                    html += `<div class="flex justify-end flex-col items-end gap-2 fade-in w-full">`;
                     if(msg.image) html += `<img src="${msg.image}" class="w-32 rounded-lg border border-white/20 shadow-lg">`;
                     if(msg.text) html += `<div class="bg-marine-blue text-ocean-dark p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${msg.text}</div>`;
                     html += `</div>`;
                 } else {
-                    html += `<div class="flex justify-start fade-in"><div class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] prose leading-relaxed">${marked.parse(msg.text)}</div></div>`;
+                    html += `<div class="flex justify-start fade-in w-full"><div class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] prose leading-relaxed">${marked.parse(msg.text)}</div></div>`;
                 }
             });
             historyEl.innerHTML = html;
         }
 
-        // --- Chat with Markdown & Image ---
         window.handleChat = async () => {
             const input = document.getElementById('chat-input'); 
             const txt = input.value.trim(); 
@@ -703,13 +698,13 @@
                 return;
             }
             
-            // Add User Message to History & UI
             const userMsg = { role: 'user', text: txt, image: selectedImageBase64 };
             state.chatHistory.push(userMsg);
-            save(); // Save immediately
+            save(); 
             
             const history = document.getElementById('chat-history');
-            let userHtml = `<div class="flex justify-end flex-col items-end gap-2">`;
+            // 修正: こちらも w-full を追加
+            let userHtml = `<div class="flex justify-end flex-col items-end gap-2 fade-in w-full">`;
             if(selectedImageBase64) {
                 userHtml += `<img src="${selectedImageBase64}" class="w-32 rounded-lg border border-white/20 shadow-lg">`;
             }
@@ -719,27 +714,24 @@
             userHtml += `</div>`;
             history.innerHTML += userHtml;
             
-            // Reset Input
             input.value = "";
-            input.style.height = 'auto'; // Reset height
+            input.style.height = 'auto'; 
             const imageFile = fileInput.files[0];
             clearImage();
             
-            // Show Loading Indicator
             const loadingEl = document.getElementById('loading-indicator');
             loadingEl.classList.remove('hidden');
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
             const aiId = 'ai-' + Date.now();
-            // Placeholder div for AI response (initially empty)
-            history.innerHTML += `<div class="flex justify-start"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] prose leading-relaxed hidden"></div></div>`;
+            // 修正: AI側のラッパーにも w-full を追加
+            history.innerHTML += `<div class="flex justify-start w-full"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] prose leading-relaxed hidden fade-in"></div></div>`;
             const aiEl = document.getElementById(aiId);
 
             try {
                 const genAI = new GoogleGenerativeAI(state.settings.apiKey); 
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely using Markdown.`;
                 
-                // --- FIX: Model Name Updated to Gemini 3.0 Flash Preview ---
                 const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction: ctx }); 
                 
                 let promptParts = [];
@@ -756,7 +748,6 @@
 
                 for await (const chunk of res.stream) {
                     if(isFirstChunk) {
-                        // Hide Loading, Show Text Area on first byte
                         loadingEl.classList.add('hidden');
                         aiEl.classList.remove('hidden');
                         isFirstChunk = false;
@@ -766,7 +757,6 @@
                     window.scrollTo({ top: document.body.scrollHeight, behavior: 'auto' });
                 }
 
-                // Final Save
                 state.chatHistory.push({ role: 'model', text: fullText });
                 save();
 
