@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aqua Control Pro v2.1</title>
+    <title>Aqua Control Pro v2.2</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,14 +22,14 @@
                     fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
                     animation: {
                         'bounce-slight': 'bounce-slight 1s infinite',
-                        'fade-in': 'fadeIn 0.3s ease-out forwards', /* アニメーション定義を追加 */
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
                     },
                     keyframes: {
                         'bounce-slight': {
                             '0%, 100%': { transform: 'translateY(-2px)' },
                             '50%': { transform: 'translateY(2px)' },
                         },
-                        'fadeIn': { /* アニメーション詳細 */
+                        'fadeIn': {
                             '0%': { opacity: '0', transform: 'translateY(10px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
@@ -139,8 +139,6 @@
         .tab-content.active { display: block; opacity: 1; transform: translateY(0); }
         .nav-active { color: #38BDF8 !important; }
         .hidden { display: none !important; }
-        
-        /* 修正: フェードイン用のクラスを追加 */
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
     </style>
 </head>
@@ -152,7 +150,7 @@
             <p class="text-xl font-light tracking-tight text-white">Aqua Control</p>
         </div>
         <div class="flex items-center gap-2 mb-1">
-            <span class="text-[9px] text-marine-blue font-bold tracking-wide border border-marine-blue/30 px-1.5 py-0.5 rounded">AI V3.0 Log</span>
+            <span class="text-[9px] text-marine-blue font-bold tracking-wide border border-marine-blue/30 px-1.5 py-0.5 rounded">AI V3.0 Fix</span>
             <div class="w-1.5 h-1.5 rounded-full bg-marine-blue shadow-[0_0_8px_#38BDF8] animate-pulse"></div>
         </div>
     </header>
@@ -160,15 +158,7 @@
     <main class="p-5 space-y-8">
         <section id="tab-chat" class="tab-content active h-full relative">
             <div id="chat-history" class="space-y-4 text-sm min-h-[50dvh] pb-32">
-                <div class="card-glass p-4 flex gap-3">
-                    <div class="min-w-[20px] mt-1 text-marine-blue">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                    <div class="text-slate-200 leading-relaxed prose">
-                        <p>Aqua Controlへようこそ。<br>水槽の状態や生体について、またログの記録について何でも聞いてください。</p>
-                    </div>
                 </div>
-            </div>
             
             <div id="loading-indicator" class="hidden flex justify-start pl-2">
                 <div class="card-glass p-4 rounded-2xl rounded-bl-sm flex items-center gap-3">
@@ -281,6 +271,8 @@
                 <div id="additive-inputs" class="space-y-3"></div>
             </div>
             <div class="pt-8 border-t border-white/5 flex flex-col items-center gap-6">
+                <button onclick="clearChatHistory()" class="w-full h-10 rounded-lg border border-coral-pink/30 text-xs text-coral-pink font-bold hover:bg-coral-pink/10 transition">Clear Chat History</button>
+                
                 <div class="flex gap-4 w-full">
                     <button onclick="exportData()" class="flex-1 h-10 rounded-lg border border-white/10 text-xs text-slate-300">Export JSON</button>
                     <input type="file" id="import-file" class="hidden" onchange="importData(this)">
@@ -419,7 +411,7 @@
             });
             const chatWrapper = document.getElementById('chat-wrapper');
             chatWrapper.style.display = (tabId === 'chat') ? 'block' : 'none';
-            if(tabId === 'logs') setTimeout(renderCharts, 100); /* レンダリング遅延を微調整 */
+            if(tabId === 'logs') setTimeout(renderCharts, 100); 
             if(tabId === 'chat') window.scrollTo(0, document.body.scrollHeight);
             else window.scrollTo(0,0);
         };
@@ -638,6 +630,16 @@
         };
         window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
+        /* New Function to Clear Chat Only */
+        window.clearChatHistory = () => {
+             if(confirm('Delete all chat history?')) {
+                 state.chatHistory = [];
+                 save();
+                 renderChatHistory();
+                 alert('Chat history cleared.');
+             }
+        };
+
         window.handleImageSelect = (input) => {
             const file = input.files[0];
             if(file) {
@@ -665,15 +667,26 @@
             return { inlineData: { data: await base64EncodedDataPromise, mimeType: file.type } };
         }
 
-        // --- Chat Render Logic (History) ---
+        // --- FIXED: Robust Chat Render Logic ---
         function renderChatHistory() {
             const historyEl = document.getElementById('chat-history');
-            const defaults = historyEl.innerHTML.split('</div>')[0] + '</div>';
             
-            let html = defaults;
+            // Welcome Message - Hardcoded to prevent nesting errors
+            const welcomeMsg = `
+            <div class="card-glass p-4 flex gap-3">
+                <div class="min-w-[20px] mt-1 text-marine-blue">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="text-slate-200 leading-relaxed prose">
+                    <p>Aqua Controlへようこそ。<br>水槽の状態や生体について、またログの記録について何でも聞いてください。</p>
+                </div>
+            </div>`;
+            
+            let html = welcomeMsg;
+            
             state.chatHistory.forEach(msg => {
                 if(msg.role === 'user') {
-                    // 修正: w-fullを追加してフレックス縮小を防止
+                    // Added w-full to prevent flex shrinking
                     html += `<div class="flex justify-end flex-col items-end gap-2 fade-in w-full">`;
                     if(msg.image) html += `<img src="${msg.image}" class="w-32 rounded-lg border border-white/20 shadow-lg">`;
                     if(msg.text) html += `<div class="bg-marine-blue text-ocean-dark p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${msg.text}</div>`;
@@ -702,17 +715,8 @@
             state.chatHistory.push(userMsg);
             save(); 
             
-            const history = document.getElementById('chat-history');
-            // 修正: こちらも w-full を追加
-            let userHtml = `<div class="flex justify-end flex-col items-end gap-2 fade-in w-full">`;
-            if(selectedImageBase64) {
-                userHtml += `<img src="${selectedImageBase64}" class="w-32 rounded-lg border border-white/20 shadow-lg">`;
-            }
-            if(txt) {
-                userHtml += `<div class="bg-marine-blue text-ocean-dark p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${txt}</div>`;
-            }
-            userHtml += `</div>`;
-            history.innerHTML += userHtml;
+            // Re-render completely to ensure structure
+            renderChatHistory();
             
             input.value = "";
             input.style.height = 'auto'; 
@@ -724,7 +728,8 @@
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
             const aiId = 'ai-' + Date.now();
-            // 修正: AI側のラッパーにも w-full を追加
+            // Append temporary AI placeholder
+            const history = document.getElementById('chat-history');
             history.innerHTML += `<div class="flex justify-start w-full"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] prose leading-relaxed hidden fade-in"></div></div>`;
             const aiEl = document.getElementById(aiId);
 
@@ -759,6 +764,8 @@
 
                 state.chatHistory.push({ role: 'model', text: fullText });
                 save();
+                // Final re-render to lock in structure
+                renderChatHistory();
 
             } catch (e) { 
                 console.error(e);
