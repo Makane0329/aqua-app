@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Aqua Control Pro v2.2</title>
+    <title>Aqua Control Pro v2.3</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -102,6 +102,11 @@
         }
         .input-elegant:focus { border-color: #38BDF8 !important; background: rgba(2, 6, 23, 0.8) !important; outline: none; }
         
+        /* Specific override for date inputs to ensure text is visible */
+        input[type="date"], input[type="datetime-local"] {
+            color-scheme: dark;
+        }
+
         textarea#chat-input {
             min-height: 44px;
             max-height: 120px;
@@ -150,7 +155,7 @@
             <p class="text-xl font-light tracking-tight text-white">Aqua Control</p>
         </div>
         <div class="flex items-center gap-2 mb-1">
-            <span class="text-[9px] text-marine-blue font-bold tracking-wide border border-marine-blue/30 px-1.5 py-0.5 rounded">AI V3.0 Fix</span>
+            <span class="text-[9px] text-marine-blue font-bold tracking-wide border border-marine-blue/30 px-1.5 py-0.5 rounded">AI V3.0 Optimized</span>
             <div class="w-1.5 h-1.5 rounded-full bg-marine-blue shadow-[0_0_8px_#38BDF8] animate-pulse"></div>
         </div>
     </header>
@@ -195,6 +200,11 @@
                         <span class="text-[10px] text-marine-blue font-bold">Water Change</span>
                         <input type="checkbox" id="wc-toggle" class="toggle-checkbox" onchange="toggleWaterChange(this)">
                     </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Date/Time</label>
+                    <input type="datetime-local" id="log-timestamp" class="input-elegant w-full font-mono text-sm">
                 </div>
                 
                 <div id="wc-fields" class="grid grid-cols-2 gap-4 hidden bg-marine-blue/5 p-4 rounded-xl border border-marine-blue/10">
@@ -390,6 +400,11 @@
             
             if(!state.chatHistory) state.chatHistory = [];
 
+            // Initialize Date Picker with current time (Local ISO format for input)
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('log-timestamp').value = now.toISOString().slice(0, 16);
+
             syncSettingsToUI(); renderAll(); renderChatHistory(); switchTab('chat');
         };
 
@@ -411,7 +426,13 @@
             });
             const chatWrapper = document.getElementById('chat-wrapper');
             chatWrapper.style.display = (tabId === 'chat') ? 'block' : 'none';
-            if(tabId === 'logs') setTimeout(renderCharts, 100); 
+            if(tabId === 'logs') {
+                setTimeout(renderCharts, 100); 
+                // Reset Date picker to now when opening tab
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('log-timestamp').value = now.toISOString().slice(0, 16);
+            }
             if(tabId === 'chat') window.scrollTo(0, document.body.scrollHeight);
             else window.scrollTo(0,0);
         };
@@ -555,6 +576,12 @@
             const isWC = document.getElementById('wc-toggle').checked;
             const sg = isWC ? document.getElementById('log-sg').value : null;
             const wc = isWC ? document.getElementById('log-wc').value : null;
+            
+            // Handle Custom Date
+            const dateInput = document.getElementById('log-timestamp').value;
+            let logDateObj = dateInput ? new Date(dateInput) : new Date();
+            const logDateStr = logDateObj.toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+
             const doses = [];
             for(let i=1; i<=2; i++) {
                 const typeIdx = document.getElementById(`log-add-type-${i}`).value; 
@@ -562,11 +589,22 @@
                 if(val > 0 && typeIdx !== "") doses.push({ name: state.settings.additiveNames[typeIdx], val: val + " drops" });
             }
             if(!sg && !wc && doses.length === 0) return;
-            state.logs.push({ date: new Date().toLocaleString('ja-JP', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}), sg, wc, additives: doses });
+            state.logs.push({ date: logDateStr, sg, wc, additives: doses });
+            
+            // Sort Logs by Date (Newest Last for processing, Newest First for display reversed)
+            state.logs.sort((a, b) => {
+                // Parse the localized format roughly or assume chronological entry if edit isn't heavy. 
+                // Since format is MM/DD HH:MM, robust parsing across years is tricky.
+                // Simplified: We rely on array order mostly, but adding a real timestamp in V2.4 would be better.
+                return 0; // Keep insertion order for now or push to end.
+            });
+
             document.getElementById('wc-toggle').checked = false; toggleWaterChange(document.getElementById('wc-toggle'));
             ['log-add-val-1', 'log-add-val-2'].forEach(id => document.getElementById(id).value = "");
             ['log-ml-1', 'log-ml-2'].forEach(id => document.getElementById(id).innerText = "0ml");
+            
             save();
+            alert('Log saved!');
         };
 
         window.saveEquipment = () => {
@@ -630,7 +668,6 @@
         };
         window.clearAllData = () => { if(confirm('Reset all?')) { localStorage.clear(); location.reload(); } };
 
-        /* New Function to Clear Chat Only */
         window.clearChatHistory = () => {
              if(confirm('Delete all chat history?')) {
                  state.chatHistory = [];
@@ -640,38 +677,66 @@
              }
         };
 
-        window.handleImageSelect = (input) => {
+        // --- NEW: Client-side Image Compression ---
+        const compressImage = (file, maxWidth, quality) => {
+            return new Promise((resolve) => {
+                 const reader = new FileReader();
+                 reader.onload = (e) => {
+                     const img = new Image();
+                     img.onload = () => {
+                         const canvas = document.createElement('canvas');
+                         let width = img.width;
+                         let height = img.height;
+                         
+                         if (width > height) {
+                             if (width > maxWidth) {
+                                 height = Math.round((height * maxWidth) / width);
+                                 width = maxWidth;
+                             }
+                         } else {
+                             if (height > maxWidth) {
+                                 width = Math.round((width * maxWidth) / height);
+                                 height = maxWidth;
+                             }
+                         }
+                         
+                         canvas.width = width;
+                         canvas.height = height;
+                         const ctx = canvas.getContext('2d');
+                         ctx.drawImage(img, 0, 0, width, height);
+                         resolve(canvas.toDataURL('image/jpeg', quality));
+                     }
+                     img.src = e.target.result;
+                 }
+                 reader.readAsDataURL(file);
+            });
+        };
+
+        window.handleImageSelect = async (input) => {
             const file = input.files[0];
             if(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    selectedImageBase64 = e.target.result;
-                    document.getElementById('img-preview').src = selectedImageBase64;
-                    document.getElementById('image-preview-area').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
+                // Compress: Max 1024px, 0.7 Quality JPEG
+                selectedImageBase64 = await compressImage(file, 1024, 0.7);
+                document.getElementById('img-preview').src = selectedImageBase64;
+                document.getElementById('image-preview-area').classList.remove('hidden');
             }
         };
+        
         window.clearImage = () => {
             document.getElementById('chat-image').value = "";
             selectedImageBase64 = null;
             document.getElementById('image-preview-area').classList.add('hidden');
         }
 
-        async function fileToGenerativePart(file) {
-            const base64EncodedDataPromise = new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                reader.readAsDataURL(file);
-            });
-            return { inlineData: { data: await base64EncodedDataPromise, mimeType: file.type } };
+        async function fileToGenerativePart(base64Data, mimeType) {
+             // base64Data comes with "data:image/jpeg;base64," prefix from canvas
+             return { inlineData: { data: base64Data.split(',')[1], mimeType: mimeType } };
         }
 
         // --- FIXED: Robust Chat Render Logic ---
         function renderChatHistory() {
             const historyEl = document.getElementById('chat-history');
             
-            // Welcome Message - Hardcoded to prevent nesting errors
             const welcomeMsg = `
             <div class="card-glass p-4 flex gap-3">
                 <div class="min-w-[20px] mt-1 text-marine-blue">
@@ -686,7 +751,6 @@
             
             state.chatHistory.forEach(msg => {
                 if(msg.role === 'user') {
-                    // Added w-full to prevent flex shrinking
                     html += `<div class="flex justify-end flex-col items-end gap-2 fade-in w-full">`;
                     if(msg.image) html += `<img src="${msg.image}" class="w-32 rounded-lg border border-white/20 shadow-lg">`;
                     if(msg.text) html += `<div class="bg-marine-blue text-ocean-dark p-3 rounded-2xl rounded-br-sm text-sm font-medium max-w-[85%] shadow-lg">${msg.text}</div>`;
@@ -711,24 +775,22 @@
                 return;
             }
             
+            // Push User Message
             const userMsg = { role: 'user', text: txt, image: selectedImageBase64 };
             state.chatHistory.push(userMsg);
             save(); 
             
-            // Re-render completely to ensure structure
             renderChatHistory();
             
             input.value = "";
             input.style.height = 'auto'; 
-            const imageFile = fileInput.files[0];
-            clearImage();
+            clearImage(); // Clear preview and internal var
             
             const loadingEl = document.getElementById('loading-indicator');
             loadingEl.classList.remove('hidden');
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
             const aiId = 'ai-' + Date.now();
-            // Append temporary AI placeholder
             const history = document.getElementById('chat-history');
             history.innerHTML += `<div class="flex justify-start w-full"><div id="${aiId}" class="card-glass p-4 rounded-2xl rounded-bl-sm text-sm text-slate-200 max-w-[90%] prose leading-relaxed hidden fade-in"></div></div>`;
             const aiEl = document.getElementById(aiId);
@@ -737,12 +799,14 @@
                 const genAI = new GoogleGenerativeAI(state.settings.apiKey); 
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely using Markdown.`;
                 
-                const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction: ctx }); 
+                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: ctx }); 
                 
                 let promptParts = [];
                 if(txt) promptParts.push(txt);
-                if(imageFile) {
-                    const imgPart = await fileToGenerativePart(imageFile);
+                
+                // If there's an image, we use the compressed base64 we already generated
+                if(userMsg.image) {
+                    const imgPart = await fileToGenerativePart(userMsg.image, "image/jpeg");
                     promptParts.push(imgPart);
                 }
 
@@ -764,7 +828,6 @@
 
                 state.chatHistory.push({ role: 'model', text: fullText });
                 save();
-                // Final re-render to lock in structure
                 renderChatHistory();
 
             } catch (e) { 
