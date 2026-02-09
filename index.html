@@ -884,7 +884,7 @@
                 const ctx = `Marine Aquarium Expert. Data: Vol ${state.settings.volume}L, Equip ${JSON.stringify(state.equipment)}, Lives ${JSON.stringify(state.livestock)}, Logs ${JSON.stringify(state.logs.slice(-5))}. Reply in JP politely using Markdown.`;
                 
                 // --- MODEL UPDATED HERE ---
-                const model = genAI.getGenerativeModel({ model: "gemini-3.0-flash-preview", systemInstruction: ctx }); 
+                const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction: ctx }); 
                 
                 let promptParts = [];
                 if(txt) promptParts.push(txt);
