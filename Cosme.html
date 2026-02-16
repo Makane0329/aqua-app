@@ -895,8 +895,8 @@ background: linear-gradient(135deg, #b8976d, #a8866d);
 </div>
 
 <div class="flex-row">
-<input type="text" id="itemName" placeholder="商品名" style="margin-top:0;">
-<button onclick="triggerManualAISearch()" style="width: auto; white-space: nowrap; margin-top:0; padding:0 18px;"><span style="position: relative; z-index: 1;">✨ AI推測</span></button>
+<input type="text" id="itemName" placeholder="商品名" style="margin-top:0; flex: 1;">
+<button onclick="triggerManualAISearch()" style="width: auto; white-space: nowrap; margin-top:0; padding:0 14px; flex-shrink: 0; font-size: 12px;"><span style="position: relative; z-index: 1;">✨ AI推測</span></button>
 </div>
 
 <input type="text" id="brand" placeholder="ブランド名">
@@ -1455,13 +1455,11 @@ addMessageToChat(currentChatId, 'user', message);
 inputEl.value = '';
 chatHistory.scrollTop = chatHistory.scrollHeight;
 
-var loadingId = 'loading-' + Date.now();
-var loadingDiv = document.createElement('div');
-loadingDiv.id = loadingId;
-loadingDiv.className = 'msg-ai';
-loadingDiv.style.color = '#999';
-loadingDiv.textContent = '考え中...';
-chatHistory.appendChild(loadingDiv);
+var streamMsgId = 'stream-' + Date.now();
+var streamDiv = document.createElement('div');
+streamDiv.id = streamMsgId;
+streamDiv.className = 'msg-ai';
+chatHistory.appendChild(streamDiv);
 
 var cosmeListText = cosmeData.length > 0 ? JSON.stringify(cosmeData) : '登録コスメなし';
 var promptText = 'あなたは美容部員AIです。回答は見やすくするため、重要なポイントは**太字**、カテゴリや見出しには##や###を使い、リストは-や数字で整理してください。\n【登録コスメ】: ' + cosmeListText + '\n【質問】: ' + message;
@@ -1469,7 +1467,7 @@ var promptText = 'あなたは美容部員AIです。回答は見やすくする
 try {
 await waitForRateLimit();
 
-var resp = await fetch(getApiUrl(), {
+var resp = await fetch(getApiUrl('stream'), {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
@@ -1498,33 +1496,50 @@ throw new Error('リクエスト形式エラー: ' + errorMsg);
 throw new Error('通信エラー(' + resp.status + '): ' + errorMsg);
 }
 
-var data = await resp.json();
-console.log('API Response:', data);
+// ストリーミングレスポンスを処理
+var reader = resp.body.getReader();
+var decoder = new TextDecoder();
+var buffer = '';
+var fullText = '';
 
-if(data.error) {
-throw new Error(data.error.message);
-}
+while (true) {
+var result = await reader.read();
+if (result.done) break;
 
-if(!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
-throw new Error('APIからの応答形式が不正です');
-}
+buffer += decoder.decode(result.value, { stream: true });
+var lines = buffer.split('\n');
+buffer = lines.pop() || '';
 
-var loadingEl = document.getElementById(loadingId);
-if(loadingEl) loadingEl.remove();
+for (var i = 0; i < lines.length; i++) {
+var line = lines[i].trim();
+if (!line || !line.startsWith('data: ')) continue;
+if (line === 'data: [DONE]') continue;
 
-var responseText = data.candidates[0].content.parts[0].text;
-var aiMsgDiv = document.createElement('div');
-aiMsgDiv.className = 'msg-ai';
-aiMsgDiv.innerHTML = formatMessage(responseText, 'ai');
-chatHistory.appendChild(aiMsgDiv);
+try {
+var jsonStr = line.substring(6);
+var data = JSON.parse(jsonStr);
+
+if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+var part = data.candidates[0].content.parts[0];
+if (part.text) {
+fullText += part.text;
+streamDiv.innerHTML = formatMessage(fullText, 'ai');
 chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+}
+} catch (e) {
+console.error('Parse error:', e);
+}
+}
+}
 
-addMessageToChat(currentChatId, 'ai', responseText);
+// 最終的なメッセージを保存
+addMessageToChat(currentChatId, 'ai', fullText);
 
 } catch (e) {
 console.error('Chat Error:', e);
-var loadingEl = document.getElementById(loadingId);
-if(loadingEl) loadingEl.remove();
+var streamEl = document.getElementById(streamMsgId);
+if(streamEl) streamEl.remove();
 
 var errorDiv = document.createElement('div');
 errorDiv.className = 'msg-system';
