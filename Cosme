@@ -1,0 +1,3178 @@
+<!DOCTYPE html>
+
+
+
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cosme Genius Pro</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
+
+
+```
+
+* {
+
+box-sizing: border-box;
+
+-webkit-tap-highlight-color: transparent;
+
+}
+
+
+body {
+
+font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+
+background: #fafafa;
+
+margin: 0;
+
+padding: 0;
+
+padding-bottom: 30px;
+
+color: #1a1a1a;
+
+line-height: 1.6;
+
+-webkit-font-smoothing: antialiased;
+
+overflow-x: hidden;
+
+}
+
+
+.container {
+
+max-width: 500px;
+
+margin: 0 auto;
+
+padding: 0 20px 30px;
+
+}
+
+
+.header {
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+color: white;
+
+padding: 25px 20px;
+
+text-align: center;
+
+font-family: 'Cormorant Garamond', serif;
+
+letter-spacing: 4px;
+
+font-weight: 300;
+
+font-size: 1.4rem;
+
+margin: 0 -20px 30px;
+
+box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+
+position: relative;
+
+overflow: hidden;
+
+animation: headerSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+
+.header::before {
+
+content: '';
+
+position: absolute;
+
+top: -50%;
+
+left: -50%;
+
+width: 200%;
+
+height: 200%;
+
+background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+
+animation: headerGlow 8s ease-in-out infinite;
+
+}
+
+
+@keyframes headerSlideDown {
+
+from {
+
+opacity: 0;
+
+transform: translateY(-30px);
+
+}
+
+to {
+
+opacity: 1;
+
+transform: translateY(0);
+
+}
+
+}
+
+
+@keyframes headerGlow {
+
+0%, 100% { transform: translate(0, 0); }
+
+50% { transform: translate(30px, 30px); }
+
+}
+
+
+/* Tabs */
+
+.tabs {
+
+display: flex;
+
+margin-bottom: 30px;
+
+background: #ffffff;
+
+border-radius: 12px;
+
+overflow: hidden;
+
+box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+
+animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+
+}
+
+
+.tab-btn {
+
+flex: 1;
+
+background: transparent;
+
+color: #666666;
+
+border: none;
+
+border-right: 1px solid #f0f0f0;
+
+padding: 18px 10px;
+
+cursor: pointer;
+
+font-weight: 500;
+
+font-size: 13px;
+
+transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+letter-spacing: 0.5px;
+
+position: relative;
+
+}
+
+
+.tab-btn:last-child { border-right: none; }
+
+
+.tab-btn::before {
+
+content: '';
+
+position: absolute;
+
+bottom: 0;
+
+left: 0;
+
+right: 0;
+
+height: 3px;
+
+background: #000000;
+
+transform: scaleX(0);
+
+transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+
+.tab-btn.active::before {
+
+transform: scaleX(1);
+
+}
+
+
+.tab-btn:active {
+
+transform: scale(0.95);
+
+}
+
+
+.tab-btn.active {
+
+background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+
+color: #000000;
+
+font-weight: 600;
+
+}
+
+
+.tab-content {
+
+display: none;
+
+}
+
+
+.tab-content.active {
+
+display: block;
+
+animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+
+@keyframes fadeInUp {
+
+from {
+
+opacity: 0;
+
+transform: translateY(20px);
+
+}
+
+to {
+
+opacity: 1;
+
+transform: translateY(0);
+
+}
+
+}
+
+
+
+/* Cards */
+
+.card {
+
+background: #ffffff;
+
+padding: 30px;
+
+margin-bottom: 25px;
+
+border-radius: 16px;
+
+box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+
+transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+}
+
+
+.card:hover {
+
+box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+
+transform: translateY(-2px);
+
+}
+
+
+@keyframes cardAppear {
+
+from {
+
+opacity: 0;
+
+transform: translateY(30px) scale(0.95);
+
+}
+
+to {
+
+opacity: 1;
+
+transform: translateY(0) scale(1);
+
+}
+
+}
+
+
+.card:nth-child(2) { animation-delay: 0.1s; }
+
+.card:nth-child(3) { animation-delay: 0.2s; }
+
+
+h2 {
+
+font-size: 0.85rem;
+
+font-family: 'Cormorant Garamond', serif;
+
+color: #1a1a1a;
+
+letter-spacing: 2px;
+
+text-transform: uppercase;
+
+font-weight: 600;
+
+margin: 0 0 25px 0;
+
+padding-bottom: 15px;
+
+border-bottom: 2px solid #000000;
+
+position: relative;
+
+}
+
+
+h2::after {
+
+content: '';
+
+position: absolute;
+
+bottom: -2px;
+
+left: 0;
+
+width: 50px;
+
+height: 2px;
+
+background: #c9a97e;
+
+animation: borderExpand 1s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+
+@keyframes borderExpand {
+
+from { width: 0; }
+
+to { width: 50px; }
+
+}
+
+
+/* Form Elements */
+
+input, select, button, textarea {
+
+width: 100%;
+
+padding: 14px 18px;
+
+margin-top: 12px;
+
+border: 2px solid #e5e5e5;
+
+box-sizing: border-box;
+
+font-size: 15px;
+
+font-family: inherit;
+
+background: white;
+
+border-radius: 10px;
+
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+
+input:focus, select:focus, textarea:focus {
+
+outline: none;
+
+border-color: #000000;
+
+box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+
+transform: translateY(-1px);
+
+}
+
+
+button {
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+color: white;
+
+border: none;
+
+font-weight: 600;
+
+cursor: pointer;
+
+letter-spacing: 1px;
+
+text-transform: uppercase;
+
+font-size: 13px;
+
+box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+
+position: relative;
+
+overflow: hidden;
+
+}
+
+
+button::before {
+
+content: '';
+
+position: absolute;
+
+top: 50%;
+
+left: 50%;
+
+width: 0;
+
+height: 0;
+
+border-radius: 50%;
+
+background: rgba(255,255,255,0.2);
+
+transform: translate(-50%, -50%);
+
+transition: width 0.6s, height 0.6s;
+
+}
+
+
+button:hover::before {
+
+width: 300px;
+
+height: 300px;
+
+}
+
+
+button:hover {
+
+box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+
+transform: translateY(-2px);
+
+}
+
+
+button:active {
+
+transform: translateY(0);
+
+box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+
+}
+
+
+button:disabled {
+
+background: #ccc;
+
+cursor: not-allowed;
+
+opacity: 0.5;
+
+box-shadow: none;
+
+}
+
+
+textarea { resize: none; min-height: 90px; }
+
+
+
+/* Progress Bar */
+
+.progress-container {
+
+background: linear-gradient(to bottom, #fafafa, #ffffff);
+
+margin-bottom: 20px;
+
+display: none;
+
+padding: 20px;
+
+border-radius: 12px;
+
+box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+
+animation: fadeInUp 0.3s ease;
+
+}
+
+
+.progress-bar-bg {
+
+width: 100%;
+
+background: #e0e0e0;
+
+height: 6px;
+
+overflow: hidden;
+
+margin-top: 12px;
+
+border-radius: 10px;
+
+}
+
+
+.progress-bar-fill {
+
+height: 100%;
+
+width: 0%;
+
+background: linear-gradient(90deg, #000000, #c9a97e);
+
+transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+border-radius: 10px;
+
+position: relative;
+
+overflow: hidden;
+
+}
+
+
+.progress-bar-fill::after {
+
+content: '';
+
+position: absolute;
+
+top: 0;
+
+left: 0;
+
+bottom: 0;
+
+right: 0;
+
+background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+
+animation: shimmer 1.5s infinite;
+
+}
+
+
+@keyframes shimmer {
+
+0% { transform: translateX(-100%); }
+
+100% { transform: translateX(100%); }
+
+}
+
+
+
+/* Chat Area */
+
+.chat-area {
+
+height: 420px;
+
+overflow-y: auto;
+
+-webkit-overflow-scrolling: touch;
+
+background: linear-gradient(to bottom, #f9f9f9, #ffffff);
+
+padding: 20px;
+
+border-radius: 12px;
+
+box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+
+display: flex;
+
+flex-direction: column;
+
+gap: 12px;
+
+margin-bottom: 15px;
+
+}
+
+
+.msg-user {
+
+align-self: flex-end;
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+color: white;
+
+padding: 14px 20px;
+
+border-radius: 18px 18px 4px 18px;
+
+max-width: 80%;
+
+font-size: 14px;
+
+word-wrap: break-word;
+
+line-height: 1.5;
+
+box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+
+animation: messageSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+transform-origin: bottom right;
+
+}
+
+
+.msg-ai {
+
+align-self: flex-start;
+
+background: white;
+
+border: 2px solid #f0f0f0;
+
+color: #1a1a1a;
+
+padding: 16px 20px;
+
+border-radius: 18px 18px 18px 4px;
+
+max-width: 85%;
+
+font-size: 14px;
+
+line-height: 1.7;
+
+word-wrap: break-word;
+
+box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+
+animation: messageSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+transform-origin: bottom left;
+
+}
+
+
+@keyframes messageSlideIn {
+
+from {
+
+opacity: 0;
+
+transform: scale(0.8) translateY(10px);
+
+}
+
+to {
+
+opacity: 1;
+
+transform: scale(1) translateY(0);
+
+}
+
+}
+
+
+.msg-system {
+
+color: #c62828;
+
+background: linear-gradient(135deg, #ffebee, #fff5f5);
+
+padding: 14px;
+
+border-radius: 12px;
+
+border: 2px solid #ef9a9a;
+
+font-size: 13px;
+
+animation: messageSlideIn 0.3s ease;
+
+}
+
+
+
+.chat-input-bar {
+
+display: flex;
+
+gap: 12px;
+
+}
+
+
+.chat-textarea {
+
+flex-grow: 1;
+
+height: 50px;
+
+resize: none;
+
+padding: 14px 18px;
+
+}
+
+
+.send-btn {
+
+width: 50px;
+
+height: 50px;
+
+padding: 0;
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+font-size: 18px;
+
+flex-shrink: 0;
+
+border-radius: 12px;
+
+}
+
+
+/* Chat Controls */
+
+.chat-controls {
+
+display: flex;
+
+gap: 12px;
+
+margin-bottom: 15px;
+
+}
+
+
+.chat-controls button {
+
+margin-top: 0;
+
+padding: 12px 18px;
+
+font-size: 12px;
+
+}
+
+
+/* Chat History List */
+
+.chat-history-list {
+
+margin-bottom: 20px;
+
+max-height: 300px;
+
+overflow-y: auto;
+
+}
+
+
+.chat-history-item {
+
+background: white;
+
+border: 2px solid #f0f0f0;
+
+padding: 14px 18px;
+
+margin-bottom: 10px;
+
+cursor: pointer;
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+border-radius: 12px;
+
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+animation: fadeInUp 0.3s ease both;
+
+}
+
+
+.chat-history-item:nth-child(1) { animation-delay: 0.05s; }
+
+.chat-history-item:nth-child(2) { animation-delay: 0.1s; }
+
+.chat-history-item:nth-child(3) { animation-delay: 0.15s; }
+
+
+.chat-history-item:hover {
+
+background: #fafafa;
+
+border-color: #000000;
+
+transform: translateX(4px);
+
+box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+}
+
+
+.chat-history-item.active {
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+color: white;
+
+border-color: #000000;
+
+box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+
+}
+
+
+.chat-history-info {
+
+flex: 1;
+
+}
+
+
+.chat-history-title {
+
+font-size: 13px;
+
+font-weight: 600;
+
+margin-bottom: 3px;
+
+letter-spacing: 0.3px;
+
+}
+
+
+.chat-history-date {
+
+font-size: 11px;
+
+opacity: 0.7;
+
+}
+
+
+.chat-history-delete {
+
+width: auto;
+
+padding: 8px 14px;
+
+font-size: 11px;
+
+margin: 0;
+
+background: #d32f2f;
+
+box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+
+}
+
+
+.chat-history-item.active .chat-history-delete {
+
+background: white;
+
+color: #000000;
+
+box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+}
+
+
+
+/* Item Cards */
+
+.item-card-details {
+
+border: 2px solid #f0f0f0;
+
+margin-top: 15px;
+
+background: white;
+
+overflow: hidden;
+
+border-radius: 12px;
+
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+animation: fadeInUp 0.4s ease both;
+
+}
+
+
+.item-card-details:hover {
+
+box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+border-color: #000000;
+
+}
+
+
+.item-card-details[open] {
+
+box-shadow: 0 6px 25px rgba(0,0,0,0.12);
+
+}
+
+
+.item-card-details summary {
+
+padding: 20px;
+
+cursor: pointer;
+
+list-style: none;
+
+font-weight: 600;
+
+user-select: none;
+
+font-size: 14px;
+
+letter-spacing: 0.3px;
+
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+position: relative;
+
+}
+
+
+.item-card-details summary::after {
+
+content: '▼';
+
+position: absolute;
+
+right: 20px;
+
+top: 50%;
+
+transform: translateY(-50%) rotate(0deg);
+
+transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+font-size: 12px;
+
+opacity: 0.6;
+
+}
+
+
+.item-card-details[open] summary::after {
+
+transform: translateY(-50%) rotate(180deg);
+
+}
+
+
+.item-card-details summary:hover {
+
+background: linear-gradient(to right, #fafafa, #ffffff);
+
+}
+
+
+.item-card-details summary::-webkit-details-marker { display: none; }
+
+
+.item-details-content {
+
+padding: 25px;
+
+font-size: 13px;
+
+border-top: 2px solid #f5f5f5;
+
+background: linear-gradient(to bottom, #fafafa, #ffffff);
+
+line-height: 1.8;
+
+animation: expandDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+
+@keyframes expandDown {
+
+from {
+
+opacity: 0;
+
+transform: translateY(-10px);
+
+}
+
+to {
+
+opacity: 1;
+
+transform: translateY(0);
+
+}
+
+}
+
+
+.item-details-content p {
+
+margin: 10px 0;
+
+color: #1a1a1a;
+
+}
+
+
+.item-details-content b {
+
+color: #1a1a1a;
+
+font-weight: 600;
+
+letter-spacing: 0.5px;
+
+}
+
+
+/* Category Headers */
+
+.category-header {
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+color: white;
+
+padding: 18px 25px;
+
+margin-top: 25px;
+
+margin-bottom: 15px;
+
+font-family: 'Cormorant Garamond', serif;
+
+font-size: 14px;
+
+letter-spacing: 2px;
+
+font-weight: 600;
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+border-radius: 10px;
+
+box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+
+animation: fadeInUp 0.4s ease both;
+
+}
+
+
+.category-header:first-child {
+
+margin-top: 0;
+
+}
+
+
+.category-count {
+
+font-size: 11px;
+
+background: rgba(255,255,255,0.2);
+
+padding: 6px 12px;
+
+letter-spacing: 1px;
+
+border-radius: 20px;
+
+backdrop-filter: blur(10px);
+
+}
+
+
+/* Pagination */
+
+.pagination {
+
+display: flex;
+
+justify-content: center;
+
+align-items: center;
+
+gap: 15px;
+
+margin-top: 25px;
+
+}
+
+
+.pagination button {
+
+width: auto;
+
+padding: 12px 22px;
+
+font-size: 12px;
+
+margin-top: 0;
+
+}
+
+
+.pagination span {
+
+padding: 12px 22px;
+
+background: white;
+
+border: 2px solid #f0f0f0;
+
+font-size: 13px;
+
+letter-spacing: 0.5px;
+
+border-radius: 10px;
+
+font-weight: 600;
+
+}
+
+
+/* Sorting Controls */
+
+.sort-controls {
+
+display: flex;
+
+gap: 12px;
+
+margin-bottom: 20px;
+
+}
+
+
+.sort-controls select { margin-top: 0; }
+
+
+/* Warnings */
+
+.expire-warning {
+
+background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+
+border: 2px solid #ffb74d;
+
+color: #e65100;
+
+padding: 12px 16px;
+
+font-size: 12px;
+
+margin-bottom: 15px;
+
+letter-spacing: 0.3px;
+
+border-radius: 10px;
+
+font-weight: 500;
+
+animation: pulse 2s ease-in-out infinite;
+
+}
+
+
+@keyframes pulse {
+
+0%, 100% { transform: scale(1); }
+
+50% { transform: scale(1.02); }
+
+}
+
+
+.alert-box {
+
+background: linear-gradient(135deg, #fff8e1, #ffecb3);
+
+border: 2px solid #ffd54f;
+
+padding: 18px;
+
+margin-bottom: 20px;
+
+font-size: 13px;
+
+color: #f57f17;
+
+line-height: 1.6;
+
+border-radius: 12px;
+
+box-shadow: 0 2px 15px rgba(245, 127, 23, 0.15);
+
+}
+
+
+.alert-box b {
+
+display: block;
+
+margin-bottom: 8px;
+
+font-weight: 600;
+
+}
+
+
+/* Special Buttons */
+
+.photo-input-label {
+
+display: flex;
+
+align-items: center;
+
+justify-content: center;
+
+gap: 12px;
+
+background: linear-gradient(135deg, #000000 0%, #2c2c2c 100%);
+
+color: white;
+
+padding: 18px;
+
+font-weight: 600;
+
+cursor: pointer;
+
+margin-bottom: 25px;
+
+letter-spacing: 0.5px;
+
+font-size: 14px;
+
+border-radius: 12px;
+
+box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+position: relative;
+
+overflow: hidden;
+
+}
+
+
+.photo-input-label::before {
+
+content: '';
+
+position: absolute;
+
+top: 50%;
+
+left: 50%;
+
+width: 0;
+
+height: 0;
+
+border-radius: 50%;
+
+background: rgba(255,255,255,0.2);
+
+transform: translate(-50%, -50%);
+
+transition: width 0.6s, height 0.6s;
+
+}
+
+
+.photo-input-label:hover::before {
+
+width: 300px;
+
+height: 300px;
+
+}
+
+
+.photo-input-label:hover {
+
+box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+
+transform: translateY(-2px);
+
+}
+
+
+.photo-input-label:active {
+
+transform: translateY(0);
+
+box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+
+}
+
+
+.btn-secondary {
+
+background: linear-gradient(135deg, #c9a97e 0%, #b8976d 100%) !important;
+
+color: white !important;
+
+}
+
+
+.btn-danger {
+
+background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
+
+color: white !important;
+
+}
+
+
+.retry-notice {
+
+background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+
+border: 2px solid #90caf9;
+
+color: #1565c0;
+
+padding: 14px;
+
+margin-top: 15px;
+
+font-size: 12px;
+
+line-height: 1.6;
+
+border-radius: 10px;
+
+}
+
+
+/* Flex utilities */
+
+.flex-row {
+
+display: flex;
+
+gap: 10px;
+
+}
+
+
+.flex-between {
+
+display: flex;
+
+justify-content: space-between;
+
+align-items: center;
+
+}
+
+
+/* Scrollbar Styling */
+
+::-webkit-scrollbar {
+
+width: 8px;
+
+height: 8px;
+
+}
+
+
+::-webkit-scrollbar-track {
+
+background: #f0f0f0;
+
+border-radius: 10px;
+
+}
+
+
+::-webkit-scrollbar-thumb {
+
+background: linear-gradient(135deg, #c9a97e, #b8976d);
+
+border-radius: 10px;
+
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+
+background: linear-gradient(135deg, #b8976d, #a8866d);
+
+}
+
+</style>
+
+```
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="header">
+
+<span style="position: relative; z-index: 1;">COSME GENIUS PRO</span>
+
+</div>
+
+
+
+<div class="container">
+
+<div class="tabs">
+
+<button class="tab-btn active" id="btn-register" onclick="switchTab('register')">💄 登録</button>
+
+<button class="tab-btn" id="btn-chat" onclick="switchTab('chat')">💬 相談</button>
+
+<button class="tab-btn" id="btn-settings" onclick="switchTab('settings')">⚙️ 設定</button>
+
+</div>
+
+
+
+```
+
+<div id="tab-register" class="tab-content active">
+
+<div class="card">
+
+<h2>✨ コスメ登録</h2>
+
+<label for="cameraInput" class="photo-input-label">
+
+<span style="position: relative; z-index: 1;">📸 写真から自動入力</span>
+
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event)">
+
+</label>
+
+
+<div id="progressContainer" class="progress-container">
+
+<div id="progressText" style="font-size: 12px; color: #1a1a1a; text-align: center; font-weight: 500; letter-spacing: 0.5px;">画像を解析中...</div>
+
+<div class="progress-bar-bg"><div id="progressBar" class="progress-bar-fill"></div></div>
+
+</div>
+
+
+
+<div class="flex-row">
+
+<input type="text" id="itemName" placeholder="商品名" style="margin-top:0;">
+
+<button onclick="triggerManualAISearch()" style="width: auto; white-space: nowrap; margin-top:0; padding:0 18px;"><span style="position: relative; z-index: 1;">✨ AI推測</span></button>
+
+</div>
+
+
+<input type="text" id="brand" placeholder="ブランド名">
+
+<select id="categorySelect">
+
+<option value="" disabled selected>カテゴリを選択</option>
+
+<option value="洗顔料">洗顔料</option>
+
+<option value="化粧水">化粧水</option>
+
+<option value="乳液">乳液</option>
+
+<option value="美容液">美容液</option>
+
+<option value="クリーム">クリーム</option>
+
+<option value="その他">その他</option>
+
+</select>
+
+<input type="text" id="ingredient" placeholder="主要成分">
+
+<textarea id="description" placeholder="商品説明"></textarea>
+
+<div class="flex-row">
+
+<input type="text" id="releaseDate" placeholder="発売日">
+
+<input type="number" id="itemPrice" placeholder="価格">
+
+</div>
+
+<label style="font-size:12px; color:#666666; margin-top:12px; display:block; letter-spacing: 0.3px;">使用開始日</label>
+
+<input type="date" id="openDate">
+
+<select id="timeTag"><option value="朝">朝用</option><option value="晩">晩用</option><option value="朝晩">朝晩両方</option></select>
+
+<button onclick="addItem()" style="margin-top:20px; padding: 15px;"><span style="position: relative; z-index: 1;">リストに追加する</span></button>
+
+</div>
+
+
+<div class="card">
+
+<div class="flex-between" style="margin-bottom: 20px;">
+
+<h2 style="margin: 0; border: none; padding: 0;">📋 登録済みコスメ</h2>
+
+<button onclick="exportData()" class="btn-secondary" style="width: auto; padding: 10px 15px; font-size: 11px; margin: 0;"><span style="position: relative; z-index: 1;">💾 バックアップ</span></button>
+
+</div>
+
+
+<div class="sort-controls">
+
+<select id="sortSelect" onchange="render()">
+
+<option value="newest">新着順</option>
+
+<option value="category">カテゴリ別</option>
+
+<option value="brand">ブランド別</option>
+
+<option value="expiring">期限近い順</option>
+
+</select>
+
+</div>
+
+
+<div id="routineArea"></div>
+
+<div id="paginationArea" class="pagination"></div>
+
+</div>
+
+</div>
+
+
+
+<div id="tab-chat" class="tab-content">
+
+<div class="card" style="padding: 20px;">
+
+<h2>💬 コスメ相談室</h2>
+
+
+<div class="chat-controls">
+
+<button onclick="createNewChat()" style="flex: 1;"><span style="position: relative; z-index: 1;">➕ 新規チャット</span></button>
+
+<button onclick="toggleChatHistory()" id="historyToggleBtn" style="flex: 1;"><span style="position: relative; z-index: 1;">📜 履歴</span></button>
+
+</div>
+
+
+<div id="chatHistoryContainer" class="chat-history-list" style="display: none;"></div>
+
+
+<div id="chatHistory" class="chat-area"><div class="msg-ai">こんにちは！登録されたコスメ情報を元にアドバイスします✨</div></div>
+
+<div class="chat-input-bar">
+
+<textarea id="chatInput" class="chat-textarea" placeholder="質問を入力..."></textarea>
+
+<button id="sendBtn" onclick="sendChatMessage()" class="send-btn"><span style="position: relative; z-index: 1;">➤</span></button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div id="tab-settings" class="tab-content">
+
+<div class="card">
+
+<h2>⚙️ アプリ設定</h2>
+
+
+<div class="alert-box">
+
+<b>⚠️ セキュリティ注意</b>
+
+APIキーは暗号化されずに保存されます。共有端末では使用後に削除してください。
+
+</div>
+
+
+<label style="font-weight:600; color:#1a1a1a; font-size:13px; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">🤖 Gemini API キー</label>
+
+<input type="password" id="geminiApiKey" placeholder="AIzaSy...">
+
+
+<p style="font-size:12px; color:#666666; margin:15px 0 8px; letter-spacing: 0.3px;">🤖 使用するモデル</p>
+
+<select id="geminiModelSelect">
+
+<option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨)</option>
+
+<option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+
+<option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+
+<option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+
+</select>
+
+
+<div class="retry-notice">
+
+💡 <b>エラー429対策:</b> リクエストが多すぎる場合は1分待ってから再試行してください。無料枠の場合は1分あたり15リクエストが上限です。
+
+</div>
+
+
+<button onclick="saveSettings()" style="margin-top: 20px; padding: 15px;"><span style="position: relative; z-index: 1;">設定を保存する</span></button>
+
+<button onclick="clearApiKey()" class="btn-danger" style="margin-top: 10px; padding: 15px;"><span style="position: relative; z-index: 1;">🗑️ APIキーを削除</span></button>
+
+
+<hr style="margin: 25px 0; border: none; border-top: 1px solid #e5e5e5;">
+
+
+<button onclick="importData()" class="btn-secondary" style="padding: 15px;"><span style="position: relative; z-index: 1;">📥 バックアップから復元</span></button>
+
+<input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
+
+</div>
+
+</div>
+
+```
+
+
+
+</div>
+
+
+
+<canvas id="compressionCanvas" style="display:none;"></canvas>
+
+
+
+<script>
+
+let cosmeData = JSON.parse(localStorage.getItem('cosmeData_v8')) || [];
+
+let currentPage = 1;
+
+const itemsPerPage = 10;
+
+let isRequesting = false;
+
+let lastRequestTime = 0;
+
+
+// チャット関連の変数
+
+let chatHistories = JSON.parse(localStorage.getItem('chatHistories_v1')) || [];
+
+let currentChatId = null;
+
+let showingHistory = false;
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+
+document.getElementById('openDate').valueAsDate = new Date();
+
+document.getElementById('geminiApiKey').value = localStorage.getItem('geminiApiKey_v1') || '';
+
+document.getElementById('geminiModelSelect').value = localStorage.getItem('geminiModelName_v2') || 'gemini-2.5-flash';
+
+
+document.getElementById('chatInput').addEventListener('keydown', function(e) {
+
+if (e.key === 'Enter' && !e.shiftKey) {
+
+e.preventDefault();
+
+sendChatMessage();
+
+}
+
+});
+
+
+// 最後のチャットを復元または新規作成
+
+if(chatHistories.length > 0) {
+
+currentChatId = chatHistories[0].id;
+
+loadChat(currentChatId);
+
+} else {
+
+createNewChat();
+
+}
+
+
+render();
+
+checkExpiredItems();
+
+});
+
+
+
+function switchTab(tabId) {
+
+var contents = document.querySelectorAll('.tab-content');
+
+for(var i = 0; i < contents.length; i++) {
+
+contents[i].classList.remove('active');
+
+}
+
+var btns = document.querySelectorAll('.tab-btn');
+
+for(var i = 0; i < btns.length; i++) {
+
+btns[i].classList.remove('active');
+
+}
+
+document.getElementById('tab-' + tabId).classList.add('active');
+
+document.getElementById('btn-' + tabId).classList.add('active');
+
+}
+
+
+// === チャット履歴管理 ===
+
+
+function createNewChat() {
+
+var chatId = 'chat_' + Date.now();
+
+var newChat = {
+
+id: chatId,
+
+title: '新しいチャット',
+
+date: new Date().toISOString(),
+
+messages: [{
+
+type: 'ai',
+
+text: 'こんにちは！登録されたコスメ情報を元にアドバイスします✨'
+
+}]
+
+};
+
+
+chatHistories.unshift(newChat);
+
+saveChatHistories();
+
+currentChatId = chatId;
+
+loadChat(chatId);
+
+
+if(showingHistory) {
+
+toggleChatHistory();
+
+}
+
+}
+
+
+function loadChat(chatId) {
+
+currentChatId = chatId;
+
+var chat = chatHistories.find(function(c) { return c.id === chatId; });
+
+if(!chat) return;
+
+
+var chatHistory = document.getElementById('chatHistory');
+
+chatHistory.innerHTML = '';
+
+
+for(var i = 0; i < chat.messages.length; i++) {
+
+var msg = chat.messages[i];
+
+var msgClass = msg.type === 'user' ? 'msg-user' : (msg.type === 'ai' ? 'msg-ai' : 'msg-system');
+
+var msgDiv = document.createElement('div');
+
+msgDiv.className = msgClass;
+
+msgDiv.innerHTML = escapeHtml(msg.text).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+chatHistory.appendChild(msgDiv);
+
+}
+
+
+chatHistory.scrollTop = chatHistory.scrollHeight;
+
+renderChatHistoryList();
+
+}
+
+
+function toggleChatHistory() {
+
+showingHistory = !showingHistory;
+
+var container = document.getElementById('chatHistoryContainer');
+
+var btn = document.getElementById('historyToggleBtn');
+
+
+if(showingHistory) {
+
+container.style.display = 'block';
+
+btn.innerHTML = '<span style="position: relative; z-index: 1;">✕ 閉じる</span>';
+
+renderChatHistoryList();
+
+} else {
+
+container.style.display = 'none';
+
+btn.innerHTML = '<span style="position: relative; z-index: 1;">📜 履歴</span>';
+
+}
+
+}
+
+
+function renderChatHistoryList() {
+
+var container = document.getElementById('chatHistoryContainer');
+
+var html = '';
+
+
+for(var i = 0; i < chatHistories.length; i++) {
+
+var chat = chatHistories[i];
+
+var isActive = chat.id === currentChatId;
+
+var date = new Date(chat.date).toLocaleString('ja-JP', {
+
+month: 'short',
+
+day: 'numeric',
+
+hour: '2-digit',
+
+minute: '2-digit'
+
+});
+
+
+html += '<div class="chat-history-item' + (isActive ? ' active' : '') + '" onclick="selectChat(\'' + chat.id + '\')">';
+
+html += '<div class="chat-history-info">';
+
+html += '<div class="chat-history-title">' + escapeHtml(chat.title) + '</div>';
+
+html += '<div class="chat-history-date">' + date + '</div>';
+
+html += '</div>';
+
+html += '<button class="chat-history-delete" onclick="event.stopPropagation(); deleteChat(\'' + chat.id + '\')"><span style="position: relative; z-index: 1;">🗑️</span></button>';
+
+html += '</div>';
+
+}
+
+
+if(html === '') {
+
+html = '<div style="padding: 20px; text-align: center; color: #999; font-size: 13px;">チャット履歴がありません</div>';
+
+}
+
+
+container.innerHTML = html;
+
+}
+
+
+function selectChat(chatId) {
+
+loadChat(chatId);
+
+}
+
+
+function deleteChat(chatId) {
+
+if(!confirm('このチャットを削除しますか？')) return;
+
+
+chatHistories = chatHistories.filter(function(c) { return c.id !== chatId; });
+
+saveChatHistories();
+
+
+if(currentChatId === chatId) {
+
+if(chatHistories.length > 0) {
+
+loadChat(chatHistories[0].id);
+
+} else {
+
+createNewChat();
+
+}
+
+} else {
+
+renderChatHistoryList();
+
+}
+
+}
+
+
+function saveChatHistories() {
+
+localStorage.setItem('chatHistories_v1', JSON.stringify(chatHistories));
+
+}
+
+
+function updateChatTitle(chatId, firstMessage) {
+
+var chat = chatHistories.find(function(c) { return c.id === chatId; });
+
+if(!chat) return;
+
+
+var title = firstMessage.length > 20 ? firstMessage.substring(0, 20) + '...' : firstMessage;
+
+chat.title = title;
+
+saveChatHistories();
+
+renderChatHistoryList();
+
+}
+
+
+function addMessageToChat(chatId, type, text) {
+
+var chat = chatHistories.find(function(c) { return c.id === chatId; });
+
+if(!chat) return;
+
+
+chat.messages.push({ type: type, text: text });
+
+
+// 最初のユーザーメッセージでタイトルを更新
+
+if(type === 'user' && chat.messages.filter(function(m) { return m.type === 'user'; }).length === 1) {
+
+updateChatTitle(chatId, text);
+
+}
+
+
+saveChatHistories();
+
+}
+
+
+
+function saveSettings() {
+
+localStorage.setItem('geminiApiKey_v1', document.getElementById('geminiApiKey').value.trim());
+
+localStorage.setItem('geminiModelName_v2', document.getElementById('geminiModelSelect').value);
+
+alert('設定を保存しました！✨');
+
+}
+
+
+function clearApiKey() {
+
+if(confirm('APIキーを削除しますか？')) {
+
+localStorage.removeItem('geminiApiKey_v1');
+
+document.getElementById('geminiApiKey').value = '';
+
+alert('APIキーを削除しました');
+
+}
+
+}
+
+
+function validateApiKey() {
+
+var apiKey = localStorage.getItem('geminiApiKey_v1');
+
+if (!apiKey || apiKey.length < 10) {
+
+alert('⚠️ 設定タブでAPIキーを登録してください');
+
+switchTab('settings');
+
+return false;
+
+}
+
+return true;
+
+}
+
+
+async function waitForRateLimit() {
+
+var now = Date.now();
+
+var timeSinceLastRequest = now - lastRequestTime;
+
+var minInterval = 4000;
+
+
+if (timeSinceLastRequest < minInterval) {
+
+var waitTime = minInterval - timeSinceLastRequest;
+
+await new Promise(function(resolve) { setTimeout(resolve, waitTime); });
+
+}
+
+lastRequestTime = Date.now();
+
+}
+
+
+
+function getApiUrl(method) {
+
+method = method || "generateContent";
+
+var apiKey = localStorage.getItem('geminiApiKey_v1');
+
+var modelName = localStorage.getItem('geminiModelName_v2') || 'gemini-2.5-flash';
+
+var apiVersion = 'v1beta';
+
+var action = method === "stream" ? "streamGenerateContent?alt=sse" : "generateContent";
+
+return 'https://generativelanguage.googleapis.com/' + apiVersion + '/models/' + modelName + ':' + action + '?key=' + apiKey;
+
+}
+
+
+
+function parseAIJson(text) {
+
+try {
+
+var jsonText = text.replace(/```json\n?|```/g, '').trim();
+
+return JSON.parse(jsonText);
+
+} catch (e) {
+
+console.error("JSON Parse Error:", e);
+
+throw new Error("AIの応答形式が正しくありません。");
+
+}
+
+}
+
+
+
+async function triggerManualAISearch() {
+
+if(!validateApiKey()) return;
+
+if(isRequesting) {
+
+alert('処理中です。少々お待ちください。');
+
+return;
+
+}
+
+
+var name = document.getElementById('itemName').value.trim();
+
+if (!name) return alert("商品名を入力してください");
+
+
+isRequesting = true;
+
+startProgress("AIが詳細を検索中...", 40);
+
+
+try {
+
+await waitForRateLimit();
+
+
+var prompt = '「' + name + '」の化粧品情報を調査し、以下のJSON形式のみで回答してください。\n{"brand": "ブランド名", "category": "洗顔料/化粧水/乳液/美容液/クリーム/その他", "ingredients": "主要成分", "description": "短い説明", "price": 数値, "releaseDate": "YYYY/MM/DD"}';
+
+
+
+var resp = await fetch(getApiUrl(), {
+
+method: 'POST',
+
+headers: { 'Content-Type': 'application/json' },
+
+body: JSON.stringify({
+
+contents: [{ parts: [{ text: prompt }] }],
+
+generationConfig: { temperature: 0.7 }
+
+})
+
+});
+
+
+if(!resp.ok) {
+
+var errorData = await resp.json().catch(function() { return {}; });
+
+if(resp.status === 429) {
+
+throw new Error('リクエスト制限に達しました。1分待ってから再試行してください。');
+
+}
+
+if(resp.status === 404) {
+
+throw new Error('モデルが見つかりません。設定で別のモデルを選択してください。エラー: ' + (errorData.error ? errorData.error.message : 'Unknown'));
+
+}
+
+throw new Error('API Error: ' + resp.status + ' - ' + (errorData.error ? errorData.error.message : '不明なエラー'));
+
+}
+
+
+var data = await resp.json();
+
+if(data.error) throw new Error(data.error.message);
+
+
+
+var res = parseAIJson(data.candidates[0].content.parts[0].text);
+
+
+document.getElementById('brand').value = res.brand || "";
+
+document.getElementById('categorySelect').value = res.category || "";
+
+document.getElementById('ingredient').value = res.ingredients || "";
+
+document.getElementById('description').value = res.description || "";
+
+document.getElementById('itemPrice').value = res.price || "";
+
+document.getElementById('releaseDate').value = res.releaseDate || "";
+
+finishProgress();
+
+} catch (e) {
+
+hideProgress();
+
+alert("AI検索に失敗しました: " + e.message);
+
+} finally {
+
+isRequesting = false;
+
+}
+
+}
+
+
+
+async function handleImageSelect(event) {
+
+if(!validateApiKey()) return;
+
+if(isRequesting) {
+
+alert('処理中です。少々お待ちください。');
+
+event.target.value = '';
+
+return;
+
+}
+
+
+var file = event.target.files[0];
+
+if (!file) return;
+
+
+isRequesting = true;
+
+startProgress("画像を解析中...", 30);
+
+
+try {
+
+var base64Data = await compressImage(file);
+
+updateProgress(60);
+
+var base64 = base64Data.split(',')[1];
+
+
+await waitForRateLimit();
+
+
+var prompt = "画像から化粧品情報を読み取り、以下のJSON形式で。 {itemName, brandName, category, ingredients, description, releaseDate, price}";
+
+
+var resp = await fetch(getApiUrl(), {
+
+method: 'POST',
+
+headers: { 'Content-Type': 'application/json' },
+
+body: JSON.stringify({
+
+contents: [{
+
+parts: [
+
+{ text: prompt },
+
+{ inlineData: { mimeType: "image/jpeg", data: base64 } }
+
+]
+
+}],
+
+generationConfig: { temperature: 0.7 }
+
+})
+
+});
+
+
+if(!resp.ok) {
+
+var errorData = await resp.json().catch(function() { return {}; });
+
+if(resp.status === 429) {
+
+throw new Error('リクエスト制限に達しました。1分待ってから再試行してください。');
+
+}
+
+if(resp.status === 404) {
+
+throw new Error('モデルが見つかりません。設定で別のモデルを選択してください。エラー: ' + (errorData.error ? errorData.error.message : 'Unknown'));
+
+}
+
+throw new Error('API Error: ' + resp.status + ' - ' + (errorData.error ? errorData.error.message : '不明なエラー'));
+
+}
+
+
+var data = await resp.json();
+
+if(data.error) throw new Error(data.error.message);
+
+
+
+var res = parseAIJson(data.candidates[0].content.parts[0].text);
+
+document.getElementById('itemName').value = res.itemName || "";
+
+document.getElementById('brand').value = res.brandName || "";
+
+document.getElementById('ingredient').value = res.ingredients || "";
+
+document.getElementById('releaseDate').value = res.releaseDate || "";
+
+document.getElementById('itemPrice').value = res.price || "";
+
+finishProgress();
+
+} catch (e) {
+
+hideProgress();
+
+alert("解析エラー: " + e.message);
+
+} finally {
+
+isRequesting = false;
+
+event.target.value = '';
+
+}
+
+}
+
+
+
+function compressImage(file) {
+
+return new Promise(function(resolve) {
+
+var r = new FileReader();
+
+r.readAsDataURL(file);
+
+r.onload = function(e) {
+
+var img = new Image();
+
+img.src = e.target.result;
+
+img.onload = function() {
+
+var c = document.getElementById('compressionCanvas');
+
+var ctx = c.getContext('2d');
+
+var scale = Math.min(600 / img.width, 1);
+
+c.width = img.width * scale;
+
+c.height = img.height * scale;
+
+ctx.drawImage(img, 0, 0, c.width, c.height);
+
+resolve(c.toDataURL('image/jpeg', 0.75));
+
+};
+
+};
+
+});
+
+}
+
+
+
+async function sendChatMessage() {
+
+if(!validateApiKey()) return;
+
+if(isRequesting) {
+
+alert('処理中です。少々お待ちください。');
+
+return;
+
+}
+
+
+var inputEl = document.getElementById('chatInput');
+
+var sendBtn = document.getElementById('sendBtn');
+
+var message = inputEl.value.trim();
+
+if (!message) return;
+
+
+
+isRequesting = true;
+
+inputEl.disabled = true;
+
+sendBtn.disabled = true;
+
+var chatHistory = document.getElementById('chatHistory');
+
+
+var userMsgDiv = document.createElement('div');
+
+userMsgDiv.className = 'msg-user';
+
+userMsgDiv.textContent = message;
+
+chatHistory.appendChild(userMsgDiv);
+
+
+addMessageToChat(currentChatId, 'user', message);
+
+
+inputEl.value = '';
+
+chatHistory.scrollTop = chatHistory.scrollHeight;
+
+
+var loadingId = 'loading-' + Date.now();
+
+var loadingDiv = document.createElement('div');
+
+loadingDiv.id = loadingId;
+
+loadingDiv.className = 'msg-ai';
+
+loadingDiv.style.color = '#999';
+
+loadingDiv.textContent = '考え中...';
+
+chatHistory.appendChild(loadingDiv);
+
+
+
+var cosmeListText = cosmeData.length > 0 ? JSON.stringify(cosmeData) : '登録コスメなし';
+
+var promptText = 'あなたは美容部員AIです。\n【登録コスメ】: ' + cosmeListText + '\n【質問】: ' + message;
+
+
+
+try {
+
+await waitForRateLimit();
+
+
+var resp = await fetch(getApiUrl(), {
+
+method: 'POST',
+
+headers: { 'Content-Type': 'application/json' },
+
+body: JSON.stringify({
+
+contents: [{ role: "user", parts: [{ text: promptText }] }],
+
+generationConfig: {
+
+temperature: 0.8,
+
+maxOutputTokens: 1024
+
+}
+
+})
+
+});
+
+
+
+if (!resp.ok) {
+
+var errorData = await resp.json().catch(function() { return {}; });
+
+var errorMsg = errorData.error ? errorData.error.message : '不明なエラー';
+
+console.error('API Error:', errorData);
+
+
+if(resp.status === 429) {
+
+throw new Error('リクエスト制限に達しました。1分待ってから再試行してください。');
+
+}
+
+if(resp.status === 404) {
+
+throw new Error('モデルが見つかりません。設定で別のモデルを選択してください。');
+
+}
+
+if(resp.status === 400) {
+
+throw new Error('リクエスト形式エラー: ' + errorMsg);
+
+}
+
+throw new Error('通信エラー(' + resp.status + '): ' + errorMsg);
+
+}
+
+
+
+var data = await resp.json();
+
+console.log('API Response:', data);
+
+
+if(data.error) {
+
+throw new Error(data.error.message);
+
+}
+
+
+if(!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+
+throw new Error('APIからの応答形式が不正です');
+
+}
+
+
+
+var loadingEl = document.getElementById(loadingId);
+
+if(loadingEl) loadingEl.remove();
+
+
+var responseText = data.candidates[0].content.parts[0].text;
+
+var aiMsgDiv = document.createElement('div');
+
+aiMsgDiv.className = 'msg-ai';
+
+aiMsgDiv.innerHTML = escapeHtml(responseText).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+chatHistory.appendChild(aiMsgDiv);
+
+chatHistory.scrollTop = chatHistory.scrollHeight;
+
+
+addMessageToChat(currentChatId, 'ai', responseText);
+
+
+
+} catch (e) {
+
+console.error('Chat Error:', e);
+
+var loadingEl = document.getElementById(loadingId);
+
+if(loadingEl) loadingEl.remove();
+
+
+var errorDiv = document.createElement('div');
+
+errorDiv.className = 'msg-system';
+
+errorDiv.textContent = '⚠️ エラー: ' + e.message;
+
+chatHistory.appendChild(errorDiv);
+
+chatHistory.scrollTop = chatHistory.scrollHeight;
+
+
+addMessageToChat(currentChatId, 'system', '⚠️ エラー: ' + e.message);
+
+} finally {
+
+isRequesting = false;
+
+inputEl.disabled = false;
+
+sendBtn.disabled = false;
+
+inputEl.focus();
+
+}
+
+}
+
+
+function escapeHtml(text) {
+
+var div = document.createElement('div');
+
+div.textContent = text;
+
+return div.innerHTML;
+
+}
+
+
+
+function addItem() {
+
+var item = {
+
+name: document.getElementById('itemName').value.trim(),
+
+brand: document.getElementById('brand').value.trim(),
+
+category: document.getElementById('categorySelect').value,
+
+ingredient: document.getElementById('ingredient').value.trim(),
+
+description: document.getElementById('description').value.trim(),
+
+releaseDate: document.getElementById('releaseDate').value,
+
+price: document.getElementById('itemPrice').value,
+
+openDate: document.getElementById('openDate').value,
+
+tag: document.getElementById('timeTag').value,
+
+id: Date.now()
+
+};
+
+if(!item.name) return alert("商品名を入力してください");
+
+cosmeData.unshift(item);
+
+localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+
+
+document.getElementById('itemName').value = '';
+
+document.getElementById('brand').value = '';
+
+document.getElementById('categorySelect').value = '';
+
+document.getElementById('ingredient').value = '';
+
+document.getElementById('description').value = '';
+
+document.getElementById('releaseDate').value = '';
+
+document.getElementById('itemPrice').value = '';
+
+document.getElementById('openDate').valueAsDate = new Date();
+
+
+currentPage = 1;
+
+render();
+
+alert("登録しました！✨");
+
+}
+
+
+function checkExpiredItems() {
+
+var today = new Date();
+
+var expiringSoon = cosmeData.filter(function(item) {
+
+if(!item.openDate) return false;
+
+var openDate = new Date(item.openDate);
+
+var monthsUsed = (today - openDate) / (1000 * 60 * 60 * 24 * 30);
+
+return monthsUsed >= 5 && monthsUsed < 6;
+
+});
+
+}
+
+
+function getDaysUsed(openDate) {
+
+if(!openDate) return null;
+
+var today = new Date();
+
+var open = new Date(openDate);
+
+return Math.floor((today - open) / (1000 * 60 * 60 * 24));
+
+}
+
+
+
+function sortData() {
+
+var sortType = document.getElementById('sortSelect').value;
+
+var sorted = cosmeData.slice();
+
+
+if(sortType === 'newest') {
+
+sorted.sort(function(a, b) { return b.id - a.id; });
+
+} else if(sortType === 'category') {
+
+sorted.sort(function(a, b) {
+
+var catA = a.category || 'その他';
+
+var catB = b.category || 'その他';
+
+return catA.localeCompare(catB);
+
+});
+
+} else if(sortType === 'brand') {
+
+sorted.sort(function(a, b) { return (a.brand || '').localeCompare(b.brand || ''); });
+
+} else if(sortType === 'expiring') {
+
+sorted.sort(function(a, b) {
+
+var daysA = getDaysUsed(a.openDate) || -1;
+
+var daysB = getDaysUsed(b.openDate) || -1;
+
+return daysB - daysA;
+
+});
+
+}
+
+
+return sorted;
+
+}
+
+
+
+function render() {
+
+var sorted = sortData();
+
+var sortType = document.getElementById('sortSelect').value;
+
+var start = (currentPage - 1) * itemsPerPage;
+
+var end = start + itemsPerPage;
+
+var paginatedData = sorted.slice(start, end);
+
+
+var area = document.getElementById('routineArea');
+
+var html = '';
+
+
+if(sortType === 'category') {
+
+// カテゴリ別表示
+
+var categories = {};
+
+for(var i = 0; i < paginatedData.length; i++) {
+
+var item = paginatedData[i];
+
+var cat = item.category || 'その他';
+
+if(!categories[cat]) categories[cat] = [];
+
+categories[cat].push(item);
+
+}
+
+
+var categoryOrder = ['洗顔料', '化粧水', '乳液', '美容液', 'クリーム', 'その他'];
+
+for(var c = 0; c < categoryOrder.length; c++) {
+
+var catName = categoryOrder[c];
+
+if(!categories[catName]) continue;
+
+
+html += '<div class="category-header">';
+
+html += '<span>' + catName + '</span>';
+
+html += '<span class="category-count">' + categories[catName].length + '個</span>';
+
+html += '</div>';
+
+
+for(var i = 0; i < categories[catName].length; i++) {
+
+html += renderItemCard(categories[catName][i]);
+
+}
+
+}
+
+} else {
+
+// 通常表示
+
+for(var i = 0; i < paginatedData.length; i++) {
+
+html += renderItemCard(paginatedData[i]);
+
+}
+
+}
+
+
+area.innerHTML = html;
+
+renderPagination(sorted.length);
+
+}
+
+
+function renderItemCard(item) {
+
+var daysUsed = getDaysUsed(item.openDate);
+
+var isExpiring = daysUsed && daysUsed >= 150 && daysUsed < 180;
+
+var isExpired = daysUsed && daysUsed >= 180;
+
+
+var warningHtml = '';
+
+if(isExpired) {
+
+warningHtml = '<div class="expire-warning">⚠️ 使用開始から6ヶ月経過しています</div>';
+
+} else if(isExpiring) {
+
+warningHtml = '<div class="expire-warning" style="background:linear-gradient(135deg, #e3f2fd, #bbdefb); border-color:#90caf9; color:#1565c0;">📅 使用開始から5ヶ月経過</div>';
+
+}
+
+
+var html = '<details class="item-card-details">';
+
+html += '<summary>' + (item.brand || '') + ' ' + item.name + ' [' + item.tag + ']</summary>';
+
+html += '<div class="item-details-content">';
+
+html += warningHtml;
+
+html += '<p><b>カテゴリ:</b> ' + (item.category || '-') + '</p>';
+
+html += '<p><b>成分:</b> ' + (item.ingredient || '-') + '</p>';
+
+html += '<p><b>説明:</b> ' + (item.description || '-') + '</p>';
+
+html += '<p><b>価格:</b> ' + (item.price ? item.price + '円' : '-') + ' / <b>発売日:</b> ' + (item.releaseDate || '-') + '</p>';
+
+html += '<p><b>使用開始:</b> ' + (item.openDate || '-') + ' ' + (daysUsed ? '(' + daysUsed + '日経過)' : '') + '</p>';
+
+html += '<button onclick="removeItem(' + item.id + ')" class="btn-danger" style="width:auto; padding:10px 15px; margin-top: 10px;"><span style="position: relative; z-index: 1;">🗑️ 削除</span></button>';
+
+html += '</div>';
+
+html += '</details>';
+
+
+return html;
+
+}
+
+
+function renderPagination(totalItems) {
+
+var totalPages = Math.ceil(totalItems / itemsPerPage);
+
+var paginationArea = document.getElementById('paginationArea');
+
+
+if(totalPages <= 1) {
+
+paginationArea.innerHTML = '';
+
+return;
+
+}
+
+
+var html = '';
+
+if(currentPage > 1) {
+
+html += '<button onclick="changePage(' + (currentPage - 1) + ')"><span style="position: relative; z-index: 1;">◀ 前へ</span></button>';
+
+}
+
+html += '<span>' + currentPage + ' / ' + totalPages + '</span>';
+
+if(currentPage < totalPages) {
+
+html += '<button onclick="changePage(' + (currentPage + 1) + ')"><span style="position: relative; z-index: 1;">次へ ▶</span></button>';
+
+}
+
+
+paginationArea.innerHTML = html;
+
+}
+
+
+function changePage(page) {
+
+currentPage = page;
+
+render();
+
+document.getElementById('routineArea').scrollIntoView({ behavior: 'smooth' });
+
+}
+
+
+
+function removeItem(id) {
+
+if(confirm("削除しますか？")) {
+
+cosmeData = cosmeData.filter(function(i) { return i.id !== id; });
+
+localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+
+
+var totalPages = Math.ceil(cosmeData.length / itemsPerPage);
+
+if(currentPage > totalPages && currentPage > 1) {
+
+currentPage = totalPages;
+
+}
+
+
+render();
+
+}
+
+}
+
+
+function exportData() {
+
+if(cosmeData.length === 0) {
+
+alert('データがありません');
+
+return;
+
+}
+
+var dataStr = JSON.stringify(cosmeData, null, 2);
+
+var blob = new Blob([dataStr], {type: 'application/json'});
+
+var url = URL.createObjectURL(blob);
+
+var a = document.createElement('a');
+
+a.href = url;
+
+a.download = 'cosme-backup-' + new Date().toISOString().split('T')[0] + '.json';
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+alert('バックアップを保存しました！');
+
+}
+
+
+function importData() {
+
+document.getElementById('importFile').click();
+
+}
+
+
+function handleImport(event) {
+
+var file = event.target.files[0];
+
+if(!file) return;
+
+
+var reader = new FileReader();
+
+reader.onload = function(e) {
+
+try {
+
+var importedData = JSON.parse(e.target.result);
+
+if(!Array.isArray(importedData)) {
+
+throw new Error('無効なデータ形式です');
+
+}
+
+
+if(confirm(importedData.length + '件のデータをインポートしますか？現在のデータは上書きされます。')) {
+
+cosmeData = importedData;
+
+localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+
+currentPage = 1;
+
+render();
+
+switchTab('register');
+
+alert('データを復元しました！');
+
+}
+
+} catch(e) {
+
+alert('インポートエラー: ' + e.message);
+
+}
+
+};
+
+reader.readAsText(file);
+
+event.target.value = '';
+
+}
+
+
+function startProgress(t, p) {
+
+document.getElementById('progressContainer').style.display='block';
+
+document.getElementById('progressText').innerText=t;
+
+updateProgress(p);
+
+}
+
+function updateProgress(p) {
+
+document.getElementById('progressBar').style.width=p+'%';
+
+}
+
+function finishProgress() {
+
+updateProgress(100);
+
+setTimeout(function() {
+
+document.getElementById('progressContainer').style.display='none';
+
+}, 800);
+
+}
+
+function hideProgress() {
+
+document.getElementById('progressContainer').style.display='none';
+
+}
+
+</script>
+
+
+
+</body>
+
+</html>
