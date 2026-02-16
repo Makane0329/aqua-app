@@ -22,12 +22,16 @@ color: #1a1a1a;
 line-height: 1.6;
 -webkit-font-smoothing: antialiased;
 overflow-x: hidden;
+width: 100%;
+position: relative;
 }
 
 .container {
 max-width: 500px;
+width: 100%;
 margin: 0 auto;
 padding: 0 20px 30px;
+overflow-x: hidden;
 }
 
 .header {
@@ -969,6 +973,11 @@ background: linear-gradient(135deg, #b8976d, #a8866d);
 APIキーは暗号化されずに保存されます。共有端末では使用後に削除してください。
 </div>
 
+<div style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 2px solid #81c784; padding: 18px; margin-bottom: 20px; font-size: 13px; color: #2e7d32; line-height: 1.6; border-radius: 12px;">
+<b>💾 自動バックアップ機能</b>
+データを追加・削除するたびに自動的にブラウザに保存されます。アップデート時も安心です！
+</div>
+
 <label style="font-weight:600; color:#1a1a1a; font-size:13px; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">🤖 Gemini API キー</label>
 <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
 
@@ -1004,11 +1013,31 @@ let currentPage = 1;
 const itemsPerPage = 10;
 let isRequesting = false;
 let lastRequestTime = 0;
+const APP_VERSION = 'v8.1'; // アプリバージョン
 
 // チャット関連の変数
 let chatHistories = JSON.parse(localStorage.getItem('chatHistories_v1')) || [];
 let currentChatId = null;
 let showingHistory = false;
+
+// 自動バックアップ機能
+function autoBackup() {
+if(cosmeData.length > 0) {
+var backup = {
+version: APP_VERSION,
+timestamp: new Date().toISOString(),
+data: cosmeData,
+chats: chatHistories
+};
+localStorage.setItem('cosmeBackup_auto', JSON.stringify(backup));
+}
+}
+
+// データ保存のラッパー関数
+function saveCosmeData() {
+localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+autoBackup(); // 自動バックアップ
+}
 
 document.addEventListener("DOMContentLoaded", function() {
 document.getElementById('openDate').valueAsDate = new Date();
@@ -1031,7 +1060,6 @@ createNewChat();
 }
 
 render();
-checkExpiredItems();
 });
 
 function switchTab(tabId) {
@@ -1459,6 +1487,7 @@ var streamMsgId = 'stream-' + Date.now();
 var streamDiv = document.createElement('div');
 streamDiv.id = streamMsgId;
 streamDiv.className = 'msg-ai';
+streamDiv.innerHTML = '<span style="color: #999;">考え中...</span>';
 chatHistory.appendChild(streamDiv);
 
 var cosmeListText = cosmeData.length > 0 ? JSON.stringify(cosmeData) : '登録コスメなし';
@@ -1467,7 +1496,7 @@ var promptText = 'あなたは美容部員AIです。回答は見やすくする
 try {
 await waitForRateLimit();
 
-var resp = await fetch(getApiUrl('stream'), {
+var resp = await fetch(getApiUrl(), {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
@@ -1496,45 +1525,33 @@ throw new Error('リクエスト形式エラー: ' + errorMsg);
 throw new Error('通信エラー(' + resp.status + '): ' + errorMsg);
 }
 
-// ストリーミングレスポンスを処理
-var reader = resp.body.getReader();
-var decoder = new TextDecoder();
-var buffer = '';
-var fullText = '';
+var data = await resp.json();
 
-while (true) {
-var result = await reader.read();
-if (result.done) break;
+if(data.error) {
+throw new Error(data.error.message);
+}
 
-buffer += decoder.decode(result.value, { stream: true });
-var lines = buffer.split('\n');
-buffer = lines.pop() || '';
+if(!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+throw new Error('APIからの応答形式が不正です');
+}
 
-for (var i = 0; i < lines.length; i++) {
-var line = lines[i].trim();
-if (!line || !line.startsWith('data: ')) continue;
-if (line === 'data: [DONE]') continue;
+// レスポンステキストを取得
+var fullText = data.candidates[0].content.parts[0].text;
 
-try {
-var jsonStr = line.substring(6);
-var data = JSON.parse(jsonStr);
-
-if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-var part = data.candidates[0].content.parts[0];
-if (part.text) {
-fullText += part.text;
-streamDiv.innerHTML = formatMessage(fullText, 'ai');
+// タイピングアニメーション風に表示
+var charIndex = 0;
+var typingInterval = setInterval(function() {
+if (charIndex < fullText.length) {
+var currentText = fullText.substring(0, charIndex + 1);
+streamDiv.innerHTML = formatMessage(currentText, 'ai');
 chatHistory.scrollTop = chatHistory.scrollHeight;
-}
-}
-} catch (e) {
-console.error('Parse error:', e);
-}
-}
-}
-
-// 最終的なメッセージを保存
+charIndex += Math.max(1, Math.floor(Math.random() * 3)); // 1-3文字ずつ表示
+} else {
+clearInterval(typingInterval);
+streamDiv.innerHTML = formatMessage(fullText, 'ai');
 addMessageToChat(currentChatId, 'ai', fullText);
+}
+}, 30); // 30msごとに更新
 
 } catch (e) {
 console.error('Chat Error:', e);
@@ -1577,7 +1594,7 @@ id: Date.now()
 };
 if(!item.name) return alert("商品名を入力してください");
 cosmeData.unshift(item);
-localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+saveCosmeData();
 
 document.getElementById('itemName').value = '';
 document.getElementById('brand').value = '';
@@ -1591,16 +1608,6 @@ document.getElementById('openDate').valueAsDate = new Date();
 currentPage = 1;
 render();
 alert("登録しました！✨");
-}
-
-function checkExpiredItems() {
-var today = new Date();
-var expiringSoon = cosmeData.filter(function(item) {
-if(!item.openDate) return false;
-var openDate = new Date(item.openDate);
-var monthsUsed = (today - openDate) / (1000 * 60 * 60 * 24 * 30);
-return monthsUsed >= 5 && monthsUsed < 6;
-});
 }
 
 function getDaysUsed(openDate) {
@@ -1682,20 +1689,10 @@ renderPagination(sorted.length);
 
 function renderItemCard(item) {
 var daysUsed = getDaysUsed(item.openDate);
-var isExpiring = daysUsed && daysUsed >= 150 && daysUsed < 180;
-var isExpired = daysUsed && daysUsed >= 180;
-
-var warningHtml = '';
-if(isExpired) {
-warningHtml = '<div class="expire-warning">⚠️ 使用開始から6ヶ月経過しています</div>';
-} else if(isExpiring) {
-warningHtml = '<div class="expire-warning" style="background:linear-gradient(135deg, #e3f2fd, #bbdefb); border-color:#90caf9; color:#1565c0;">📅 使用開始から5ヶ月経過</div>';
-}
 
 var html = '<details class="item-card-details">';
 html += '<summary>' + (item.brand || '') + ' ' + item.name + ' [' + item.tag + ']</summary>';
 html += '<div class="item-details-content">';
-html += warningHtml;
 html += '<p><b>カテゴリ:</b> ' + (item.category || '-') + '</p>';
 html += '<p><b>成分:</b> ' + (item.ingredient || '-') + '</p>';
 html += '<p><b>説明:</b> ' + (item.description || '-') + '</p>';
@@ -1738,7 +1735,7 @@ document.getElementById('routineArea').scrollIntoView({ behavior: 'smooth' });
 function removeItem(id) {
 if(confirm("削除しますか？")) {
 cosmeData = cosmeData.filter(function(i) { return i.id !== id; });
-localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+saveCosmeData();
 
 var totalPages = Math.ceil(cosmeData.length / itemsPerPage);
 if(currentPage > totalPages && currentPage > 1) {
@@ -1750,11 +1747,17 @@ render();
 }
 
 function exportData() {
-if(cosmeData.length === 0) {
+if(cosmeData.length === 0 && chatHistories.length === 0) {
 alert('データがありません');
 return;
 }
-var dataStr = JSON.stringify(cosmeData, null, 2);
+var backup = {
+version: APP_VERSION,
+timestamp: new Date().toISOString(),
+data: cosmeData,
+chats: chatHistories
+};
+var dataStr = JSON.stringify(backup, null, 2);
 var blob = new Blob([dataStr], {type: 'application/json'});
 var url = URL.createObjectURL(blob);
 var a = document.createElement('a');
@@ -1762,7 +1765,7 @@ a.href = url;
 a.download = 'cosme-backup-' + new Date().toISOString().split('T')[0] + '.json';
 a.click();
 URL.revokeObjectURL(url);
-alert('バックアップを保存しました！');
+alert('バックアップを保存しました！\nコスメ: ' + cosmeData.length + '件\nチャット: ' + chatHistories.length + '件');
 }
 
 function importData() {
@@ -1777,17 +1780,34 @@ var reader = new FileReader();
 reader.onload = function(e) {
 try {
 var importedData = JSON.parse(e.target.result);
-if(!Array.isArray(importedData)) {
-throw new Error('無効なデータ形式です');
-}
 
-if(confirm(importedData.length + '件のデータをインポートしますか？現在のデータは上書きされます。')) {
-cosmeData = importedData;
-localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData));
+// 新形式（バックアップファイル）の場合
+if(importedData.data && Array.isArray(importedData.data)) {
+if(confirm(importedData.data.length + '件のデータをインポートしますか？現在のデータは上書きされます。')) {
+cosmeData = importedData.data;
+if(importedData.chats) {
+chatHistories = importedData.chats;
+localStorage.setItem('chatHistories_v1', JSON.stringify(chatHistories));
+}
+saveCosmeData();
 currentPage = 1;
 render();
 switchTab('register');
 alert('データを復元しました！');
+}
+}
+// 旧形式（配列のみ）の場合
+else if(Array.isArray(importedData)) {
+if(confirm(importedData.length + '件のデータをインポートしますか？現在のデータは上書きされます。')) {
+cosmeData = importedData;
+saveCosmeData();
+currentPage = 1;
+render();
+switchTab('register');
+alert('データを復元しました！');
+}
+} else {
+throw new Error('無効なデータ形式です');
 }
 } catch(e) {
 alert('インポートエラー: ' + e.message);
