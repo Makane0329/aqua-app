@@ -10,22 +10,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-html {
-  overflow-x: hidden;
-  overscroll-behavior: none;
-  -webkit-text-size-adjust: 100%;
-}
-
+html { overflow-x: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Sans', 'Yu Gothic', sans-serif;
   background: #fafafa; margin: 0; padding: 0; padding-bottom: 30px;
   color: #1a1a1a; line-height: 1.6; -webkit-font-smoothing: antialiased;
   overflow-x: hidden; width: 100%; position: relative;
-  overscroll-behavior-x: none;
-  touch-action: pan-y;
+  overscroll-behavior-x: none; touch-action: pan-y;
 }
-
 .container { max-width: 500px; width: 100%; margin: 0 auto; padding: 0 20px 30px; overflow-x: hidden; max-width: min(500px, 100vw); }
 
 .header {
@@ -45,7 +37,6 @@ body {
 @keyframes headerSlideDown { from { opacity:0; transform:translateY(-30px); } to { opacity:1; transform:translateY(0); } }
 @keyframes headerGlow { 0%,100%{transform:translate(0,0);} 50%{transform:translate(30px,30px);} }
 
-/* Tabs - 5タブ対応 */
 .tabs {
   display: flex; margin-bottom: 30px; background: #ffffff;
   border-radius: 12px; overflow: hidden;
@@ -69,10 +60,8 @@ body {
 
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeInUp 0.5s cubic-bezier(0.16,1,0.3,1); }
-
 @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
 
-/* Cards */
 .card {
   background: #fff; padding: 30px; margin-bottom: 25px;
   border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
@@ -96,7 +85,6 @@ h2::after {
 }
 @keyframes borderExpand { from{width:0;} to{width:50px;} }
 
-/* Form */
 input, select, button, textarea {
   width: 100%; padding: 14px 18px; margin-top: 12px;
   border: 2px solid #e5e5e5; box-sizing: border-box; font-size: 16px;
@@ -106,7 +94,6 @@ input, select, button, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none; border-color: #000; box-shadow: 0 0 0 4px rgba(0,0,0,0.05); transform: translateY(-1px);
 }
-
 button {
   background: linear-gradient(135deg, #000 0%, #2c2c2c 100%);
   color: white; border: none; font-weight: 600; cursor: pointer;
@@ -125,7 +112,6 @@ button:active { transform: translateY(0); box-shadow: 0 2px 10px rgba(0,0,0,0.2)
 button:disabled { background: #ccc; cursor: not-allowed; opacity: 0.5; box-shadow: none; }
 textarea { resize: none; min-height: 90px; }
 
-/* Progress */
 .progress-container {
   background: linear-gradient(to bottom, #fafafa, #fff); margin-bottom: 20px; display: none;
   padding: 20px; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,0.08); animation: fadeInUp 0.3s ease;
@@ -142,23 +128,36 @@ textarea { resize: none; min-height: 90px; }
 }
 @keyframes shimmer { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
 
-/* Chat */
+/* ===== チャット: 横幅・縦幅拡大 ===== */
 .chat-area {
-  height: 420px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  /* 縦幅を拡大: 420px → 560px */
+  height: 560px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
   background: linear-gradient(to bottom, #f9f9f9, #fff); padding: 20px;
   border-radius: 12px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
   display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;
 }
+/* チャットカードのpadding削減で横幅確保 */
+.chat-card {
+  padding: 16px !important;
+}
+
 .msg-user {
-  align-self: flex-end; background: linear-gradient(135deg, #000 0%, #2c2c2c 100%);
-  color: white; padding: 14px 20px; border-radius: 18px 18px 4px 18px;
-  max-width: 80%; font-size: 15px; word-wrap: break-word; line-height: 1.5;
+  align-self: flex-end;
+  background: linear-gradient(135deg, #000 0%, #2c2c2c 100%);
+  color: white; padding: 12px 16px; border-radius: 18px 18px 4px 18px;
+  /* 横幅を拡大: 80% → 92% */
+  max-width: 92%;
+  font-size: 15px; word-wrap: break-word; line-height: 1.6;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15); animation: messageSlideIn 0.3s cubic-bezier(0.16,1,0.3,1);
 }
 .msg-ai {
-  align-self: flex-start; background: white; border: 2px solid #f0f0f0;
-  color: #1a1a1a; padding: 16px 20px; border-radius: 18px 18px 18px 4px;
-  max-width: 85%; font-size: 15px; line-height: 1.7; word-wrap: break-word;
+  align-self: flex-start;
+  background: white; border: 2px solid #f0f0f0;
+  color: #1a1a1a; padding: 14px 16px; border-radius: 18px 18px 18px 4px;
+  /* 横幅を拡大: 85% → 95% */
+  max-width: 95%;
+  font-size: 15px; line-height: 1.75; word-wrap: break-word;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08); animation: messageSlideIn 0.3s cubic-bezier(0.16,1,0.3,1);
 }
 .msg-ai strong,.msg-ai b{color:#000;font-weight:700;}
@@ -166,7 +165,7 @@ textarea { resize: none; min-height: 90px; }
 .msg-ai h4{font-size:15px;font-weight:600;color:#2c2c2c;margin:10px 0 6px;}
 .msg-ai em,.msg-ai i{color:#c9a97e;font-style:italic;}
 .msg-ai code{background:#f5f5f5;border:1px solid #e0e0e0;padding:2px 6px;border-radius:4px;font-size:14px;color:#d32f2f;}
-.msg-ai ul,.msg-ai ol{margin:8px 0;padding-left:24px;}
+.msg-ai ul,.msg-ai ol{margin:8px 0;padding-left:20px;}
 .msg-ai li{margin:6px 0;line-height:1.6;}
 .msg-ai blockquote{border-left:4px solid #c9a97e;padding-left:16px;margin:12px 0;color:#666;font-style:italic;}
 @keyframes messageSlideIn { from{opacity:0;transform:scale(0.8) translateY(10px);} to{opacity:1;transform:scale(1) translateY(0);} }
@@ -223,9 +222,25 @@ textarea { resize: none; min-height: 90px; }
 .item-details-content p{margin:10px 0;color:#1a1a1a;}
 .item-details-content b{color:#1a1a1a;font-weight:600;letter-spacing:0.5px;}
 
-/* Item action buttons */
 .item-action-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .item-action-btns button { width: auto; padding: 10px 15px; margin-top: 0; font-size: 12px; }
+
+/* ===== インライン編集フィールド ===== */
+.edit-field-row {
+  display: flex; align-items: center; gap: 8px; margin: 8px 0;
+}
+.edit-field-row b { flex-shrink: 0; min-width: 90px; color: #1a1a1a; font-weight: 600; }
+.edit-inline {
+  flex: 1; padding: 7px 12px; border: 2px solid #e5e5e5; border-radius: 8px;
+  font-size: 13px; font-family: inherit; background: #fafafa;
+  transition: all 0.2s; margin: 0; width: auto;
+}
+.edit-inline:focus { outline: none; border-color: #c9a97e; background: white; box-shadow: 0 0 0 3px rgba(201,169,126,0.15); transform: none; }
+.edit-save-btn {
+  width: auto; padding: 7px 14px; margin: 0; font-size: 11px;
+  background: linear-gradient(135deg, #c9a97e 0%, #b8976d 100%) !important;
+  border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(201,169,126,0.3);
+}
 
 /* Category Headers */
 .category-header {
@@ -239,31 +254,15 @@ textarea { resize: none; min-height: 90px; }
 .category-header:first-child{margin-top:0;}
 .category-count{font-size:11px;background:rgba(255,255,255,0.2);padding:6px 12px;letter-spacing:1px;border-radius:20px;}
 
-/* Pagination */
 .pagination{display:flex;justify-content:center;align-items:center;gap:15px;margin-top:25px;}
 .pagination button{width:auto;padding:12px 22px;font-size:12px;margin-top:0;}
 .pagination span{padding:12px 22px;background:white;border:2px solid #f0f0f0;font-size:13px;letter-spacing:0.5px;border-radius:10px;font-weight:600;}
 
-/* Sort Controls */
 .sort-controls{display:flex;gap:12px;margin-bottom:20px;}
 .sort-controls select{margin-top:0;}
 
-/* Warnings */
 .alert-box{background:linear-gradient(135deg,#fff8e1,#ffecb3);border:2px solid #ffd54f;padding:18px;margin-bottom:20px;font-size:13px;color:#f57f17;line-height:1.6;border-radius:12px;box-shadow:0 2px 15px rgba(245,127,23,0.15);}
 .alert-box b{display:block;margin-bottom:8px;font-weight:600;}
-
-/* Photo Buttons */
-.photo-buttons{display:flex;gap:12px;margin-bottom:25px;}
-.photo-input-label {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
-  background:linear-gradient(135deg,#000 0%,#2c2c2c 100%); color:white; padding:16px;
-  font-weight:600; cursor:pointer; letter-spacing:0.5px; font-size:13px;
-  border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.2);
-  transition:all 0.3s cubic-bezier(0.16,1,0.3,1); position:relative; overflow:hidden;
-}
-.photo-input-label::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.2);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s;}
-.photo-input-label:active::before{width:300px;height:300px;}
-.photo-input-label:active{box-shadow:0 6px 25px rgba(0,0,0,0.3);transform:translateY(-2px);}
 
 .btn-secondary{background:linear-gradient(135deg,#c9a97e 0%,#b8976d 100%)!important;color:white!important;}
 .btn-danger{background:linear-gradient(135deg,#d32f2f 0%,#b71c1c 100%)!important;color:white!important;}
@@ -273,10 +272,8 @@ textarea { resize: none; min-height: 90px; }
 .flex-row{display:flex;gap:10px;}
 .flex-between{display:flex;justify-content:space-between;align-items:center;}
 
-/* ===== コスパタブ専用スタイル ===== */
-.cospa-filter-bar {
-  display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
-}
+/* ===== コスパタブ ===== */
+.cospa-filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
 .cospa-filter-bar select { margin-top: 0; flex: 1; min-width: 120px; }
 
 .cospa-summary {
@@ -285,14 +282,8 @@ textarea { resize: none; min-height: 90px; }
   margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
   animation: cardAppear 0.5s cubic-bezier(0.16,1,0.3,1);
 }
-.cospa-summary-title {
-  font-family: 'Cormorant Garamond', serif; font-size: 11px;
-  letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-bottom: 8px;
-}
-.cospa-summary-value {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.2rem;
-  font-weight: 300; letter-spacing: 2px; line-height: 1;
-}
+.cospa-summary-title { font-family: 'Cormorant Garamond', serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; margin-bottom: 8px; }
+.cospa-summary-value { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; letter-spacing: 2px; line-height: 1; }
 .cospa-summary-sub { font-size: 11px; opacity: 0.6; margin-top: 6px; letter-spacing: 0.5px; }
 
 .cospa-card {
@@ -305,45 +296,30 @@ textarea { resize: none; min-height: 90px; }
   background: linear-gradient(to bottom, #c9a97e, #b8976d);
 }
 .cospa-card:hover { box-shadow: 0 6px 25px rgba(0,0,0,0.1); border-color: #c9a97e; transform: translateX(4px); }
-
 .cospa-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .cospa-card-name { font-weight: 700; font-size: 14px; flex: 1; padding-right: 10px; line-height: 1.4; }
-.cospa-card-price {
-  font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;
-  font-weight: 600; color: #000; white-space: nowrap;
-}
+.cospa-card-price { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 600; color: #000; white-space: nowrap; }
 .cospa-card-price span { font-size: 11px; font-family: inherit; color: #666; letter-spacing: 0.5px; }
-
 .cospa-card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-.cospa-badge {
-  font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 600;
-  letter-spacing: 0.5px; background: #f0f0f0; color: #555;
-}
+.cospa-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; background: #f0f0f0; color: #555; }
 .cospa-badge.cat { background: #000; color: white; }
 .cospa-badge.days { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); color: #2e7d32; }
 .cospa-badge.finished { background: linear-gradient(135deg, #e3f2fd, #bbdefb); color: #1565c0; }
 .cospa-badge.warning { background: linear-gradient(135deg, #fff3e0, #ffe0b2); color: #e65100; }
-
 .cospa-bar-wrap { margin-top: 10px; }
 .cospa-bar-label { font-size: 10px; color: #999; margin-bottom: 4px; letter-spacing: 0.3px; }
 .cospa-bar-bg { width:100%; background:#f0f0f0; height:5px; border-radius:10px; overflow:hidden; }
-.cospa-bar-fill {
-  height: 100%; border-radius: 10px;
-  background: linear-gradient(90deg, #c9a97e, #b8976d);
-  transition: width 1s cubic-bezier(0.16,1,0.3,1);
+.cospa-bar-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #c9a97e, #b8976d); transition: width 1s cubic-bezier(0.16,1,0.3,1); }
+.cospa-empty { text-align: center; padding: 40px 20px; color: #999; font-size: 14px; line-height: 2; }
+.cospa-rank { position: absolute; right: 20px; bottom: 20px; font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; color: #f0f0f0; pointer-events: none; letter-spacing: 2px; }
+
+/* ===== コスパ削除ボタン ===== */
+.cospa-delete-btn {
+  width: auto; padding: 7px 12px; margin: 10px 0 0; font-size: 11px;
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
+  border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(211,47,47,0.2);
 }
 
-.cospa-empty {
-  text-align: center; padding: 40px 20px; color: #999;
-  font-size: 14px; line-height: 2;
-}
-.cospa-rank {
-  position: absolute; right: 20px; bottom: 20px;
-  font-family: 'Cormorant Garamond', serif; font-size: 2rem;
-  font-weight: 300; color: #f0f0f0; pointer-events: none; letter-spacing: 2px;
-}
-
-/* Scrollbar */
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:#f0f0f0;border-radius:10px;}
 ::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#c9a97e,#b8976d);border-radius:10px;}
@@ -368,38 +344,27 @@ textarea { resize: none; min-height: 90px; }
   <div id="tab-register" class="tab-content active">
     <div class="card">
       <h2>✨ コスメ登録</h2>
-      <!-- 写真追加ボタン（1つに集約） -->
       <button onclick="showPhotoSheet()" style="margin-bottom:25px;padding:16px;font-size:14px;letter-spacing:1px;">
         <span style="position:relative;z-index:1;">📷 写真からAI登録</span>
       </button>
 
-      <!-- 写真選択シート（モーダル風） -->
       <div id="photoSheet" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);" onclick="hidePhotoSheet()">
         <div style="position:absolute;bottom:0;left:0;right:0;background:white;border-radius:20px 20px 0 0;padding:20px;max-width:500px;margin:0 auto;" onclick="event.stopPropagation()">
           <div style="width:40px;height:4px;background:#e0e0e0;border-radius:4px;margin:0 auto 20px;"></div>
           <p style="text-align:center;font-size:12px;color:#999;margin:0 0 20px;letter-spacing:1px;text-transform:uppercase;font-family:'Cormorant Garamond',serif;">写真を選択</p>
           <label for="cameraInput" style="display:flex;align-items:center;gap:14px;padding:18px;border-radius:12px;border:2px solid #f0f0f0;margin-bottom:10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#000'" onmouseout="this.style.borderColor='#f0f0f0'" onclick="hidePhotoSheet()">
             <span style="font-size:26px;">📸</span>
-            <span>
-              <div style="font-weight:700;font-size:15px;color:#1a1a1a;">カメラで撮影</div>
-              <div style="font-size:12px;color:#999;margin-top:2px;">その場で商品を撮影</div>
-            </span>
+            <span><div style="font-weight:700;font-size:15px;color:#1a1a1a;">カメラで撮影</div><div style="font-size:12px;color:#999;margin-top:2px;">その場で商品を撮影</div></span>
             <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event)">
           </label>
           <label for="albumInput" style="display:flex;align-items:center;gap:14px;padding:18px;border-radius:12px;border:2px solid #f0f0f0;margin-bottom:10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#000'" onmouseout="this.style.borderColor='#f0f0f0'" onclick="hidePhotoSheet()">
             <span style="font-size:26px;">🖼️</span>
-            <span>
-              <div style="font-weight:700;font-size:15px;color:#1a1a1a;">アルバムから選択</div>
-              <div style="font-size:12px;color:#999;margin-top:2px;">フォトライブラリから選ぶ</div>
-            </span>
+            <span><div style="font-weight:700;font-size:15px;color:#1a1a1a;">アルバムから選択</div><div style="font-size:12px;color:#999;margin-top:2px;">フォトライブラリから選ぶ</div></span>
             <input type="file" id="albumInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
           </label>
           <label for="fileInput" style="display:flex;align-items:center;gap:14px;padding:18px;border-radius:12px;border:2px solid #f0f0f0;margin-bottom:20px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#000'" onmouseout="this.style.borderColor='#f0f0f0'" onclick="hidePhotoSheet()">
             <span style="font-size:26px;">📁</span>
-            <span>
-              <div style="font-weight:700;font-size:15px;color:#1a1a1a;">ファイルから選択</div>
-              <div style="font-size:12px;color:#999;margin-top:2px;">ファイルアプリなどから選ぶ</div>
-            </span>
+            <span><div style="font-weight:700;font-size:15px;color:#1a1a1a;">ファイルから選択</div><div style="font-size:12px;color:#999;margin-top:2px;">ファイルアプリなどから選ぶ</div></span>
             <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
           </label>
           <button onclick="hidePhotoSheet()" style="background:#f0f0f0;color:#1a1a1a;box-shadow:none;padding:14px;font-size:13px;letter-spacing:0.5px;">
@@ -417,7 +382,6 @@ textarea { resize: none; min-height: 90px; }
         <input type="text" id="itemName" placeholder="商品名" style="margin-top:0;flex:1;">
         <button onclick="triggerManualAISearch()" style="width:auto;white-space:nowrap;margin-top:0;padding:0 14px;flex-shrink:0;font-size:12px;"><span style="position:relative;z-index:1;">✨ AI推測</span></button>
       </div>
-
       <input type="text" id="brand" placeholder="ブランド名">
       <select id="categorySelect">
         <option value="" disabled selected>カテゴリを選択</option>
@@ -466,9 +430,7 @@ textarea { resize: none; min-height: 90px; }
   <div id="tab-cospa" class="tab-content">
     <div class="card">
       <h2>💰 コスパ分析</h2>
-
       <div id="cospaTopSummary"></div>
-
       <div class="cospa-filter-bar">
         <select id="cospaCategory" onchange="renderCospa()">
           <option value="all">すべてのカテゴリ</option>
@@ -486,14 +448,14 @@ textarea { resize: none; min-height: 90px; }
           <option value="name_asc">名前順</option>
         </select>
       </div>
-
       <div id="cospaList"></div>
     </div>
   </div>
 
   <!-- ===== チャットタブ ===== -->
   <div id="tab-chat" class="tab-content">
-    <div class="card" style="padding:20px;">
+    <!-- chat-card クラスで padding 削減 → 横幅最大化 -->
+    <div class="card chat-card">
       <h2>💬 コスメ相談室</h2>
       <div class="chat-controls">
         <button onclick="createNewChat()" style="flex:1;"><span style="position:relative;z-index:1;">➕ 新規チャット</span></button>
@@ -524,16 +486,13 @@ textarea { resize: none; min-height: 90px; }
       </div>
       <label style="font-weight:600;color:#1a1a1a;font-size:13px;letter-spacing:0.5px;display:block;margin-bottom:5px;">🤖 Gemini API キー</label>
       <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
-      <p style="font-size:12px;color:#666;margin:15px 0 8px;letter-spacing:0.3px;">🤖 使用するモデル</p>
-      <select id="geminiModelSelect">
-        <option value="gemini-3-flash-preview">Gemini 3 Flash Preview (デフォルト)</option>
-        <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
-        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (最速)</option>
-      </select>
-      <div class="retry-notice">
-        💡 <b>エラー429対策:</b> リクエストが多い場合は1分待ってから再試行してください。無料枠は1分15リクエストが上限です。<br><br>
-        ✨ <b>デフォルトモデル:</b> Gemini 3.0 Flash Preview を使用しています。エラーが出る場合は Gemini 2.5 Flash に切り替えてください。
+      <p style="font-size:12px;color:#666;margin:15px 0 8px;letter-spacing:0.3px;">🤖 使用モデル</p>
+      <div style="background:linear-gradient(135deg,#f3e5f5,#e1bee7);border:2px solid #ce93d8;padding:14px;border-radius:10px;font-size:13px;color:#6a1b9a;font-weight:600;letter-spacing:0.5px;">
+        ✨ Gemini 3 Flash Preview（固定）
+      </div>
+      <div class="retry-notice" style="margin-top:15px;">
+        💡 <b>Gemini 3 Flash Preview:</b> 思考モード搭載のため、レスポンス解析を自動で最適化しています。<br><br>
+        ⚠️ <b>エラー429対策:</b> リクエストが多い場合は1分待ってから再試行してください。
       </div>
       <button onclick="saveSettings()" style="margin-top:20px;padding:15px;"><span style="position:relative;z-index:1;">設定を保存する</span></button>
       <button onclick="clearApiKey()" class="btn-danger" style="margin-top:10px;padding:15px;"><span style="position:relative;z-index:1;">🗑️ APIキーを削除</span></button>
@@ -552,7 +511,7 @@ let currentPage = 1;
 const itemsPerPage = 10;
 let isRequesting = false;
 let lastRequestTime = 0;
-const APP_VERSION = 'v9.0';
+const APP_VERSION = 'v9.2';
 
 let chatHistories = JSON.parse(localStorage.getItem('chatHistories_v1')) || [];
 let currentChatId = null;
@@ -574,15 +533,11 @@ function saveCosmeData() {
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('openDate').valueAsDate = new Date();
   document.getElementById('geminiApiKey').value = localStorage.getItem('geminiApiKey_v1') || '';
-  document.getElementById('geminiModelSelect').value = localStorage.getItem('geminiModelName_v2') || 'gemini-3-flash-preview';
-
   document.getElementById('chatInput').addEventListener('keydown', function(e) {
     if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
   });
-
   if(chatHistories.length > 0) { currentChatId = chatHistories[0].id; loadChat(currentChatId); }
   else { createNewChat(); }
-
   render();
   renderCospa();
 });
@@ -602,21 +557,33 @@ function validateApiKey() {
   if(!apiKey || apiKey.length < 10) { alert('⚠️ 設定タブでAPIキーを登録してください'); switchTab('settings'); return false; }
   return true;
 }
-
 async function waitForRateLimit() {
   var now = Date.now();
   var timeSinceLastRequest = now - lastRequestTime;
-  var minInterval = 2000; // 高速化: 4000→2000ms
+  var minInterval = 2000;
   if(timeSinceLastRequest < minInterval) {
     await new Promise(function(resolve){ setTimeout(resolve, minInterval - timeSinceLastRequest); });
   }
   lastRequestTime = Date.now();
 }
-
 function getApiUrl() {
   var apiKey = localStorage.getItem('geminiApiKey_v1');
-  var modelName = localStorage.getItem('geminiModelName_v2') || 'gemini-2.5-flash';
-  return 'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent?key=' + apiKey;
+  return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + apiKey;
+}
+
+/* ===== Gemini 3 Flash Preview 思考モード対応 ===== */
+function extractTextFromParts(data) {
+  try {
+    var parts = data.candidates[0].content.parts;
+    var textParts = parts.filter(function(p) { return typeof p.text === 'string'; });
+    if(textParts.length === 0) throw new Error('テキストパートが見つかりません');
+    for(var i = textParts.length - 1; i >= 0; i--) {
+      if(textParts[i].text.includes('{')) return textParts[i].text;
+    }
+    return textParts[textParts.length - 1].text;
+  } catch(e) {
+    throw new Error('レスポンス解析エラー: ' + e.message);
+  }
 }
 
 function parseAIJson(text) {
@@ -624,70 +591,44 @@ function parseAIJson(text) {
     var jsonText = text.replace(/```json\n?|```/g, '').trim();
     return JSON.parse(jsonText);
   } catch(e) {
-    // JSON部分を抽出試み
     var match = text.match(/\{[\s\S]*\}/);
-    if(match) return JSON.parse(match[0]);
-    throw new Error("AIの応答形式が正しくありません");
+    if(match) { try { return JSON.parse(match[0]); } catch(e2) {} }
+    throw new Error("AIの応答形式が正しくありません: " + text.substring(0, 150));
   }
 }
-
-/* ===== 写真シート ===== */
-function showPhotoSheet() {
-  document.getElementById('photoSheet').style.display = 'block';
-  document.body.style.overflow = 'hidden';
-}
-function hidePhotoSheet() {
-  document.getElementById('photoSheet').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-// iOS Safari 横スクロール・ピンチズーム防止
-document.addEventListener('touchmove', function(e) {
-  if(e.touches.length > 1) e.preventDefault(); // ピンチズーム防止
-}, { passive: false });
-
-var lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-  var now = Date.now();
-  if(now - lastTouchEnd <= 300) e.preventDefault(); // ダブルタップズーム防止
-  lastTouchEnd = now;
-}, false);
-
 function handleApiError(resp, errorData) {
   if(resp.status === 429) throw new Error('リクエスト制限中。1分待ってから再試行してください。');
-  if(resp.status === 404) throw new Error('モデルが見つかりません。設定で別のモデルを選択してください。');
+  if(resp.status === 404) throw new Error('モデルが見つかりません。APIキーがGemini 3対応かご確認ください。');
   throw new Error('API Error: ' + resp.status + ' - ' + (errorData.error ? errorData.error.message : '不明'));
 }
 
-/* ===== AI推測（高速化版） ===== */
+/* ===== 写真シート ===== */
+function showPhotoSheet() { document.getElementById('photoSheet').style.display = 'block'; document.body.style.overflow = 'hidden'; }
+function hidePhotoSheet() { document.getElementById('photoSheet').style.display = 'none'; document.body.style.overflow = ''; }
+
+document.addEventListener('touchmove', function(e) { if(e.touches.length > 1) e.preventDefault(); }, { passive: false });
+var lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) { var now = Date.now(); if(now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, false);
+
+/* ===== AI推測 ===== */
 async function triggerManualAISearch() {
   if(!validateApiKey()) return;
   if(isRequesting) { alert('処理中です。少々お待ちください。'); return; }
   var name = document.getElementById('itemName').value.trim();
   if(!name) return alert("商品名を入力してください");
-
   isRequesting = true;
   startProgress("AIが詳細を検索中...", 40);
-
   try {
     await waitForRateLimit();
-    // 高速化: プロンプトを短縮・temperature下げ、maxOutputTokens制限
     var prompt = '化粧品「' + name + '」の情報をJSON形式のみで回答。余分なテキスト不要。\n{"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分をカンマ区切りで","description":"","price":0,"releaseDate":""}';
-
     var resp = await fetch(getApiUrl(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 256 } // 高速化
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 512 } })
     });
-
     if(!resp.ok) { var ed = await resp.json().catch(function(){return{};}); handleApiError(resp, ed); }
     var data = await resp.json();
     if(data.error) throw new Error(data.error.message);
-
-    var res = parseAIJson(data.candidates[0].content.parts[0].text);
+    var res = parseAIJson(extractTextFromParts(data));
     if(res.brand) document.getElementById('brand').value = res.brand;
     if(res.category) document.getElementById('categorySelect').value = res.category;
     if(res.ingredients) document.getElementById('ingredient').value = res.ingredients;
@@ -695,84 +636,58 @@ async function triggerManualAISearch() {
     if(res.price) document.getElementById('itemPrice').value = res.price;
     if(res.releaseDate) document.getElementById('releaseDate').value = res.releaseDate;
     finishProgress();
-  } catch(e) {
-    hideProgress(); alert("AI検索に失敗しました: " + e.message);
-  } finally { isRequesting = false; }
+  } catch(e) { hideProgress(); alert("AI検索に失敗しました: " + e.message); }
+  finally { isRequesting = false; }
 }
 
-/* ===== 画像解析（2ステップ: 商品名→AI推測） ===== */
+/* ===== 画像解析 ===== */
 async function handleImageSelect(event) {
   if(!validateApiKey()) return;
   if(isRequesting) { alert('処理中です。少々お待ちください。'); event.target.value = ''; return; }
-
   var file = event.target.files[0];
   if(!file) return;
-
   isRequesting = true;
   startProgress("画像から商品名を読み取り中...", 20);
-
   try {
     var base64Data = await compressImage(file);
     updateProgress(40);
     var base64 = base64Data.split(',')[1];
     await waitForRateLimit();
-
-    // Step1: 画像から商品名・ブランドのみ抽出（軽量）
     var prompt1 = '画像から化粧品の商品名とブランド名だけ読み取ってJSON形式のみで回答。{"itemName":"","brandName":""}';
     var resp1 = await fetch(getApiUrl(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt1 }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 128 }
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt1 }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 256 } })
     });
-
     if(!resp1.ok) { var ed = await resp1.json().catch(function(){return{};}); handleApiError(resp1, ed); }
     var data1 = await resp1.json();
     if(data1.error) throw new Error(data1.error.message);
-
-    var res1 = parseAIJson(data1.candidates[0].content.parts[0].text);
+    var res1 = parseAIJson(extractTextFromParts(data1));
     var itemName = res1.itemName || '';
     var brandName = res1.brandName || '';
-
     if(itemName) document.getElementById('itemName').value = itemName;
     if(brandName) document.getElementById('brand').value = brandName;
     updateProgress(65);
-
-    // Step2: 商品名からカテゴリ・詳細をAI推測（テキストのみ・高速）
     if(itemName) {
       startProgress("商品情報をAI予測中...", 70);
       await waitForRateLimit();
-
       var prompt2 = '化粧品「' + itemName + '」(ブランド:' + (brandName||'不明') + ')の情報をJSON形式のみで回答。{"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分をカンマ区切りで","description":"","price":0,"releaseDate":""}';
       var resp2 = await fetch(getApiUrl(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt2 }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt2 }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 512 } })
       });
-
       if(!resp2.ok) { var ed2 = await resp2.json().catch(function(){return{};}); handleApiError(resp2, ed2); }
       var data2 = await resp2.json();
       if(data2.error) throw new Error(data2.error.message);
-
-      var res2 = parseAIJson(data2.candidates[0].content.parts[0].text);
+      var res2 = parseAIJson(extractTextFromParts(data2));
       if(res2.category) document.getElementById('categorySelect').value = res2.category;
       if(res2.ingredients) document.getElementById('ingredient').value = res2.ingredients;
       if(res2.description) document.getElementById('description').value = res2.description;
       if(res2.price) document.getElementById('itemPrice').value = res2.price;
       if(res2.releaseDate) document.getElementById('releaseDate').value = res2.releaseDate;
     }
-
     finishProgress();
-  } catch(e) {
-    hideProgress(); alert("解析エラー: " + e.message);
-  } finally {
-    isRequesting = false; event.target.value = '';
-  }
+  } catch(e) { hideProgress(); alert("解析エラー: " + e.message); }
+  finally { isRequesting = false; event.target.value = ''; }
 }
 
 function compressImage(file) {
@@ -805,7 +720,6 @@ function createNewChat() {
   loadChat(chatId);
   if(showingHistory) toggleChatHistory();
 }
-
 function loadChat(chatId) {
   currentChatId = chatId;
   var chat = chatHistories.find(function(c){ return c.id === chatId; });
@@ -821,7 +735,6 @@ function loadChat(chatId) {
   chatHistory.scrollTop = chatHistory.scrollHeight;
   renderChatHistoryList();
 }
-
 function formatMessage(text, type) {
   if(type === 'user' || type === 'system') return escapeHtml(text).replace(/\n/g, '<br>');
   var f = escapeHtml(text);
@@ -835,7 +748,6 @@ function formatMessage(text, type) {
   f = f.replace(/\n/g, '<br>');
   return f;
 }
-
 function toggleChatHistory() {
   showingHistory = !showingHistory;
   var container = document.getElementById('chatHistoryContainer');
@@ -843,7 +755,6 @@ function toggleChatHistory() {
   if(showingHistory) { container.style.display = 'block'; btn.innerHTML = '<span style="position:relative;z-index:1;">✕ 閉じる</span>'; renderChatHistoryList(); }
   else { container.style.display = 'none'; btn.innerHTML = '<span style="position:relative;z-index:1;">📜 履歴</span>'; }
 }
-
 function renderChatHistoryList() {
   var container = document.getElementById('chatHistoryContainer');
   var html = '';
@@ -859,9 +770,7 @@ function renderChatHistoryList() {
   if(!html) html = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">チャット履歴がありません</div>';
   container.innerHTML = html;
 }
-
 function selectChat(chatId) { loadChat(chatId); }
-
 function deleteChat(chatId) {
   if(!confirm('このチャットを削除しますか？')) return;
   chatHistories = chatHistories.filter(function(c){ return c.id !== chatId; });
@@ -869,16 +778,13 @@ function deleteChat(chatId) {
   if(currentChatId === chatId) { if(chatHistories.length > 0) loadChat(chatHistories[0].id); else createNewChat(); }
   else renderChatHistoryList();
 }
-
 function saveChatHistories() { localStorage.setItem('chatHistories_v1', JSON.stringify(chatHistories)); }
-
 function updateChatTitle(chatId, firstMessage) {
   var chat = chatHistories.find(function(c){ return c.id === chatId; });
   if(!chat) return;
   chat.title = firstMessage.length > 20 ? firstMessage.substring(0, 20) + '...' : firstMessage;
   saveChatHistories(); renderChatHistoryList();
 }
-
 function addMessageToChat(chatId, type, text) {
   var chat = chatHistories.find(function(c){ return c.id === chatId; });
   if(!chat) return;
@@ -886,7 +792,6 @@ function addMessageToChat(chatId, type, text) {
   if(type === 'user' && chat.messages.filter(function(m){ return m.type === 'user'; }).length === 1) updateChatTitle(chatId, text);
   saveChatHistories();
 }
-
 async function sendChatMessage() {
   if(!validateApiKey()) return;
   if(isRequesting) { alert('処理中です。少々お待ちください。'); return; }
@@ -894,44 +799,33 @@ async function sendChatMessage() {
   var sendBtn = document.getElementById('sendBtn');
   var message = inputEl.value.trim();
   if(!message) return;
-
   isRequesting = true;
   inputEl.disabled = true; sendBtn.disabled = true;
   var chatHistory = document.getElementById('chatHistory');
-
   var userDiv = document.createElement('div');
   userDiv.className = 'msg-user'; userDiv.textContent = message;
   chatHistory.appendChild(userDiv);
   addMessageToChat(currentChatId, 'user', message);
   inputEl.value = '';
   chatHistory.scrollTop = chatHistory.scrollHeight;
-
   var streamMsgId = 'stream-' + Date.now();
   var streamDiv = document.createElement('div');
   streamDiv.id = streamMsgId; streamDiv.className = 'msg-ai';
   streamDiv.innerHTML = '<span style="color:#999;">考え中...</span>';
   chatHistory.appendChild(streamDiv);
-
   var cosmeListText = cosmeData.length > 0 ? JSON.stringify(cosmeData) : '登録コスメなし';
   var promptText = 'あなたは美容部員AIです。重要点は**太字**、見出しは##/###、リストは-や数字で整理してください。\n【登録コスメ】:' + cosmeListText + '\n【質問】:' + message;
-
   try {
     await waitForRateLimit();
     var resp = await fetch(getApiUrl(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: promptText }] }], generationConfig: { temperature: 0.8, maxOutputTokens: 1024 } })
     });
-
     if(!resp.ok) { var ed = await resp.json().catch(function(){return{};}); handleApiError(resp, ed); }
     var data = await resp.json();
     if(data.error) throw new Error(data.error.message);
     if(!data.candidates || !data.candidates[0]?.content?.parts) throw new Error('APIからの応答形式が不正です');
-
-    var fullText = data.candidates[0].content.parts[0].text;
+    var fullText = extractTextFromParts(data);
     var charIndex = 0;
     var typingInterval = setInterval(function() {
       if(charIndex < fullText.length) {
@@ -957,7 +851,7 @@ async function sendChatMessage() {
   }
 }
 
-/* ===== 登録・削除 ===== */
+/* ===== 登録 ===== */
 function addItem() {
   var item = {
     name: document.getElementById('itemName').value.trim(),
@@ -968,7 +862,7 @@ function addItem() {
     releaseDate: document.getElementById('releaseDate').value,
     price: document.getElementById('itemPrice').value,
     openDate: document.getElementById('openDate').value,
-    finishDate: null, // 使い切り日（初期はnull）
+    finishDate: null,
     tag: document.getElementById('timeTag').value,
     id: Date.now()
   };
@@ -984,17 +878,62 @@ function addItem() {
   alert("登録しました！✨");
 }
 
+/* ===== 登録タブの削除（コスパには影響しない） ===== */
 function removeItem(id) {
-  if(confirm("削除しますか？")) {
+  if(confirm("削除しますか？\n※コスパタブからは削除されません。")) {
     cosmeData = cosmeData.filter(function(i){ return i.id !== id; });
     saveCosmeData();
     var totalPages = Math.ceil(cosmeData.length / itemsPerPage);
     if(currentPage > totalPages && currentPage > 1) currentPage = totalPages;
-    render(); renderCospa();
+    render();
+    // コスパタブは再描画しない → 独立して管理
   }
 }
 
-/* ===== 使い切り機能 ===== */
+/* ===== コスパタブ専用削除 ===== */
+function removeCospaItem(id) {
+  if(confirm("コスパリストから削除しますか？\n（登録リストからも削除されます）")) {
+    cosmeData = cosmeData.filter(function(i){ return i.id !== id; });
+    saveCosmeData();
+    renderCospa();
+    // 登録タブは再描画しない
+  }
+}
+
+/* ===== ★ 使用開始日・価格のインライン編集 ===== */
+function saveEditField(id, field, inputId) {
+  var item = cosmeData.find(function(i){ return i.id === id; });
+  if(!item) return;
+  var val = document.getElementById(inputId).value;
+  item[field] = val;
+  saveCosmeData();
+  // アイテムカード内の表示を更新（再描画なしで値だけ反映）
+  var displayEl = document.getElementById('display-' + field + '-' + id);
+  if(displayEl) {
+    if(field === 'price') {
+      displayEl.textContent = val ? '¥' + parseFloat(val).toLocaleString() : '-';
+    } else if(field === 'openDate') {
+      var days = getDaysUsed(val);
+      displayEl.textContent = (val || '-') + (days !== null ? ' (' + days + '日経過)' : '');
+    } else {
+      displayEl.textContent = val || '-';
+    }
+  }
+  // コスパの1日あたり表示も更新
+  var cospaEl = document.getElementById('display-cospa-' + id);
+  if(cospaEl) {
+    var cp = calcDailyPrice(item);
+    cospaEl.textContent = cp ? '¥' + Math.round(cp.daily) + (item.finishDate ? '（完走）' : '（使用中）') : '-';
+  }
+  // 保存フィードバック
+  var btn = document.querySelector('[data-savebtn="' + id + '-' + field + '"]');
+  if(btn) {
+    btn.innerHTML = '<span style="position:relative;z-index:1;">✓ 保存済</span>';
+    setTimeout(function(){ btn.innerHTML = '<span style="position:relative;z-index:1;">保存</span>'; }, 1500);
+  }
+}
+
+/* ===== 使い切り ===== */
 function markFinished(id) {
   var item = cosmeData.find(function(i){ return i.id === id; });
   if(!item) return;
@@ -1024,18 +963,16 @@ function calcDailyPrice(item) {
   return { daily: price / days, days: days, finished: !!item.finishDate };
 }
 
-/* ===== コスパタブ描画 ===== */
+/* ===== コスパタブ描画（独立・専用削除ボタン付き） ===== */
 function renderCospa() {
   var categoryFilter = document.getElementById('cospaCategory') ? document.getElementById('cospaCategory').value : 'all';
   var sortType = document.getElementById('cospaSort') ? document.getElementById('cospaSort').value : 'cost_asc';
 
-  // フィルタ
   var filtered = cosmeData.filter(function(item) {
     if(categoryFilter !== 'all' && item.category !== categoryFilter) return false;
     return calcDailyPrice(item) !== null;
   });
 
-  // ソート
   filtered.sort(function(a, b) {
     var ca = calcDailyPrice(a), cb = calcDailyPrice(b);
     if(sortType === 'cost_asc') return ca.daily - cb.daily;
@@ -1045,29 +982,23 @@ function renderCospa() {
     return 0;
   });
 
-  // サマリー
   var summaryEl = document.getElementById('cospaTopSummary');
   if(filtered.length > 0) {
     var totalDaily = filtered.reduce(function(sum, item){ return sum + calcDailyPrice(item).daily; }, 0);
     var totalMonthly = totalDaily * 30;
     summaryEl.innerHTML =
       '<div class="cospa-summary" style="display:flex;gap:20px;">' +
-        '<div style="flex:1;">' +
-          '<div class="cospa-summary-title">1日あたり合計</div>' +
-          '<div class="cospa-summary-value">¥' + Math.round(totalDaily).toLocaleString() + '</div>' +
-          '<div class="cospa-summary-sub">表示中の ' + filtered.length + ' 件合計</div>' +
-        '</div>' +
-        '<div style="flex:1;">' +
-          '<div class="cospa-summary-title">1ヶ月あたり合計</div>' +
-          '<div class="cospa-summary-value">¥' + Math.round(totalMonthly).toLocaleString() + '</div>' +
-          '<div class="cospa-summary-sub">× 30日換算</div>' +
-        '</div>' +
+        '<div style="flex:1;"><div class="cospa-summary-title">1日あたり合計</div>' +
+        '<div class="cospa-summary-value">¥' + Math.round(totalDaily).toLocaleString() + '</div>' +
+        '<div class="cospa-summary-sub">表示中の ' + filtered.length + ' 件合計</div></div>' +
+        '<div style="flex:1;"><div class="cospa-summary-title">1ヶ月あたり合計</div>' +
+        '<div class="cospa-summary-value">¥' + Math.round(totalMonthly).toLocaleString() + '</div>' +
+        '<div class="cospa-summary-sub">× 30日換算</div></div>' +
       '</div>';
   } else {
     summaryEl.innerHTML = '';
   }
 
-  // リスト
   var listEl = document.getElementById('cospaList');
   if(filtered.length === 0) {
     var noDataMsg = cosmeData.length === 0 ?
@@ -1077,9 +1008,7 @@ function renderCospa() {
     return;
   }
 
-  // 最高・最低を計算（バー描画用）
   var maxDaily = Math.max.apply(null, filtered.map(function(item){ return calcDailyPrice(item).daily; }));
-
   var html = '';
   filtered.forEach(function(item, idx) {
     var cp = calcDailyPrice(item);
@@ -1092,7 +1021,6 @@ function renderCospa() {
     html += '<div class="cospa-card-name">' + escapeHtml((item.brand ? item.brand + ' ' : '') + item.name) + '</div>';
     html += '<div class="cospa-card-price">¥' + Math.round(cp.daily) + '<span> / 日</span></div>';
     html += '</div>';
-
     html += '<div class="cospa-card-meta">';
     if(item.category) html += '<span class="cospa-badge cat">' + escapeHtml(item.category) + '</span>';
     html += '<span class="cospa-badge days">📅 ' + cp.days + '日使用</span>';
@@ -1100,17 +1028,17 @@ function renderCospa() {
     else html += '<span class="cospa-badge warning">🔄 使用中</span>';
     if(rankLabel) html += '<span class="cospa-badge" style="background:linear-gradient(135deg,#000,#333);color:white;">🏆 ' + rankLabel + '</span>';
     html += '</div>';
-
     html += '<div class="cospa-bar-wrap">';
     html += '<div class="cospa-bar-label">¥' + parseFloat(item.price).toLocaleString() + ' ÷ ' + cp.days + '日</div>';
     html += '<div class="cospa-bar-bg"><div class="cospa-bar-fill" style="width:' + barWidth + '%"></div></div>';
     html += '</div>';
+    /* ★ コスパ専用削除ボタン ★ */
+    html += '<button class="cospa-delete-btn" onclick="removeCospaItem(' + item.id + ')"><span style="position:relative;z-index:1;">🗑️ リストから削除</span></button>';
     html += '</div>';
   });
 
   listEl.innerHTML = html;
 
-  // バーのアニメーション（少し遅延）
   setTimeout(function() {
     var bars = listEl.querySelectorAll('.cospa-bar-fill');
     bars.forEach(function(bar) {
@@ -1126,7 +1054,6 @@ function getDaysUsed(openDate) {
   if(!openDate) return null;
   return Math.floor((new Date() - new Date(openDate)) / (1000 * 60 * 60 * 24));
 }
-
 function sortData() {
   var sortType = document.getElementById('sortSelect').value;
   var sorted = cosmeData.slice();
@@ -1136,14 +1063,12 @@ function sortData() {
   else if(sortType === 'expiring') sorted.sort(function(a,b){ return (getDaysUsed(b.openDate)||0) - (getDaysUsed(a.openDate)||0); });
   return sorted;
 }
-
 function render() {
   var sorted = sortData();
   var sortType = document.getElementById('sortSelect').value;
   var paginatedData = sorted.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   var area = document.getElementById('routineArea');
   var html = '';
-
   if(sortType === 'category') {
     var categories = {};
     paginatedData.forEach(function(item) {
@@ -1159,14 +1084,17 @@ function render() {
   } else {
     paginatedData.forEach(function(item){ html += renderItemCard(item); });
   }
-
   area.innerHTML = html;
   renderPagination(sorted.length);
 }
 
+/* ===== ★ インライン編集付きアイテムカード ===== */
 function renderItemCard(item) {
   var daysUsed = getDaysUsed(item.openDate);
   var cp = calcDailyPrice(item);
+  var priceDisplay = item.price ? '¥' + parseFloat(item.price).toLocaleString() : '-';
+  var openDisplay = (item.openDate || '-') + (daysUsed !== null ? ' (' + daysUsed + '日経過)' : '');
+  var cospaDisplay = cp ? '¥' + Math.round(cp.daily) + (item.finishDate ? '（完走）' : '（使用中）') : '-';
 
   var html = '<details class="item-card-details">';
   html += '<summary>' + escapeHtml((item.brand ? item.brand + ' ' : '') + item.name) + ' [' + item.tag + ']' + (item.finishDate ? ' ✅' : '') + '</summary>';
@@ -1174,10 +1102,33 @@ function renderItemCard(item) {
   html += '<p><b>カテゴリ:</b> ' + escapeHtml(item.category || '-') + '</p>';
   html += '<p><b>全成分:</b> ' + escapeHtml(item.ingredient || '-') + '</p>';
   html += '<p><b>説明:</b> ' + escapeHtml(item.description || '-') + '</p>';
-  html += '<p><b>価格:</b> ' + (item.price ? '¥' + parseFloat(item.price).toLocaleString() : '-') + ' / <b>発売日:</b> ' + (item.releaseDate || '-') + '</p>';
-  html += '<p><b>使用開始:</b> ' + (item.openDate || '-') + ' ' + (daysUsed !== null ? '(' + daysUsed + '日経過)' : '') + '</p>';
+  html += '<p><b>発売日:</b> ' + escapeHtml(item.releaseDate || '-') + '</p>';
+
+  /* ★ 価格 編集フィールド ★ */
+  html += '<div class="edit-field-row">';
+  html += '<b>価格:</b>';
+  html += '<span id="display-price-' + item.id + '" style="font-size:13px;color:#1a1a1a;">' + priceDisplay + '</span>';
+  html += '</div>';
+  html += '<div class="edit-field-row" style="margin-top:4px;">';
+  html += '<input type="number" id="edit-price-' + item.id + '" class="edit-inline" value="' + (item.price || '') + '" placeholder="価格（円）" min="0">';
+  html += '<button class="edit-save-btn" data-savebtn="' + item.id + '-price" onclick="saveEditField(' + item.id + ',\'price\',\'edit-price-' + item.id + '\')">';
+  html += '<span style="position:relative;z-index:1;">保存</span></button>';
+  html += '</div>';
+
+  /* ★ 使用開始日 編集フィールド ★ */
+  html += '<div class="edit-field-row" style="margin-top:10px;">';
+  html += '<b>使用開始日:</b>';
+  html += '<span id="display-openDate-' + item.id + '" style="font-size:13px;color:#1a1a1a;">' + openDisplay + '</span>';
+  html += '</div>';
+  html += '<div class="edit-field-row" style="margin-top:4px;">';
+  html += '<input type="date" id="edit-openDate-' + item.id + '" class="edit-inline" value="' + (item.openDate || '') + '">';
+  html += '<button class="edit-save-btn" data-savebtn="' + item.id + '-openDate" onclick="saveEditField(' + item.id + ',\'openDate\',\'edit-openDate-' + item.id + '\')">';
+  html += '<span style="position:relative;z-index:1;">保存</span></button>';
+  html += '</div>';
+
   if(item.finishDate) html += '<p><b>使い切り日:</b> ' + item.finishDate + '</p>';
-  if(cp) html += '<p><b>1日あたり:</b> <span style="color:#000;font-weight:700;">¥' + Math.round(cp.daily) + '</span>' + (cp.finished ? '（完走）' : '（使用中）') + '</p>';
+  if(cp) html += '<p><b>1日あたり:</b> <span id="display-cospa-' + item.id + '" style="color:#000;font-weight:700;">' + cospaDisplay + '</span></p>';
+
   html += '<div class="item-action-btns">';
   html += '<button onclick="markFinished(' + item.id + ')" class="btn-success" style="flex:1;"><span style="position:relative;z-index:1;">' + (item.finishDate ? '↩️ 使い切り解除' : '✅ 使い切り完了') + '</span></button>';
   html += '<button onclick="removeItem(' + item.id + ')" class="btn-danger"><span style="position:relative;z-index:1;">🗑️ 削除</span></button>';
@@ -1197,13 +1148,11 @@ function renderPagination(totalItems) {
   if(currentPage < totalPages) html += '<button onclick="changePage(' + (currentPage+1) + ')"><span style="position:relative;z-index:1;">次へ ▶</span></button>';
   el.innerHTML = html;
 }
-
 function changePage(page) { currentPage = page; render(); document.getElementById('routineArea').scrollIntoView({behavior:'smooth'}); }
 
 /* ===== 設定 ===== */
 function saveSettings() {
   localStorage.setItem('geminiApiKey_v1', document.getElementById('geminiApiKey').value.trim());
-  localStorage.setItem('geminiModelName_v2', document.getElementById('geminiModelSelect').value);
   alert('設定を保存しました！✨');
 }
 function clearApiKey() {
@@ -1221,9 +1170,7 @@ function exportData() {
   URL.revokeObjectURL(url);
   alert('バックアップを保存しました！\nコスメ: ' + cosmeData.length + '件\nチャット: ' + chatHistories.length + '件');
 }
-
 function importData() { document.getElementById('importFile').click(); }
-
 function handleImport(event) {
   var file = event.target.files[0];
   if(!file) return;
