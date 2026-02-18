@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.11</title>
+<title>Cosme Genius Pro v10.12</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -293,7 +293,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.11</span>
+  <span class="brand-subtitle">PRO EDITION v10.12</span>
 </div>
 
 <!-- Tabs -->
@@ -437,11 +437,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <div class="input-group" style="margin-top:30px;">
         <label>チャット用モデル</label>
         <select id="chatModelSelect" onchange="updateModelCodeDisplay()">
-          <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨・安定)</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
           <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
           <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-          <option value="gemini-3-flash-preview">Gemini 3 Flash ⚠️不安定</option>
-          <option value="gemini-3-pro-preview">Gemini 3 Pro ⚠️不安定</option>
+          <option value="gemini-3-flash-preview">Gemini 3 Flash (推奨)</option>
+          <option value="gemini-3-pro-preview">Gemini 3 Pro</option>
         </select>
         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
           <div class="code-display">Code: <span id="chatModelCodeDisplay"></span></div>
@@ -459,11 +459,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <div class="input-group">
         <label>検索・登録用モデル</label>
         <select id="fastModelSelect" onchange="updateModelCodeDisplay()">
-          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (最速・推奨)</option>
+          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (最速)</option>
           <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
           <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-          <option value="gemini-3-flash-preview">Gemini 3 Flash ⚠️不安定</option>
-          <option value="gemini-3-pro-preview">Gemini 3 Pro ⚠️不安定</option>
+          <option value="gemini-3-flash-preview">Gemini 3 Flash (推奨)</option>
+          <option value="gemini-3-pro-preview">Gemini 3 Pro</option>
         </select>
         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
           <div class="code-display">Code: <span id="fastModelCodeDisplay"></span></div>
@@ -504,19 +504,28 @@ let isRequesting = false;
 let lastRequestTime = 0;
 let currentFilter = 'active';
 
-const DEFAULT_CHAT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
 
-// 思考モード設定: OFFの時はthinkingConfigキー自体を送らない（モデルによる無視を防ぐ）
+// 思考モード設定
+// gemini-3系はthinkingConfig非対応のため送信しない（送ると400エラーまたは遅延の原因）
+function modelSupportsThinking(modelId) {
+  // gemini-2.5-pro / gemini-2.5-flash のみ対応
+  return modelId && modelId.startsWith('gemini-2.5') && !modelId.includes('lite');
+}
 function getGenConfig(isFast) {
-  const thinkingOn = isFast
+  const modelSelectId = isFast ? 'fastModelSelect' : 'chatModelSelect';
+  const modelId = document.getElementById(modelSelectId)?.value || '';
+  const thinkingToggle = isFast
     ? document.getElementById('fastThinkingToggle')?.checked
     : document.getElementById('chatThinkingToggle')?.checked;
+
   const cfg = { temperature: isFast ? 0.2 : 0.7 };
-  if (thinkingOn) {
+
+  // thinkingConfigはgemini-2.5-pro/flashのみ送信
+  if (thinkingToggle && modelSupportsThinking(modelId)) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
-  // OFFの場合はthinkingConfigを送らない → モデルのデフォルト動作（非思考）になる
   return cfg;
 }
 
@@ -599,10 +608,13 @@ function parseAIJson(text) {
 */
 async function callGeminiAPI(url, parts, config, jsonMode = false) {
   var genConfig = Object.assign({}, config);
-  if (jsonMode) {
+  // gemini-3系はresponseMimeType非対応 → プロンプトベースのJSON指示のみ使用
+  var supportsJsonMode = !url.includes('gemini-3');
+  if (jsonMode && supportsJsonMode) {
     genConfig.responseMimeType = "application/json";
-    if (!genConfig.maxOutputTokens) genConfig.maxOutputTokens = 512;
   }
+  // maxOutputTokensは常に設定（検索用は短くて済む）
+  if (jsonMode && !genConfig.maxOutputTokens) genConfig.maxOutputTokens = 512;
 
   var res = await fetch(url, {
     method: 'POST',
@@ -625,7 +637,7 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
 
     // サーバー過負荷（high demand / Gemini 3系プレビューで頻発）
     if (res.status === 503 || errMsg.includes('high demand') || errMsg.includes('overloaded') || errMsg.includes('UNAVAILABLE')) {
-      throw new Error('モデルが混雑しています。\n設定タブで「Gemini 2.5 Flash」または「Gemini 2.5 Flash-Lite」に変更してお試しください。\n（Gemini 3シリーズはプレビュー版のため不安定です）');
+      throw new Error('サーバーが混雑しています。しばらく待ってから再試行してください。\n（数秒〜数十秒後に再度お試しください）');
     }
 
     // responseMimeType非対応 → JSONなしでリトライ
