@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.7</title>
+<title>Cosme Genius Pro v10.8</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -119,6 +119,25 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   color: var(--accent-dark) !important; width: auto !important; margin: 0 !important; font-size: 0.8rem;
 }
 
+/* === Toggle Switch === */
+.toggle-label { display: flex; align-items: center; cursor: pointer; }
+.toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider {
+  position: absolute; inset: 0; background: #ccc; border-radius: 24px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.toggle-slider::before {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; left: 3px; top: 3px;
+  background: white; border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--accent-color); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
 /* === 写真AI登録: リスト形式ボタン === */
 .photo-list-card {
   background: #fff;
@@ -221,7 +240,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .msg-row { display: flex; width: 100%; }
 .msg-row.user { justify-content: flex-end; }
 .msg-row.ai { justify-content: flex-start; }
-.msg-bubble { max-width: 90%; padding: 18px 22px; font-size: 1rem; line-height: 1.8; border-radius: 12px; word-break: break-word; box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+.msg-bubble { max-width: 90%; padding: 14px 18px; font-size: 1rem; line-height: 1.55; border-radius: 12px; word-break: break-word; box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
 .msg-row.user .msg-bubble { background: #3a3a3a; color: #f0f0f0; border-bottom-right-radius: 2px; font-weight: 400; white-space: pre-wrap; }
 .msg-row.ai .msg-bubble { background: #fcfbf9; border: 1px solid #dcdcdc; color: #333; border-bottom-left-radius: 2px; font-weight: 400; }
 .msg-bubble h3 { font-size: 1.1rem; font-weight: 700; margin: 1.2em 0 0.5em; color: #111; border-bottom: 1px solid #eee; padding-bottom: 4px; }
@@ -261,7 +280,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.7</span>
+  <span class="brand-subtitle">PRO EDITION v10.8</span>
 </div>
 
 <!-- Tabs -->
@@ -281,22 +300,12 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   <div id="tab-register" class="tab-content active">
     <div class="section-title"><span>アイテム登録</span></div>
 
-    <!-- 写真AI登録: リスト形式 -->
+    <!-- 写真AI登録: シンプルボタン -->
     <div class="photo-list-card" style="margin-bottom: 20px;">
       <div class="photo-list-item">
-        <div class="photo-list-icon">📷</div>
         <div>
-          <div class="photo-list-label">カメラで撮影してAI登録</div>
-          <div class="photo-list-sub">カメラを起動して商品を撮影</div>
-        </div>
-        <div class="photo-list-arrow">›</div>
-        <input type="file" accept="image/*" capture="environment" onchange="handleImageSelect(event)">
-      </div>
-      <div class="photo-list-item">
-        <div class="photo-list-icon">🖼️</div>
-        <div>
-          <div class="photo-list-label">アルバムから選んでAI登録</div>
-          <div class="photo-list-sub">写真ライブラリから画像を選択</div>
+          <div class="photo-list-label">📷 写真からAI登録</div>
+          <div class="photo-list-sub">アルバムから画像を選択して自動入力</div>
         </div>
         <div class="photo-list-arrow">›</div>
         <input type="file" accept="image/*" onchange="handleImageSelect(event)">
@@ -410,6 +419,8 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <label>Gemini API キー</label>
         <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
       </div>
+
+      <!-- チャット用モデル -->
       <div class="input-group" style="margin-top:30px;">
         <label>チャット用モデル</label>
         <select id="chatModelSelect" onchange="updateModelCodeDisplay()">
@@ -419,8 +430,19 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
           <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
           <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
         </select>
-        <div class="code-display">Code: <span id="chatModelCodeDisplay"></span></div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+          <div class="code-display">Code: <span id="chatModelCodeDisplay"></span></div>
+          <label class="toggle-label" style="margin:0;">
+            <span style="font-size:0.75rem; color:var(--text-sub); margin-right:8px;">思考モード</span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="chatThinkingToggle" checked>
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+        </div>
       </div>
+
+      <!-- 検索・登録用モデル -->
       <div class="input-group">
         <label>検索・登録用モデル</label>
         <select id="fastModelSelect" onchange="updateModelCodeDisplay()">
@@ -430,8 +452,18 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
           <option value="gemini-3-flash-preview">Gemini 3 Flash</option>
           <option value="gemini-3-pro-preview">Gemini 3 Pro</option>
         </select>
-        <div class="code-display">Code: <span id="fastModelCodeDisplay"></span></div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+          <div class="code-display">Code: <span id="fastModelCodeDisplay"></span></div>
+          <label class="toggle-label" style="margin:0;">
+            <span style="font-size:0.75rem; color:var(--text-sub); margin-right:8px;">思考モード</span>
+            <div class="toggle-switch">
+              <input type="checkbox" id="fastThinkingToggle">
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+        </div>
       </div>
+
       <button onclick="saveSettings()" class="btn-accent">設定を保存</button>
       <button onclick="clearApiKey()" class="btn-secondary" style="margin-top:20px; color:#c62828!important; border-color:#ef9a9a!important;">APIキーを削除</button>
     </div>
@@ -463,16 +495,16 @@ const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
 const IMAGE_MODEL = 'gemini-2.5-flash';
 
-// 思考モード無効・高速化のための共通設定
-// thinkingBudget:0 で思考モードを無効化し、レイテンシを下げる
-const GENERATION_CONFIG_FAST = {
-  temperature: 0.2,
-  thinkingConfig: { thinkingBudget: 0 }
-};
-const GENERATION_CONFIG_CHAT = {
-  temperature: 0.7,
-  thinkingConfig: { thinkingBudget: 0 }
-};
+// 思考モード設定: toggleの値を読んで動的に生成
+function getGenConfig(isFast) {
+  const thinkingOn = isFast
+    ? document.getElementById('fastThinkingToggle')?.checked
+    : document.getElementById('chatThinkingToggle')?.checked;
+  return {
+    temperature: isFast ? 0.2 : 0.7,
+    thinkingConfig: { thinkingBudget: thinkingOn ? 8192 : 0 }
+  };
+}
 
 document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('openDate').valueAsDate = new Date();
@@ -559,6 +591,12 @@ async function callGeminiAPI(url, parts, config) {
   if(!res.ok) {
     var errJson = await res.json().catch(() => ({}));
     var errMsg = errJson?.error?.message || `HTTP ${res.status}`;
+    // クォータ超過の場合は分かりやすいメッセージに変換
+    if(errMsg.includes('quota') || errMsg.includes('Quota') || res.status === 429) {
+      var retryMatch = errMsg.match(/retry in ([\d.]+)s/i);
+      var waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : null;
+      throw new Error('APIの無料枠の上限に達しました。' + (waitSec ? `約${waitSec}秒後にお試しください。` : 'しばらく待ってから再試行してください。') + '\n\n有料プランへのアップグレードや、設定でより軽量なモデル（Flash-Lite）への変更もご検討ください。');
+    }
     throw new Error(errMsg);
   }
   var d = await res.json();
@@ -582,7 +620,7 @@ async function handleImageSelect(e) {
     var text1 = await callGeminiAPI(getImageApiUrl(), [
       { text: p1 },
       { inlineData: { mimeType: "image/jpeg", data: base64 } }
-    ], GENERATION_CONFIG_FAST);
+    ], getGenConfig(true));
 
     var j1 = parseAIJson(text1);
     if(j1?.itemName) document.getElementById('itemName').value = j1.itemName;
@@ -594,7 +632,7 @@ async function handleImageSelect(e) {
       await waitForRateLimit();
       var p2 = `化粧品「${j1.brandName || ''} ${j1.itemName}」の詳細情報をJSON形式のみで出力してください（説明文不要）:
 {"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分テキスト","description":"製品説明","price":数値または0,"releaseDate":"YYYY-MM-DDまたは空文字"}`;
-      var text2 = await callGeminiAPI(getApiUrl(true), [{ text: p2 }], GENERATION_CONFIG_FAST);
+      var text2 = await callGeminiAPI(getApiUrl(true), [{ text: p2 }], getGenConfig(true));
       var j2 = parseAIJson(text2);
       if(j2) {
         if(j2.category) document.getElementById('categorySelect').value = j2.category;
@@ -644,7 +682,7 @@ async function triggerManualAISearch() {
     var p = `化粧品「${name}」の詳細情報を検索してJSON形式のみで出力してください（前置き・説明文不要）:
 {"brand":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分テキスト","description":"製品説明","price":数値または0,"releaseDate":"YYYY-MM-DDまたは空文字"}`;
 
-    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], GENERATION_CONFIG_FAST);
+    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], getGenConfig(true));
     var j = parseAIJson(text);
 
     if(!j) throw new Error("情報を取得できませんでした。商品名をより正確に入力してみてください。");
@@ -868,7 +906,7 @@ async function sendChatMessage() {
     await waitForRateLimit();
     var context = JSON.stringify(cosmeData.map(c => ({n:c.name, b:c.brand, c:c.category, ing:c.ingredients})));
     var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
-    var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], GENERATION_CONFIG_CHAT);
+    var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], getGenConfig(false));
     if(!ans) ans = "回答を取得できませんでした。";
     removeTypingIndicator();
     appendMsg('ai', ans, true);
@@ -901,9 +939,15 @@ function loadModelSettings() {
   var fm = localStorage.getItem('fastModel_v1') || DEFAULT_FAST_MODEL;
   var cmSel = document.getElementById('chatModelSelect');
   var fmSel = document.getElementById('fastModelSelect');
-  // Set value only if option exists
   if([...cmSel.options].some(o => o.value === cm)) cmSel.value = cm;
   if([...fmSel.options].some(o => o.value === fm)) fmSel.value = fm;
+
+  // 思考モード: デフォルトはチャット=ON、検索=OFF
+  var chatThinking = localStorage.getItem('chatThinking_v1');
+  var fastThinking = localStorage.getItem('fastThinking_v1');
+  document.getElementById('chatThinkingToggle').checked = chatThinking === null ? true : chatThinking === 'true';
+  document.getElementById('fastThinkingToggle').checked = fastThinking === null ? false : fastThinking === 'true';
+
   updateModelCodeDisplay();
 }
 function updateModelCodeDisplay() {
@@ -914,6 +958,8 @@ function saveSettings() {
   localStorage.setItem('geminiApiKey_v1', document.getElementById('geminiApiKey').value.trim());
   localStorage.setItem('chatModel_v1', document.getElementById('chatModelSelect').value);
   localStorage.setItem('fastModel_v1', document.getElementById('fastModelSelect').value);
+  localStorage.setItem('chatThinking_v1', document.getElementById('chatThinkingToggle').checked.toString());
+  localStorage.setItem('fastThinking_v1', document.getElementById('fastThinkingToggle').checked.toString());
   alert('設定を保存しました');
 }
 function clearApiKey() { localStorage.removeItem('geminiApiKey_v1'); document.getElementById('geminiApiKey').value = ''; alert('APIキーを削除しました'); }
