@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.2</title>
+<title>Cosme Genius Pro v10.3</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
 :root {
   --bg-color: #f2f2f0;
   --card-bg: #ffffff;
-  --text-main: #2b2b2b; /* 文字色を少し濃く */
+  --text-main: #2b2b2b;
   --text-sub: #555555;
   --accent-color: #a89f91;
   --accent-dark: #5e5a55;
@@ -199,7 +199,15 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle;
 }
 
-/* === List Items (Improved) === */
+/* === List Items === */
+.filter-tabs {
+  display: flex; gap: 5px; margin-bottom: 15px; background: #e0e0e0; padding: 4px; border-radius: 6px;
+}
+.filter-tab {
+  flex: 1; text-align: center; padding: 8px 0; font-size: 0.8rem; cursor: pointer; border-radius: 4px; color: #666; transition: 0.3s;
+}
+.filter-tab.active { background: #fff; color: var(--text-main); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
 .item-card-details {
   background: #fff;
   border: 1px solid rgba(0,0,0,0.05);
@@ -213,28 +221,22 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 }
 .item-card-details summary::-webkit-details-marker { display: none; }
 
-.summary-top-row {
-  display: flex; align-items: flex-start; justify-content: space-between; width: 100%;
-}
-.summary-bottom-row {
-  display: flex; align-items: center; justify-content: space-between; width: 100%;
-}
+.summary-top-row { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; }
+.summary-bottom-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 
 .item-brand { font-size: 0.7rem; color: #666; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 2px; }
-/* 商品名を表示しきる設定 */
 .item-name {
   font-size: 1.05rem; font-weight: 600; color: var(--text-main);
-  white-space: normal; /* 折り返し許可 */
-  word-break: break-all;
-  line-height: 1.4;
+  white-space: normal; word-break: break-all; line-height: 1.4;
 }
 
-.item-badges { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
+.item-badges { display: flex; gap: 5px; flex-shrink: 0; align-items: center; flex-wrap: wrap; }
 .badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 2px; font-weight: 600; }
 .badge.morning { background: #fff8e1; color: #f39c12; border: 1px solid #ffe0b2; }
 .badge.night { background: #e8eaf6; color: #3f51b5; border: 1px solid #c5cae9; }
 .badge.both { background: #f3e5f5; color: #9c27b0; border: 1px solid #e1bee7; }
-.badge.category { background: #eee; color: #444; border: 1px solid #ddd; } /* カテゴリバッジ */
+.badge.category { background: #eee; color: #444; border: 1px solid #ddd; }
+.badge.finished { background: #cfd8dc; color: #455a64; border: 1px solid #b0bec5; }
 
 .item-content { padding: 0 20px 20px; font-size: 0.9rem; color: var(--text-sub); border-top: 1px solid #f5f5f5; margin-top: 10px; padding-top: 15px; }
 .ingredients-box {
@@ -254,7 +256,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .cospa-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--text-main)); position: absolute; left: 0; top: 0; }
 .cospa-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 8px; }
 
-/* === Chat UI (Improved Readability) === */
+/* === Chat UI (Improved) === */
 .chat-area { padding-bottom: 90px; display: flex; flex-direction: column; gap: 20px; }
 .msg-row { display: flex; width: 100%; }
 .msg-row.user { justify-content: flex-end; }
@@ -265,25 +267,22 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   white-space: pre-wrap; word-break: break-word;
   box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
+.msg-row.user .msg-bubble { background: #444; color: #fff; border-bottom-right-radius: 2px; font-weight: 400; }
+.msg-row.ai .msg-bubble { background: #fff; border: 1px solid #dcdcdc; color: #222; border-bottom-left-radius: 2px; font-weight: 500; }
 
-/* ユーザー: 濃いグレー背景、白文字 */
-.msg-row.user .msg-bubble {
-  background: #444; /* #333から少し明るく */
-  color: #fff;
-  border-bottom-right-radius: 2px;
-  font-weight: 400;
+/* Typing Indicator */
+.typing-indicator {
+  display: flex; gap: 4px; padding: 10px 14px; background: #fff; border: 1px solid #dcdcdc; border-radius: 12px; border-bottom-left-radius: 2px; width: fit-content;
 }
-
-/* AI: 温かみのある白背景、濃い文字、少し太め */
-.msg-row.ai .msg-bubble {
-  background: #fff; /* 背景は白 */
-  border: 1px solid #dcdcdc; /* 枠線を少しはっきり */
-  color: #222; /* 文字色を濃く */
-  border-bottom-left-radius: 2px;
-  font-weight: 500; /* 文字を少し太く */
+.typing-indicator span {
+  width: 6px; height: 6px; background: #aaa; border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out both;
 }
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-/* 入力エリア */
+/* Chat Input */
 .chat-footer {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: rgba(242, 242, 240, 0.98);
@@ -305,7 +304,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .send-btn {
   width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; background: var(--text-main); flex-shrink: 0;
+  font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white;
 }
 
 /* === Utils === */
@@ -318,13 +317,19 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .alert-box { background: #fff3e0; padding: 15px; font-size: 0.85rem; color: #e65100; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ffe0b2; }
 .code-display { font-family: monospace; font-size: 0.75rem; color: #666; background: #eee; padding: 4px 8px; border-radius: 4px; margin-top: 5px; display: inline-block; }
 
-/* File Upload */
+/* File Upload Popup (Centered) */
 .file-upload-label {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   border: 1px dashed #aaa; padding: 25px; background: #fafafa; border-radius: 4px;
   margin-bottom: 15px; cursor: pointer; transition: 0.3s; color: #666;
 }
 .file-upload-label:hover { border-color: var(--text-main); background: #fff; }
+
+#photoSheet > div {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  bottom: auto !important; width: 90%; max-width: 340px; border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
 
 /* Global Overlay */
 .progress-overlay {
@@ -345,7 +350,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.2</span>
+  <span class="brand-subtitle">PRO EDITION v10.3</span>
 </div>
 
 <!-- Tabs -->
@@ -368,8 +373,9 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <button class="btn-text" onclick="showPhotoSheet()">📷 写真でAI登録</button>
     </div>
 
+    <!-- Centered Modal -->
     <div id="photoSheet" style="display:none;position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,0.6);backdrop-filter:blur(3px);" onclick="hidePhotoSheet()">
-      <div style="position:absolute;bottom:0;left:0;right:0;background:var(--bg-color);padding:30px 20px;border-radius:20px 20px 0 0;" onclick="event.stopPropagation()">
+      <div style="background:var(--bg-color);padding:30px 20px;border-radius:20px;" onclick="event.stopPropagation()">
         <p class="text-center" style="margin-bottom:20px;font-family:var(--font-serif);font-size:1.1rem;color:var(--text-main);">写真を選択してください</p>
         <label class="file-upload-label">
           <span style="font-size:1.5rem;margin-bottom:5px;">📸</span><span>カメラを起動</span>
@@ -402,7 +408,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         </select>
       </div>
       <div class="input-group"><textarea id="description" rows="2" placeholder="説明・メモ"></textarea></div>
-      <!-- 成分表追加 -->
       <div class="input-group">
         <label>全成分 (AI登録で自動取得)</label>
         <textarea id="ingredients" rows="3" placeholder="水, グリセリン..."></textarea>
@@ -425,14 +430,22 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <button onclick="addItem()">リストに追加</button>
     </div>
 
-    <div class="section-title" style="margin-top:50px;">
-      <span>登録リスト</span>
-      <select id="sortSelect" onchange="render()" style="width:auto; border:none; background:transparent; font-size:0.8rem; text-align:right; color:var(--text-sub);">
-        <option value="newest">新着順</option>
-        <option value="time">朝・夜別</option>
-        <option value="category">カテゴリ別</option>
-        <option value="brand">ブランド順</option>
-      </select>
+    <div class="section-title" style="margin-top:50px; border:none; padding-bottom:0; display:block;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span>登録リスト</span>
+        <select id="sortSelect" onchange="render()" style="width:auto; border:none; background:transparent; font-size:0.8rem; text-align:right; color:var(--text-sub);">
+          <option value="newest">新着順</option>
+          <option value="time">朝・夜別</option>
+          <option value="category">カテゴリ別</option>
+          <option value="brand">ブランド順</option>
+        </select>
+      </div>
+      <!-- Filters -->
+      <div class="filter-tabs">
+        <div class="filter-tab active" id="filter-active" onclick="setFilter('active')">使用中</div>
+        <div class="filter-tab" id="filter-finished" onclick="setFilter('finished')">使い切り</div>
+        <div class="filter-tab" id="filter-all" onclick="setFilter('all')">全て</div>
+      </div>
     </div>
     <div id="routineArea"></div>
   </div>
@@ -528,10 +541,10 @@ let chatHistories = JSON.parse(localStorage.getItem('chatHistories_v1')) || [];
 let currentChatId = null;
 let isRequesting = false;
 let lastRequestTime = 0;
+let currentFilter = 'active'; // 'active', 'finished', 'all'
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
-// 画像認識は必ずこのモデルを使用する（Lite系は画像非対応の可能性があるため）
 const IMAGE_MODEL = 'gemini-2.5-flash'; 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -563,7 +576,6 @@ function getApiUrl(isFast) {
   var model = isFast ? document.getElementById('fastModelSelect').value : document.getElementById('chatModelSelect').value;
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
-// 画像認識専用のURL取得関数
 function getImageApiUrl() {
   return `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
@@ -602,11 +614,10 @@ function parseAIJson(text) {
   if(start !== -1 && end !== -1) {
     try { return JSON.parse(clean.substring(start, end + 1)); } catch(e) {}
   }
-  console.warn("JSON Parse Failed. Raw:", text);
   return null;
 }
 
-/* Image Search (Fixed Model) */
+/* Image Search */
 async function handleImageSelect(e) {
   if(!validateApiKey() || isRequesting) return;
   var file = e.target.files[0];
@@ -617,10 +628,7 @@ async function handleImageSelect(e) {
   try {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
-    
-    // Step 1: Identify Brand/Name
     var p1 = 'この化粧品のブランド名と商品名を特定しJSONで出力: {"itemName":"","brandName":""}';
-    // 修正: 画像認識用URLを使用
     var r1 = await fetch(getImageApiUrl(), {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ contents: [{ parts: [{ text: p1 }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }], generationConfig: { responseMimeType: "application/json" } })
@@ -631,12 +639,10 @@ async function handleImageSelect(e) {
     if(j1 && j1.itemName) document.getElementById('itemName').value = j1.itemName;
     if(j1 && j1.brandName) document.getElementById('brand').value = j1.brandName;
 
-    // Step 2: Get Details (Use Text Model)
     if(j1 && j1.itemName) {
-      document.getElementById('progressText').textContent = "成分・詳細を取得中...";
+      document.getElementById('progressText').textContent = "詳細を取得中...";
       await waitForRateLimit();
       var p2 = `化粧品「${j1.brandName} ${j1.itemName}」の詳細JSON: {"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"全成分リスト","description":"","price":0,"releaseDate":""}`;
-      // ここはテキストベースなので通常の高速モデルを使用
       var r2 = await fetch(getApiUrl(true), {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ contents: [{ parts: [{ text: p2 }] }], generationConfig: { responseMimeType: "application/json" } })
@@ -646,7 +652,7 @@ async function handleImageSelect(e) {
       if(j2) {
         if(j2.category) document.getElementById('categorySelect').value = j2.category;
         if(j2.description) document.getElementById('description').value = j2.description;
-        if(j2.ingredients) document.getElementById('ingredients').value = j2.ingredients; // 成分反映
+        if(j2.ingredients) document.getElementById('ingredients').value = j2.ingredients;
         if(j2.price) document.getElementById('itemPrice').value = j2.price;
       }
     }
@@ -685,7 +691,6 @@ async function triggerManualAISearch() {
   
   try {
     await waitForRateLimit();
-    // 成分(ingredients)も含めるようプロンプト修正
     var p = `化粧品「${name}」の詳細情報を検索しJSONで出力: {"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"全成分","description":"","price":0,"releaseDate":""}`;
     var res = await fetch(getApiUrl(true), {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -705,7 +710,7 @@ async function triggerManualAISearch() {
     if(j.releaseDate) document.getElementById('releaseDate').value = j.releaseDate;
     
   } catch(e) {
-    alert("検索エラー: " + e.message + "\nもう一度お試しください。");
+    alert("検索エラー: " + e.message);
   } finally {
     isRequesting = false;
     setBtnLoading('btn-ai-search', false);
@@ -729,7 +734,6 @@ function addItem() {
   if(!item.name) return alert('商品名は必須です');
   cosmeData.unshift(item);
   saveData(); render(); renderCospa();
-  // フォームクリア
   document.getElementById('itemName').value = '';
   document.getElementById('ingredients').value = '';
   document.getElementById('description').value = '';
@@ -744,10 +748,23 @@ function markFinished(id) {
 }
 function saveEdit(id, key, val) { var i = cosmeData.find(x => x.id === id); if(i) { i[key] = val; saveData(); renderCospa(); } }
 
-/* Render Logic (Improved List) */
+/* Filter & Render */
+function setFilter(type) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('filter-' + type).classList.add('active');
+  render();
+}
+
 function render() {
   var type = document.getElementById('sortSelect').value;
-  var d = [...cosmeData];
+  // フィルタリング
+  var d = cosmeData.filter(item => {
+    if(currentFilter === 'active') return !item.finishDate;
+    if(currentFilter === 'finished') return item.finishDate;
+    return true; // all
+  });
+
   if (type === 'time') d.sort((a,b) => (a.tag||'').localeCompare(b.tag||''));
   else if (type === 'category') d.sort((a,b) => (a.category||'').localeCompare(b.category||''));
   else if (type === 'brand') d.sort((a,b) => (a.brand||'').localeCompare(b.brand||''));
@@ -771,15 +788,13 @@ function render() {
            <div class="item-badges">
              <span class="badge category">${categoryLabel}</span>
              <span class="badge ${badgeClass}">${badgeLabel}</span>
-             ${item.finishDate ? '<span>✅ 完食</span>' : ''}
+             ${item.finishDate ? '<span class="badge finished">使い切り</span>' : ''}
            </div>
         </div>
       </summary>
       <div class="item-content">
         <p style="margin:5px 0;">${escapeHtml(item.description || '説明なし')}</p>
-        
         ${item.ingredients ? `<div class="ingredients-box"><b>全成分:</b><br>${escapeHtml(item.ingredients)}</div>` : ''}
-
         <div class="flex-row" style="margin-top:15px;">
            <input type="number" value="${item.price}" placeholder="価格" onchange="saveEdit(${item.id},'price',this.value)" style="font-size:0.9rem;">
            <input type="date" value="${item.openDate}" onchange="saveEdit(${item.id},'openDate',this.value)" style="font-size:0.9rem;">
@@ -791,7 +806,7 @@ function render() {
       </div>
     </details>`;
   });
-  document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;">登録アイテムはありません</div>';
+  document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;font-size:0.9rem;">該当するアイテムはありません</div>';
 }
 
 function renderCospa() {
@@ -846,22 +861,61 @@ function loadChat(id) {
   var chat = chatHistories.find(c => c.id === id);
   var area = document.getElementById('chatHistory');
   area.innerHTML = '';
-  chat.messages.forEach(m => appendMsg(m.type, m.text));
+  chat.messages.forEach(m => appendMsg(m.type, m.text, false)); // 初期ロード時はアニメなし
   renderChatList();
 }
-function appendMsg(type, text) {
+
+function appendMsg(type, text, animate = false) {
   var div = document.createElement('div');
   div.className = `msg-row ${type}`;
   var bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
-  bubble.textContent = text;
-  div.appendChild(bubble);
-  document.getElementById('chatHistory').appendChild(div);
+  
+  if (animate && type === 'ai') {
+    div.appendChild(bubble);
+    document.getElementById('chatHistory').appendChild(div);
+    typeWriter(bubble, text);
+  } else {
+    bubble.textContent = text;
+    div.appendChild(bubble);
+    document.getElementById('chatHistory').appendChild(div);
+  }
 }
+
+// 1文字ずつ表示する関数
+function typeWriter(element, text) {
+  element.textContent = '';
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, 20); // スピード調整 (ms)
+      scrollToBottom();
+    }
+  }
+  type();
+}
+
+// ローディング表示
+function showTypingIndicator() {
+  var div = document.createElement('div');
+  div.className = 'msg-row ai';
+  div.id = 'typing-indicator-row';
+  div.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+  document.getElementById('chatHistory').appendChild(div);
+  scrollToBottom();
+}
+function removeTypingIndicator() {
+  var el = document.getElementById('typing-indicator-row');
+  if(el) el.remove();
+}
+
 function adjustChatHeight(el) {
   el.style.height = 'auto';
   el.style.height = (el.scrollHeight) + 'px';
 }
+
 async function sendChatMessage() {
   if(!validateApiKey() || isRequesting) return;
   var input = document.getElementById('chatInput');
@@ -869,19 +923,22 @@ async function sendChatMessage() {
   if(!txt) return;
   
   input.value = '';
-  input.style.height = 'auto'; // Reset height
+  input.style.height = 'auto'; 
   isRequesting = true;
   appendMsg('user', txt);
   scrollToBottom();
 
+  // ユーザー発言保存
   var chat = chatHistories.find(c => c.id === currentChatId);
   chat.messages.push({ type: 'user', text: txt });
   if(chat.messages.length === 2) chat.title = txt.substring(0, 20);
   saveChatHistories();
 
+  // ローディング表示
+  showTypingIndicator();
+
   try {
     await waitForRateLimit();
-    // 成分情報も含めてプロンプトへ
     var context = JSON.stringify(cosmeData.map(c => ({n:c.name, b:c.brand, c:c.category, ing:c.ingredients})));
     var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}`;
     
@@ -892,10 +949,13 @@ async function sendChatMessage() {
     var d = await res.json();
     var ans = d.candidates?.[0]?.content?.parts?.[0]?.text || "エラーが発生しました";
     
-    appendMsg('ai', ans);
+    removeTypingIndicator();
+    appendMsg('ai', ans, true); // アニメーション付きで表示
+    
     chat.messages.push({ type: 'ai', text: ans });
     saveChatHistories();
   } catch(e) {
+    removeTypingIndicator();
     appendMsg('ai', "通信エラー: " + e.message);
   } finally {
     isRequesting = false;
