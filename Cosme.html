@@ -5,20 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v9.9</title>
+<title>Cosme Genius Pro v10.0</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap');
 
 :root {
-  --bg-color: #f7f7f5; /* わずかに温かみのあるグレー */
+  /* 参考サイトのようなウォームグレーとステンレス感のパレット */
+  --bg-color: #f2f2f0; /* 温かみのあるライトグレー */
   --card-bg: #ffffff;
-  --text-main: #111111;
+  --text-main: #333333; /* 真っ黒ではなく濃いグレー */
   --text-sub: #666666;
-  --accent: #2b2b2b;
+  --accent-color: #a89f91; /* グレージュ/ブロンズ系のアクセント */
+  --accent-dark: #5e5a55;
+  --header-bg: #e6e5e3;
   --line-color: #e0e0e0;
+  
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Zen Kaku Gothic New', -apple-system, BlinkMacSystemFont, sans-serif;
   --safe-bottom: env(safe-area-inset-bottom);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -39,31 +44,31 @@ body {
 /* スクロールバー非表示 */
 ::-webkit-scrollbar { display: none; }
 
-/* === Header Design === */
+/* === Header Design (Rinnai-like) === */
 .header-area {
-  padding: 60px 20px 20px;
-  background: var(--bg-color);
+  padding: 50px 20px 30px;
+  background: linear-gradient(to bottom, #e6e5e3, #f2f2f0);
   position: relative;
   z-index: 10;
+  text-align: center;
 }
 .brand-title {
   font-family: var(--font-serif);
-  font-size: 2.8rem;
-  font-weight: 300;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+  font-size: 2.2rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   margin: 0;
   color: var(--text-main);
-  transform: translateX(-2px); /* 視覚調整 */
+  text-transform: uppercase;
 }
 .brand-subtitle {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
   color: var(--text-sub);
-  margin-top: 10px;
-  text-transform: uppercase;
+  margin-top: 8px;
   display: block;
+  font-weight: 400;
 }
 
 /* === Navigation Tabs === */
@@ -72,14 +77,16 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(247, 247, 245, 0.85); /* 半透明背景 */
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: rgba(242, 242, 240, 0.9); /* 背景色に合わせた透過 */
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   padding: 10px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.03);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
 }
 .tabs {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 15px;
   max-width: 600px;
   margin: 0 auto;
   padding: 0 10px;
@@ -87,31 +94,29 @@ body {
 .tab-btn {
   background: transparent;
   border: none;
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  font-style: italic;
-  color: #999;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: #888;
   padding: 8px 12px;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s ease;
   position: relative;
+  font-weight: 500;
 }
 .tab-btn.active {
   color: var(--text-main);
   font-weight: 600;
-  font-style: normal;
-  transform: scale(1.05);
 }
+/* アクティブ時のインジケーター */
 .tab-btn.active::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background: var(--text-main);
-  border-radius: 50%;
+  width: 20px;
+  height: 2px;
+  background-color: var(--accent-color);
 }
 
 /* === Main Container === */
@@ -119,105 +124,119 @@ body {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 20px 100px; /* 下部余白多め */
+  padding: 20px 20px 100px;
 }
 
 /* === Animations === */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-in {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* === Cards & Inputs === */
+/* === Cards & Typography === */
 .section-title {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
-  font-weight: 400;
+  font-size: 1.3rem;
+  color: var(--text-main);
   margin: 40px 0 20px;
-  border-bottom: 1px solid var(--text-main);
-  padding-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--accent-color); /* アクセントカラーのライン */
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
+.section-title span { letter-spacing: 0.05em; }
 
-.input-group {
-  margin-bottom: 24px;
+.card {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 4px; /* 角丸を少し抑えてシャープに */
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 20px;
 }
+
+/* Inputs */
+.input-group { margin-bottom: 20px; }
+label { display: block; font-size: 0.75rem; color: var(--text-sub); margin-bottom: 5px; }
+
 input, select, textarea {
   width: 100%;
-  padding: 12px 0;
-  border: none;
-  border-bottom: 1px solid #ccc;
-  background: transparent;
-  border-radius: 0;
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  border-radius: 2px;
   font-family: var(--font-sans);
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-main);
-  transition: border-color 0.3s;
+  transition: all 0.3s;
 }
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-bottom-color: var(--text-main);
+  border-color: var(--accent-color);
+  background: #fff;
 }
 input::placeholder, textarea::placeholder {
-  color: #aaa;
-  font-weight: 300;
+  color: #bbb;
 }
 
-/* Button Reset & Style */
+/* Buttons */
 button {
   width: 100%;
-  padding: 16px;
-  border: 1px solid var(--text-main);
-  background: var(--text-main);
+  padding: 15px;
+  background: var(--text-main); /* ダークグレー */
   color: #fff;
+  border: none;
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 0.9rem;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.3s;
-  border-radius: 4px; /* Slightly rounded */
+  transition: opacity 0.3s, transform 0.2s;
+  border-radius: 2px;
   margin-top: 10px;
 }
-button:active {
-  transform: scale(0.98);
-}
+button:active { transform: scale(0.98); }
+
 .btn-secondary {
   background: transparent !important;
   color: var(--text-main) !important;
   border: 1px solid #ccc !important;
 }
+.btn-accent {
+  background: var(--accent-color) !important; /* グレージュボタン */
+  color: #fff !important;
+  border: none !important;
+}
 .btn-text {
   background: transparent !important;
   border: none !important;
-  padding: 8px !important;
-  color: var(--text-sub) !important;
-  text-decoration: underline;
+  padding: 5px 10px !important;
+  color: var(--accent-dark) !important;
+  text-decoration: none;
   width: auto !important;
   margin: 0 !important;
+  font-size: 0.8rem;
 }
+.btn-text:hover { opacity: 0.7; }
 
-/* === List Items (Accordion Style) === */
+/* === List Items === */
 .item-card-details {
-  border-bottom: 1px solid var(--line-color);
-  background: transparent;
-  margin-bottom: 0;
-  transition: background 0.3s;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.05);
+  margin-bottom: 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
 }
 .item-card-details[open] {
-  background: #fff;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-  border-bottom: none;
+  box-shadow: var(--shadow-soft);
+  border-color: transparent;
+  margin-bottom: 15px;
 }
 .item-card-details summary {
-  padding: 20px 10px;
+  padding: 18px 15px;
   cursor: pointer;
   list-style: none;
   display: flex;
@@ -227,58 +246,75 @@ button:active {
 }
 .item-card-details summary::-webkit-details-marker { display: none; }
 
-.item-summ-left { display: flex; align-items: baseline; gap: 10px; overflow: hidden; }
-.item-brand { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-sub); }
-.item-name { font-size: 1rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.item-badges { display: flex; gap: 5px; margin-left: auto; padding-left: 10px; flex-shrink: 0; }
+.item-summ-left { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.item-brand { 
+  font-size: 0.7rem; 
+  background: #eee; 
+  padding: 2px 6px; 
+  border-radius: 2px; 
+  color: #555;
+  white-space: nowrap;
+}
+.item-name { 
+  font-size: 1rem; 
+  font-weight: 500; 
+  color: var(--text-main);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+.item-badges { display: flex; gap: 5px; flex-shrink: 0; }
 
 .badge {
-  font-size: 0.65rem; padding: 2px 6px; border: 1px solid #ddd;
-  border-radius: 2px; color: #666; font-weight: 400;
+  font-size: 0.65rem; padding: 2px 6px; 
+  border-radius: 2px; font-weight: 500;
 }
-.badge.morning { border-color: #f39c12; color: #f39c12; }
-.badge.night { border-color: #34495e; color: #34495e; }
+.badge.morning { background: #fff8e1; color: #f39c12; border: 1px solid #ffe0b2; }
+.badge.night { background: #e8eaf6; color: #3f51b5; border: 1px solid #c5cae9; }
+.badge.both { background: #f3e5f5; color: #9c27b0; border: 1px solid #e1bee7; }
 
 .item-content {
   padding: 0 20px 20px;
   font-size: 0.9rem;
   color: var(--text-sub);
-  animation: fadeIn 0.3s ease;
+  border-top: 1px solid #f5f5f5;
+  margin-top: 5px;
+  padding-top: 15px;
 }
-@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
 /* === Cospa Style === */
 .cospa-card {
   background: #fff;
   padding: 20px;
   margin-bottom: 15px;
-  border-radius: 2px;
+  border-radius: 4px;
   position: relative;
-  border-left: 3px solid var(--text-main);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  border: 1px solid #eee;
 }
 .cospa-header {
   display: flex; justify-content: space-between; align-items: baseline;
 }
 .cospa-price {
   font-family: var(--font-serif);
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: var(--text-main);
+  font-weight: 600;
 }
-.cospa-unit { font-size: 0.8rem; color: #999; margin-left: 2px; font-family: var(--font-sans); }
+.cospa-unit { font-size: 0.8rem; color: #999; margin-left: 3px; }
 .cospa-bar-bg {
-  width: 100%; height: 2px; background: #eee; margin-top: 15px; position: relative;
+  width: 100%; height: 4px; background: #eee; margin-top: 12px; position: relative; border-radius: 2px; overflow: hidden;
 }
 .cospa-bar-fill {
-  height: 100%; background: var(--text-main); position: absolute; left: 0; top: 0;
+  height: 100%; 
+  background: linear-gradient(90deg, var(--accent-color), var(--text-main)); /* グラデーションで金属感 */
+  position: absolute; left: 0; top: 0;
 }
 .cospa-meta {
-  display: flex; justify-content: space-between; font-size: 0.75rem; color: #999; margin-top: 8px;
+  display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 8px;
 }
 
-/* === Chat Style (Refined) === */
+/* === Chat Style === */
 .chat-area {
-  padding-bottom: 80px;
+  padding-bottom: 90px;
   display: flex; flex-direction: column; gap: 20px;
 }
 .msg-row { display: flex; width: 100%; }
@@ -291,52 +327,71 @@ button:active {
   font-size: 0.95rem;
   line-height: 1.6;
   position: relative;
+  border-radius: 12px;
 }
 .msg-row.user .msg-bubble {
   background: var(--text-main);
   color: #fff;
-  border-radius: 12px 12px 2px 12px;
+  border-bottom-right-radius: 2px;
 }
 .msg-row.ai .msg-bubble {
   background: #fff;
   color: var(--text-main);
-  border: 1px solid #eee;
-  border-radius: 12px 12px 12px 2px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  border: 1px solid #e0e0e0;
+  border-bottom-left-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
 }
+
 .chat-footer {
   position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(255,255,255,0.9);
+  background: rgba(242, 242, 240, 0.95);
   backdrop-filter: blur(10px);
-  padding: 10px 15px calc(10px + var(--safe-bottom));
+  padding: 12px 15px calc(12px + var(--safe-bottom));
   border-top: 1px solid rgba(0,0,0,0.05);
   display: flex; gap: 10px; z-index: 200;
 }
 .chat-input {
-  flex: 1; border: 1px solid #ddd; background: #fff;
+  flex: 1; border: 1px solid #ccc; background: #fff;
   border-radius: 24px; padding: 10px 16px; font-size: 16px;
-  height: 44px; margin: 0; transition: all 0.2s;
+  height: 48px; margin: 0; transition: all 0.2s;
 }
-.chat-input:focus { border-color: var(--text-main); }
+.chat-input:focus { border-color: var(--accent-color); }
 .send-btn {
-  width: 44px; height: 44px; border-radius: 50%; padding: 0; margin: 0;
+  width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.2rem; background: var(--text-main);
 }
 
-/* === Settings & Utils === */
+/* === Utils === */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 .flex-row { display: flex; gap: 10px; align-items: center; }
 .text-center { text-align: center; }
 .alert-box {
-  background: #f0f0f0; padding: 15px; font-size: 0.85rem; color: #555; border-radius: 4px; margin-bottom: 20px;
+  background: #fff3e0; padding: 15px; font-size: 0.85rem; color: #e65100; border-radius: 4px; margin-bottom: 20px;
+  border: 1px solid #ffe0b2;
 }
+
+/* File Upload */
 .file-upload-label {
-  display: block; border: 1px dashed #ccc; padding: 30px; text-align: center;
-  margin-bottom: 20px; cursor: pointer; transition: 0.3s; color: #888;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px dashed #aaa; padding: 25px; 
+  background: #fafafa; border-radius: 4px;
+  margin-bottom: 15px; cursor: pointer; transition: 0.3s; color: #666;
 }
-.file-upload-label:hover { border-color: #333; color: #333; }
+.file-upload-label:hover { border-color: var(--text-main); background: #fff; }
+
+/* Code Display in Settings */
+.code-display {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #666;
+  background: #eee;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 5px;
+  display: inline-block;
+}
 
 /* Progress */
 .progress-overlay {
@@ -345,7 +400,7 @@ button:active {
   display:none; flex-direction:column; align-items:center; justify-content:center;
 }
 .progress-spinner {
-  width: 40px; height: 40px; border: 3px solid #eee; border-top-color: #333;
+  width: 40px; height: 40px; border: 3px solid #eee; border-top-color: var(--accent-color);
   border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px;
 }
 @keyframes spin { to {transform: rotate(360deg);} }
@@ -356,17 +411,17 @@ button:active {
 
 <!-- Header -->
 <div class="header-area">
-  <h1 class="brand-title">COSME<br>GENIUS</h1>
-  <span class="brand-subtitle">Pro Edition v9.9</span>
+  <h1 class="brand-title">COSME GENIUS</h1>
+  <span class="brand-subtitle">PRO EDITION v10.0</span>
 </div>
 
 <!-- Tabs -->
 <div class="tabs-sticky-wrapper">
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('register')" id="btn-register">Register</button>
-    <button class="tab-btn" onclick="switchTab('chat')" id="btn-chat">Chat</button>
-    <button class="tab-btn" onclick="switchTab('cospa')" id="btn-cospa">Value</button>
-    <button class="tab-btn" onclick="switchTab('settings')" id="btn-settings">Settings</button>
+    <button class="tab-btn active" onclick="switchTab('register')" id="btn-register">登録</button>
+    <button class="tab-btn" onclick="switchTab('chat')" id="btn-chat">相談</button>
+    <button class="tab-btn" onclick="switchTab('cospa')" id="btn-cospa">コスパ</button>
+    <button class="tab-btn" onclick="switchTab('settings')" id="btn-settings">設定</button>
   </div>
 </div>
 
@@ -376,71 +431,73 @@ button:active {
   <!-- ================= REGISTER TAB ================= -->
   <div id="tab-register" class="tab-content active fade-in">
     <div class="section-title">
-      <span>New Entry</span>
-      <button class="btn-text" onclick="showPhotoSheet()">📷 Scan Photo</button>
+      <span>アイテム登録</span>
+      <button class="btn-text" onclick="showPhotoSheet()">📷 写真でAI登録</button>
     </div>
 
     <!-- Scan Overlay -->
-    <div id="photoSheet" style="display:none;position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);" onclick="hidePhotoSheet()">
+    <div id="photoSheet" style="display:none;position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,0.6);backdrop-filter:blur(3px);" onclick="hidePhotoSheet()">
       <div style="position:absolute;bottom:0;left:0;right:0;background:var(--bg-color);padding:30px 20px;border-radius:20px 20px 0 0;" onclick="event.stopPropagation()">
-        <p class="text-center" style="margin-bottom:20px;font-family:var(--font-serif);font-size:1.2rem;">Select Source</p>
-        <label class="file-upload-label" style="background:#fff;border-style:solid;border-width:1px;border-color:#eee;">
-          <span>📷 Take Photo</span>
+        <p class="text-center" style="margin-bottom:20px;font-family:var(--font-serif);font-size:1.1rem;color:var(--text-main);">写真を選択してください</p>
+        <label class="file-upload-label">
+          <span style="font-size:1.5rem;margin-bottom:5px;">📸</span>
+          <span>カメラを起動</span>
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event)">
         </label>
-        <label class="file-upload-label" style="background:#fff;border-style:solid;border-width:1px;border-color:#eee;">
-          <span>🖼️ Photo Library</span>
+        <label class="file-upload-label">
+          <span style="font-size:1.5rem;margin-bottom:5px;">🖼️</span>
+          <span>アルバムから選択</span>
           <input type="file" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
         </label>
-        <button onclick="hidePhotoSheet()" class="btn-secondary">Cancel</button>
+        <button onclick="hidePhotoSheet()" class="btn-secondary">キャンセル</button>
       </div>
     </div>
 
     <!-- Manual Input Form -->
-    <div style="background:#fff; padding:30px 20px; border-radius:2px; box-shadow:0 10px 40px rgba(0,0,0,0.03);">
+    <div class="card">
       <div class="input-group flex-row">
-        <input type="text" id="itemName" placeholder="Item Name (Required)">
-        <button onclick="triggerManualAISearch()" style="width:auto; padding:8px 15px; font-size:0.8rem;">✨ Auto</button>
+        <input type="text" id="itemName" placeholder="商品名 (必須)">
+        <button onclick="triggerManualAISearch()" class="btn-accent" style="width:auto; padding:0 20px; font-size:0.8rem; margin:0;">AI自動入力</button>
       </div>
-      <div class="input-group"><input type="text" id="brand" placeholder="Brand Name"></div>
+      <div class="input-group"><input type="text" id="brand" placeholder="ブランド名"></div>
       <div class="input-group">
         <select id="categorySelect">
-          <option value="" disabled selected>Category</option>
-          <option value="洗顔料">Face Wash</option>
-          <option value="化粧水">Lotion</option>
-          <option value="乳液">Emulsion</option>
-          <option value="美容液">Serum</option>
-          <option value="クリーム">Cream</option>
-          <option value="その他">Other</option>
+          <option value="" disabled selected>カテゴリを選択</option>
+          <option value="洗顔料">洗顔料</option>
+          <option value="化粧水">化粧水</option>
+          <option value="乳液">乳液</option>
+          <option value="美容液">美容液</option>
+          <option value="クリーム">クリーム</option>
+          <option value="その他">その他</option>
         </select>
       </div>
-      <div class="input-group"><textarea id="description" rows="2" placeholder="Description / Ingredients"></textarea></div>
+      <div class="input-group"><textarea id="description" rows="2" placeholder="説明・メモ"></textarea></div>
       <div class="input-group flex-row">
-        <input type="text" id="releaseDate" placeholder="Release Date">
-        <input type="number" id="itemPrice" placeholder="Price (¥)">
+        <input type="text" id="releaseDate" placeholder="発売日">
+        <input type="number" id="itemPrice" placeholder="価格 (円)">
       </div>
       <div class="input-group">
-        <label style="font-size:0.8rem; color:#999;">Open Date</label>
+        <label>使用開始日</label>
         <input type="date" id="openDate">
       </div>
       <div class="input-group">
         <select id="timeTag">
-          <option value="朝">Morning Use</option>
-          <option value="晩">Night Use</option>
-          <option value="朝晩">Both</option>
+          <option value="朝">朝用</option>
+          <option value="晩">夜用</option>
+          <option value="朝晩">朝晩兼用</option>
         </select>
       </div>
-      <button onclick="addItem()">ADD TO LIST</button>
+      <button onclick="addItem()">リストに追加</button>
     </div>
 
     <!-- List -->
-    <div class="section-title" style="margin-top:60px;">
-      <span>Collection</span>
-      <select id="sortSelect" onchange="render()" style="width:auto; border:none; font-size:0.8rem; text-align:right;">
-        <option value="newest">Newest</option>
-        <option value="time">Time</option>
-        <option value="category">Category</option>
-        <option value="brand">Brand</option>
+    <div class="section-title" style="margin-top:50px;">
+      <span>登録リスト</span>
+      <select id="sortSelect" onchange="render()" style="width:auto; border:none; background:transparent; font-size:0.8rem; text-align:right; color:var(--text-sub);">
+        <option value="newest">新着順</option>
+        <option value="time">朝・夜別</option>
+        <option value="category">カテゴリ別</option>
+        <option value="brand">ブランド順</option>
       </select>
     </div>
     <div id="routineArea"></div>
@@ -449,18 +506,18 @@ button:active {
   <!-- ================= CHAT TAB ================= -->
   <div id="tab-chat" class="tab-content fade-in">
     <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:20px;">
-      <button class="btn-text" onclick="createNewChat()">New Chat</button>
-      <button class="btn-text" onclick="toggleChatHistory()">History</button>
+      <button class="btn-text" onclick="createNewChat()">＋ 新規チャット</button>
+      <button class="btn-text" onclick="toggleChatHistory()">履歴を表示</button>
     </div>
     
-    <div id="chatHistoryContainer" style="display:none; background:#fff; margin-bottom:20px; padding:10px;"></div>
+    <div id="chatHistoryContainer" style="display:none; background:#fff; margin-bottom:20px; padding:10px; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,0.05);"></div>
 
     <div id="chatHistory" class="chat-area">
       <!-- Chat bubbles go here -->
     </div>
 
     <div class="chat-footer">
-      <textarea id="chatInput" class="chat-input" placeholder="Ask your beauty advisor..." rows="1"></textarea>
+      <textarea id="chatInput" class="chat-input" placeholder="コスメの相談を入力..." rows="1"></textarea>
       <button onclick="sendChatMessage()" class="send-btn">➤</button>
     </div>
   </div>
@@ -468,25 +525,25 @@ button:active {
   <!-- ================= COSPA TAB ================= -->
   <div id="tab-cospa" class="tab-content fade-in">
     <div class="section-title">
-      <span>Cost Performance</span>
+      <span>コスパ分析</span>
     </div>
 
     <div id="cospaTopSummary" style="margin-bottom:30px; text-align:center;"></div>
 
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-      <select id="cospaCategory" onchange="renderCospa()" style="font-size:0.85rem;">
-        <option value="all">All Items</option>
-        <option value="洗顔料">Face Wash</option>
-        <option value="化粧水">Lotion</option>
-        <option value="乳液">Emulsion</option>
-        <option value="美容液">Serum</option>
-        <option value="クリーム">Cream</option>
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap: wrap;">
+      <select id="cospaCategory" onchange="renderCospa()" style="font-size:0.85rem; width:48%;">
+        <option value="all">全カテゴリ</option>
+        <option value="洗顔料">洗顔料</option>
+        <option value="化粧水">化粧水</option>
+        <option value="乳液">乳液</option>
+        <option value="美容液">美容液</option>
+        <option value="クリーム">クリーム</option>
       </select>
-      <select id="cospaSort" onchange="renderCospa()" style="font-size:0.85rem;">
-        <option value="cost_asc">Cost: Low to High</option>
-        <option value="cost_desc">Cost: High to Low</option>
-        <option value="days_desc">Days: Longest</option>
-        <option value="days_asc">Days: Shortest</option>
+      <select id="cospaSort" onchange="renderCospa()" style="font-size:0.85rem; width:48%;">
+        <option value="cost_asc">安い順 (日割り)</option>
+        <option value="cost_desc">高い順 (日割り)</option>
+        <option value="days_desc">長く使っている順</option>
+        <option value="days_asc">使用期間が短い順</option>
       </select>
     </div>
 
@@ -495,41 +552,47 @@ button:active {
 
   <!-- ================= SETTINGS TAB ================= -->
   <div id="tab-settings" class="tab-content fade-in">
-    <div class="section-title"><span>Settings</span></div>
+    <div class="section-title"><span>設定</span></div>
     
     <div class="alert-box">
-      API keys are stored locally in your browser.
+      APIキーはブラウザ内にのみ保存され、外部サーバーには送信されません。
     </div>
     
-    <div class="input-group">
-      <label style="font-size:0.8rem; font-weight:600;">Gemini API Key</label>
-      <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
+    <div class="card">
+      <div class="input-group">
+        <label>Gemini API キー</label>
+        <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
+      </div>
+
+      <div class="input-group" style="margin-top:30px;">
+        <label>チャット用モデル (高精度)</label>
+        <select id="chatModelSelect" onchange="updateModelCodeDisplay()">
+          <option value="gemini-3-flash-preview">Gemini 3 Flash (推奨)</option>
+          <option value="gemini-3-pro-preview">Gemini 3 Pro</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+        </select>
+        <div class="code-display">Model Code: <span id="chatModelCodeDisplay"></span></div>
+      </div>
+
+      <div class="input-group">
+        <label>検索・登録用モデル (高速)</label>
+        <select id="fastModelSelect" onchange="updateModelCodeDisplay()">
+          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (推奨・最速)</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+        </select>
+        <div class="code-display">Model Code: <span id="fastModelCodeDisplay"></span></div>
+      </div>
+
+      <button onclick="saveSettings()" class="btn-accent">設定を保存</button>
+      <button onclick="clearApiKey()" class="btn-secondary" style="margin-top:20px; color:#c62828!important; border-color:#ef9a9a!important;">APIキーを削除</button>
     </div>
 
-    <div class="input-group" style="margin-top:30px;">
-      <label style="font-size:0.8rem; font-weight:600;">Chat Model</label>
-      <select id="chatModelSelect">
-        <option value="gemini-3-flash-preview">Gemini 3 Flash (Rec.)</option>
-        <option value="gemini-3-pro-preview">Gemini 3 Pro</option>
-        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-      </select>
+    <div class="section-title" style="margin-top:50px;"><span>データ管理</span></div>
+    <div class="card">
+      <button onclick="exportData()" class="btn-secondary">データを保存 (JSON)</button>
+      <button onclick="importData()" class="btn-secondary">データを復元 (JSON)</button>
+      <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
     </div>
-
-    <div class="input-group">
-      <label style="font-size:0.8rem; font-weight:600;">Search Model (Fast)</label>
-      <select id="fastModelSelect">
-        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (Rec.)</option>
-        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-      </select>
-    </div>
-
-    <button onclick="saveSettings()">Save Configuration</button>
-    <button onclick="clearApiKey()" class="btn-secondary" style="margin-top:20px; border-color:red!important; color:red!important;">Clear API Key</button>
-
-    <div class="section-title" style="margin-top:50px;"><span>Data Management</span></div>
-    <button onclick="exportData()" class="btn-secondary">Export JSON</button>
-    <button onclick="importData()" class="btn-secondary">Import JSON</button>
-    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
   </div>
 
 </div>
@@ -537,7 +600,7 @@ button:active {
 <!-- Progress Overlay -->
 <div id="progressOverlay" class="progress-overlay">
   <div class="progress-spinner"></div>
-  <div id="progressText" style="font-family:var(--font-serif); font-size:1.2rem;">Processing...</div>
+  <div id="progressText" style="font-family:var(--font-serif); font-size:1.1rem; color:#555;">処理中...</div>
 </div>
 
 <canvas id="compressionCanvas" style="display:none;"></canvas>
@@ -558,13 +621,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('openDate').valueAsDate = new Date();
   document.getElementById('geminiApiKey').value = localStorage.getItem('geminiApiKey_v1') || '';
   
-  // Model Settings
-  var cm = localStorage.getItem('chatModel_v1');
-  var fm = localStorage.getItem('fastModel_v1');
-  if(!cm) cm = DEFAULT_CHAT_MODEL;
-  if(!fm) fm = DEFAULT_FAST_MODEL;
-  document.getElementById('chatModelSelect').value = cm;
-  document.getElementById('fastModelSelect').value = fm;
+  loadModelSettings();
 
   if(chatHistories.length > 0) {
     currentChatId = chatHistories[0].id;
@@ -600,7 +657,7 @@ function scrollToBottom() {
 /* API Utils */
 function validateApiKey() {
   var k = localStorage.getItem('geminiApiKey_v1');
-  if(!k || k.length < 10) { alert('Please set your API Key in Settings.'); switchTab('settings'); return false; }
+  if(!k || k.length < 10) { alert('設定タブでAPIキーを設定してください。'); switchTab('settings'); return false; }
   return true;
 }
 function getApiUrl(isFast) {
@@ -618,6 +675,21 @@ function showProgress(txt) {
 }
 function hideProgress() { document.getElementById('progressOverlay').style.display = 'none'; }
 
+/* Model Settings & Display Code */
+function loadModelSettings() {
+  var cm = localStorage.getItem('chatModel_v1');
+  var fm = localStorage.getItem('fastModel_v1');
+  if(!cm) cm = DEFAULT_CHAT_MODEL;
+  if(!fm) fm = DEFAULT_FAST_MODEL;
+  document.getElementById('chatModelSelect').value = cm;
+  document.getElementById('fastModelSelect').value = fm;
+  updateModelCodeDisplay();
+}
+function updateModelCodeDisplay() {
+  document.getElementById('chatModelCodeDisplay').textContent = document.getElementById('chatModelSelect').value;
+  document.getElementById('fastModelCodeDisplay').textContent = document.getElementById('fastModelSelect').value;
+}
+
 /* AI Helper */
 function parseAIJson(text) {
   try { return JSON.parse(text); } catch(e) {}
@@ -625,7 +697,7 @@ function parseAIJson(text) {
   try { return JSON.parse(clean); } catch(e) {}
   var m = clean.match(/\{[\s\S]*\}/);
   if(m) return JSON.parse(m[0]);
-  throw new Error("Failed to parse JSON");
+  throw new Error("JSONの解析に失敗しました");
 }
 
 /* Image Handling */
@@ -634,14 +706,14 @@ async function handleImageSelect(e) {
   var file = e.target.files[0];
   if(!file) return;
   hidePhotoSheet();
-  isRequesting = true; showProgress("Analyzing Image...");
+  isRequesting = true; showProgress("画像を解析中...");
 
   try {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
     
     // Step 1: Identify
-    var p1 = 'Identify brand and product name. Output JSON only: {"itemName":"","brandName":""}';
+    var p1 = 'この画像の化粧品のブランド名と商品名を特定し、JSONのみで出力してください: {"itemName":"","brandName":""}';
     var r1 = await fetch(getApiUrl(true), {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ contents: [{ parts: [{ text: p1 }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }], generationConfig: { responseMimeType: "application/json" } })
@@ -654,9 +726,9 @@ async function handleImageSelect(e) {
 
     // Step 2: Details
     if(j1.itemName) {
-      document.getElementById('progressText').textContent = "Getting Details...";
+      document.getElementById('progressText').textContent = "詳細情報を取得中...";
       await waitForRateLimit();
-      var p2 = `Provide details for cosmetics "${j1.brandName} ${j1.itemName}" in JSON: {"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"","description":"","price":0,"releaseDate":""}`;
+      var p2 = `化粧品「${j1.brandName} ${j1.itemName}」の詳細情報をJSONで出力してください: {"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"","description":"","price":0,"releaseDate":""}`;
       var r2 = await fetch(getApiUrl(true), {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ contents: [{ parts: [{ text: p2 }] }], generationConfig: { responseMimeType: "application/json" } })
@@ -668,7 +740,7 @@ async function handleImageSelect(e) {
       if(j2.price) document.getElementById('itemPrice').value = j2.price;
     }
   } catch(e) {
-    alert("Error: " + e.message);
+    alert("エラー: " + e.message);
   } finally {
     isRequesting = false; hideProgress(); e.target.value = '';
   }
@@ -695,11 +767,11 @@ function compressImage(file) {
 async function triggerManualAISearch() {
   if(!validateApiKey() || isRequesting) return;
   var name = document.getElementById('itemName').value;
-  if(!name) return alert("Please enter Item Name");
-  isRequesting = true; showProgress("Searching...");
+  if(!name) return alert("商品名を入力してください");
+  isRequesting = true; showProgress("検索中...");
   try {
     await waitForRateLimit();
-    var p = `Search cosmetic "${name}". Return JSON: {"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","description":"","price":0,"releaseDate":""}`;
+    var p = `化粧品「${name}」の詳細情報を検索しJSONで出力: {"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","description":"","price":0,"releaseDate":""}`;
     var res = await fetch(getApiUrl(true), {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ contents: [{ parts: [{ text: p }] }], generationConfig: { responseMimeType: "application/json" } })
@@ -728,15 +800,15 @@ function addItem() {
     openDate: document.getElementById('openDate').value,
     tag: document.getElementById('timeTag').value
   };
-  if(!item.name) return alert('Name is required');
+  if(!item.name) return alert('商品名は必須です');
   cosmeData.unshift(item);
   saveData(); render(); renderCospa();
   document.getElementById('itemName').value = '';
-  alert('Added to collection');
+  alert('リストに追加しました');
 }
 function saveData() { localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData)); }
 function removeItem(id) {
-  if(confirm('Delete this item?')) {
+  if(confirm('削除しますか？')) {
     cosmeData = cosmeData.filter(i => i.id !== id);
     saveData(); render(); renderCospa();
   }
@@ -764,7 +836,7 @@ function render() {
   var html = '';
   d.forEach(item => {
     var badgeClass = item.tag === '朝' ? 'morning' : (item.tag === '晩' ? 'night' : 'both');
-    var badgeLabel = item.tag === '朝' ? 'SUN' : (item.tag === '晩' ? 'MOON' : 'BOTH');
+    var badgeLabel = item.tag === '朝' ? '朝' : (item.tag === '晩' ? '夜' : '朝夜');
     
     html += `
     <details class="item-card-details">
@@ -779,39 +851,36 @@ function render() {
         </div>
       </summary>
       <div class="item-content">
-        <p style="margin:5px 0;">${escapeHtml(item.description || 'No description')}</p>
+        <p style="margin:5px 0;">${escapeHtml(item.description || '説明なし')}</p>
         <div class="flex-row" style="margin-top:15px;">
-           <input type="number" value="${item.price}" placeholder="Price" onchange="saveEdit(${item.id},'price',this.value)" style="font-size:0.9rem;">
+           <input type="number" value="${item.price}" placeholder="価格" onchange="saveEdit(${item.id},'price',this.value)" style="font-size:0.9rem;">
            <input type="date" value="${item.openDate}" onchange="saveEdit(${item.id},'openDate',this.value)" style="font-size:0.9rem;">
         </div>
         <div class="flex-row" style="margin-top:10px;">
-          <button class="btn-secondary" onclick="markFinished(${item.id})">${item.finishDate?'Restore':'Finish'}</button>
-          <button class="btn-secondary" onclick="removeItem(${item.id})" style="color:red!important;border-color:#ffcccc!important;">Delete</button>
+          <button class="btn-secondary" onclick="markFinished(${item.id})">${item.finishDate?'使い切り解除':'使い切りにする'}</button>
+          <button class="btn-secondary" onclick="removeItem(${item.id})" style="color:red!important;border-color:#ffcccc!important;">削除</button>
         </div>
       </div>
     </details>`;
   });
-  document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;">No items registered.</div>';
+  document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;">登録アイテムはありません</div>';
 }
 
-/* Cospa Logic Update */
+/* Cospa Logic */
 function renderCospa() {
   var cat = document.getElementById('cospaCategory').value;
   var sort = document.getElementById('cospaSort').value;
   
   var list = cosmeData.filter(i => (cat==='all'||i.category===cat) && i.price && i.openDate);
   
-  // Sorting Logic Updated
   list.sort((a,b) => {
     var da = getDaily(a), db = getDaily(b);
     var daysA = getDays(a), daysB = getDays(b);
     
     if(sort === 'cost_asc') return da - db;
-    if(sort === 'cost_desc') return db - da; // Added
-    if(sort === 'days_desc') return daysA - daysB; // Logic flip (Longest use = High days = Low Cost effectively?) No, literally days count.
-    // Correction: "Days Descending" means Longest first.
+    if(sort === 'cost_desc') return db - da;
     if(sort === 'days_desc') return daysB - daysA;
-    if(sort === 'days_asc') return daysA - daysB; // Added
+    if(sort === 'days_asc') return daysA - daysB;
     return 0;
   });
 
@@ -822,33 +891,33 @@ function renderCospa() {
     var days = getDays(item);
     var daily = Math.round(getDaily(item));
     totalDaily += daily;
-    var barWidth = Math.min(100, (daily / 150) * 100); // 150yen benchmark
+    var barWidth = Math.min(100, (daily / 150) * 100);
     
     html += `
     <div class="cospa-card">
       <div class="cospa-header">
         <div>
-          <div style="font-size:0.75rem;color:#999;">${escapeHtml(item.brand)}</div>
+          <div style="font-size:0.75rem;color:#888;">${escapeHtml(item.brand)}</div>
           <div style="font-weight:500;">${escapeHtml(item.name)}</div>
         </div>
         <div>
-          <span class="cospa-price">¥${daily}</span><span class="cospa-unit">/day</span>
+          <span class="cospa-price">¥${daily}</span><span class="cospa-unit">/日</span>
         </div>
       </div>
       <div class="cospa-bar-bg"><div class="cospa-bar-fill" style="width:${barWidth}%"></div></div>
       <div class="cospa-meta">
-        <span>¥${item.price} total</span>
-        <span>Used: ${days} days ${item.finishDate?'(Done)':''}</span>
+        <span>購入額: ¥${item.price}</span>
+        <span>使用期間: ${days}日 ${item.finishDate?'(完)':''}</span>
       </div>
     </div>`;
   });
 
-  document.getElementById('cospaList').innerHTML = html || '<div class="text-center" style="margin-top:40px;color:#ccc;">Not enough data for calculation</div>';
+  document.getElementById('cospaList').innerHTML = html || '<div class="text-center" style="margin-top:40px;color:#ccc;">計算可能なデータがありません</div>';
   
   if(list.length > 0) {
     document.getElementById('cospaTopSummary').innerHTML = `
-      <div style="font-size:0.9rem; color:#999; font-family:var(--font-serif); font-style:italic;">Total Daily Cost</div>
-      <div style="font-size:3rem; line-height:1; font-family:var(--font-serif);">¥${Math.round(totalDaily)}</div>
+      <div style="font-size:0.9rem; color:#888; font-family:var(--font-serif); font-style:italic;">1日あたりの合計コスト</div>
+      <div style="font-size:3rem; line-height:1; font-family:var(--font-serif); color:var(--text-main);">¥${Math.round(totalDaily)}</div>
     `;
   } else {
     document.getElementById('cospaTopSummary').innerHTML = '';
@@ -863,10 +932,10 @@ function getDays(i) {
 }
 function getDaily(i) { return i.price / getDays(i); }
 
-/* Chat Logic (Refined) */
+/* Chat Logic */
 function createNewChat() {
   var id = 'chat_' + Date.now();
-  chatHistories.unshift({ id: id, title: 'New Conversation', date: new Date().toISOString(), messages: [{ type: 'ai', text: 'Hello! I am your beauty advisor. Ask me anything about your collection.' }] });
+  chatHistories.unshift({ id: id, title: '新規チャット', date: new Date().toISOString(), messages: [{ type: 'ai', text: 'こんにちは！登録コスメに基づいたアドバイスをします。何でも聞いてください✨' }] });
   saveChatHistories(); loadChat(id);
 }
 function loadChat(id) {
@@ -896,7 +965,6 @@ async function sendChatMessage() {
   appendMsg('user', txt);
   scrollToBottom();
 
-  // Save user msg
   var chat = chatHistories.find(c => c.id === currentChatId);
   chat.messages.push({ type: 'user', text: txt });
   if(chat.messages.length === 2) chat.title = txt.substring(0, 20);
@@ -905,7 +973,7 @@ async function sendChatMessage() {
   try {
     await waitForRateLimit();
     var context = JSON.stringify(cosmeData.map(c => ({n:c.name, b:c.brand, c:c.category})));
-    var prompt = `Role: Beauty Advisor. Context: User owns ${context}. Question: ${txt}`;
+    var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}`;
     
     var res = await fetch(getApiUrl(false), {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -918,7 +986,7 @@ async function sendChatMessage() {
     chat.messages.push({ type: 'ai', text: ans });
     saveChatHistories();
   } catch(e) {
-    appendMsg('ai', "Error: " + e.message);
+    appendMsg('ai', "エラー: " + e.message);
   } finally {
     isRequesting = false;
     scrollToBottom();
@@ -929,7 +997,7 @@ function renderChatList() {
   var h = '';
   chatHistories.forEach(c => {
     h += `<div onclick="loadChat('${c.id}')" style="padding:10px; border-bottom:1px solid #eee; cursor:pointer; background:${c.id===currentChatId?'#f9f9f9':'#fff'}">
-      <div style="font-weight:600; font-size:0.9rem;">${escapeHtml(c.title)}</div>
+      <div style="font-weight:600; font-size:0.9rem; color:var(--text-main);">${escapeHtml(c.title)}</div>
       <div style="font-size:0.75rem; color:#999;">${new Date(c.date).toLocaleDateString()}</div>
     </div>`;
   });
@@ -946,9 +1014,9 @@ function saveSettings() {
   localStorage.setItem('geminiApiKey_v1', document.getElementById('geminiApiKey').value.trim());
   localStorage.setItem('chatModel_v1', document.getElementById('chatModelSelect').value);
   localStorage.setItem('fastModel_v1', document.getElementById('fastModelSelect').value);
-  alert('Settings Saved');
+  alert('設定を保存しました');
 }
-function clearApiKey() { localStorage.removeItem('geminiApiKey_v1'); alert('Key cleared'); }
+function clearApiKey() { localStorage.removeItem('geminiApiKey_v1'); alert('APIキーを削除しました'); }
 function exportData() {
   var b = new Blob([JSON.stringify({data:cosmeData, chats:chatHistories})], {type:'application/json'});
   var a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='cosme_backup.json'; a.click();
@@ -956,7 +1024,7 @@ function exportData() {
 function importData(){ document.getElementById('importFile').click(); }
 function handleImport(e){
   var r=new FileReader(); r.onload=function(ev){
-    try{ var d=JSON.parse(ev.target.result); cosmeData=d.data||[]; chatHistories=d.chats||[]; saveData(); saveChatHistories(); render(); alert('Imported'); }catch(x){alert('Error');}
+    try{ var d=JSON.parse(ev.target.result); cosmeData=d.data||[]; chatHistories=d.chats||[]; saveData(); saveChatHistories(); render(); alert('復元しました'); }catch(x){alert('エラー');}
   }; r.readAsText(e.target.files[0]);
 }
 
