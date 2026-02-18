@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.5</title>
+<title>Cosme Genius Pro v10.6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -267,8 +267,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 }
 .cospa-delete-btn:hover { color: #d32f2f; }
 
-/* === Chat UI (Fast & Readable) === */
-.chat-area { padding-bottom: 90px; display: flex; flex-direction: column; gap: 20px; }
+/* === Chat UI (Rich & Fast) === */
+.chat-area { 
+  padding-bottom: 120px; /* 入力欄と読み込みマークのために余白を多めに */
+  display: flex; flex-direction: column; gap: 20px; 
+}
 .msg-row { display: flex; width: 100%; }
 .msg-row.user { justify-content: flex-end; }
 .msg-row.ai { justify-content: flex-start; }
@@ -279,7 +282,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   font-size: 1rem; 
   line-height: 1.8; 
   border-radius: 12px;
-  white-space: pre-wrap; 
   word-break: break-word;
   box-shadow: 0 3px 8px rgba(0,0,0,0.06);
 }
@@ -290,21 +292,54 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   color: #f0f0f0;
   border-bottom-right-radius: 2px;
   font-weight: 400;
+  white-space: pre-wrap;
 }
 
-/* AI Bubble */
+/* AI Bubble (ChatGPT Style) */
 .msg-row.ai .msg-bubble {
   background: #fcfbf9;
   border: 1px solid #dcdcdc;
   color: #333;
   border-bottom-left-radius: 2px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 400; /* 通常は標準 */
 }
 
-/* Typing Indicator */
+/* Markdown Styling within AI Bubble */
+.msg-bubble h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1.2em 0 0.5em;
+  color: #111;
+  border-bottom: 1px solid #eee; /* 薄い下線 */
+  padding-bottom: 4px;
+}
+.msg-bubble h3:first-child { margin-top: 0; }
+
+.msg-bubble strong {
+  font-weight: 700;
+  color: #000;
+}
+
+.msg-bubble ul {
+  padding-left: 1.2em;
+  margin: 0.5em 0;
+}
+.msg-bubble li {
+  margin-bottom: 0.3em;
+  list-style-type: disc;
+}
+
+.msg-bubble hr {
+  border: 0;
+  height: 1px;
+  background: #e0e0e0;
+  margin: 1.5em 0;
+}
+
+/* Typing Indicator (Updated to be visible) */
 .typing-indicator {
   display: flex; gap: 4px; padding: 12px 16px; background: #fcfbf9; border: 1px solid #dcdcdc; border-radius: 12px; border-bottom-left-radius: 2px; width: fit-content;
+  margin-bottom: 10px; /* 余白確保 */
 }
 .typing-indicator span {
   width: 6px; height: 6px; background: #888; border-radius: 50%;
@@ -341,46 +376,47 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-/* === Photo Action Sheet === */
+/* === Photo Action Sheet (Updated to Dark Modal) === */
 .photo-trigger-btn {
   background: #fff; color: var(--text-main); border: 1px solid #ccc;
   display: flex; align-items: center; justify-content: center; gap: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   position: relative;
 }
-.photo-trigger-btn::after {
-  content: '▼'; font-size: 10px; color: #999; margin-left: 5px;
-}
+.photo-trigger-btn::after { content: '▼'; font-size: 10px; color: #999; margin-left: 5px; }
 
 #photoSheet {
   display: none; position: fixed; inset: 0; z-index: 2500;
-  background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
   animation: fadeInBg 0.3s forwards;
+  align-items: center; justify-content: center; /* Center content */
 }
 #photoSheetContent {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: #f2f2f0;
-  border-radius: 16px 16px 0 0;
-  padding: 20px 20px calc(20px + var(--safe-bottom));
-  transform: translateY(100%);
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
+  background: #333; /* Dark Background */
+  border-radius: 12px;
+  width: 280px;
+  padding: 0;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  overflow: hidden;
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes slideUp { to { transform: translateY(0); } }
-@keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.sheet-title { text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 15px; font-weight: 600; }
+.sheet-title {
+  text-align: left; color: #aaa; font-size: 0.75rem; 
+  padding: 15px 20px 5px; font-weight: 500;
+}
 .sheet-btn {
-  width: 100%; padding: 18px; background: #fff; border: none;
-  font-size: 1rem; color: var(--text-main); font-weight: 500;
-  margin-bottom: 10px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  width: 100%; padding: 15px 20px; 
+  background: transparent; border: none; border-bottom: 1px solid #444;
+  font-size: 1rem; color: #fff; font-weight: 400;
+  display: flex; align-items: center; gap: 12px;
+  margin: 0; border-radius: 0; box-shadow: none;
+  cursor: pointer; text-align: left;
 }
-.sheet-btn:active { background: #eee; transform: scale(0.99); }
-.sheet-cancel {
-  margin-top: 10px; background: #e0e0e0; color: #333; font-weight: 600;
-}
+.sheet-btn:last-child { border-bottom: none; }
+.sheet-btn:active { background: #444; }
+.sheet-btn span:first-child { width: 24px; text-align: center; } /* icon alignment */
 
 /* === Utils === */
 .tab-content { display: none; }
@@ -410,7 +446,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.5</span>
+  <span class="brand-subtitle">PRO EDITION v10.6</span>
 </div>
 
 <!-- Tabs -->
@@ -437,19 +473,19 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <span>📷 写真でAI登録する</span>
     </button>
 
-    <!-- Bottom Action Sheet -->
-    <div id="photoSheet" onclick="hidePhotoSheet()">
+    <!-- Dark Modal Sheet -->
+    <div id="photoSheet" onclick="hidePhotoSheet()" style="display:none;">
       <div id="photoSheetContent" onclick="event.stopPropagation()">
         <div class="sheet-title">写真を選択</div>
         <label class="sheet-btn">
-          <span>📷 カメラを起動</span>
+          <span>📷</span><span>カメラを起動</span>
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event)">
         </label>
         <label class="sheet-btn">
-          <span>🖼️ アルバムから選択</span>
+          <span>🖼️</span><span>アルバムから選択</span>
           <input type="file" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
         </label>
-        <button class="sheet-btn sheet-cancel" onclick="hidePhotoSheet()">キャンセル</button>
+        <!-- キャンセルは背景タップでOKだが明示的に置くなら別枠で -->
       </div>
     </div>
 
@@ -933,33 +969,36 @@ function appendMsg(type, text, animate = false) {
   var bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
   
+  // Format HTML if AI (convert simple markdown to HTML tags for styling)
+  if (type === 'ai') {
+    bubble.innerHTML = formatMarkdown(text);
+  } else {
+    bubble.textContent = text;
+  }
+
   if (animate && type === 'ai') {
     div.appendChild(bubble);
     document.getElementById('chatHistory').appendChild(div);
-    typeWriter(bubble, text);
+    // Simple fade in for blocks instead of char-by-char to keep HTML structure valid
+    bubble.style.opacity = '0';
+    setTimeout(() => { bubble.style.opacity = '1'; bubble.style.transition = 'opacity 0.3s'; }, 50);
+    scrollToBottom();
   } else {
-    bubble.textContent = text;
     div.appendChild(bubble);
     document.getElementById('chatHistory').appendChild(div);
   }
 }
 
-// Gemini風の高速タイプライター表示
-function typeWriter(element, text) {
-  element.textContent = '';
-  let i = 0;
-  const charsPerFrame = 3; // 一度に追加する文字数
-  const delay = 5; // 更新間隔(ms)
-
-  function type() {
-    if (i < text.length) {
-      element.textContent += text.substring(i, i + charsPerFrame);
-      i += charsPerFrame;
-      scrollToBottom();
-      setTimeout(type, delay);
-    }
-  }
-  type();
+// Simple Markdown Formatter
+function formatMarkdown(text) {
+  if (!text) return '';
+  let html = text
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>') // Headers
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+    .replace(/^\- (.*$)/gim, '<ul><li>$1</li></ul>') // Lists (rough)
+    .replace(/<\/ul>\s*<ul>/g, '') // Merge lists
+    .replace(/---/g, '<hr>'); // Horizontal Rule
+  return html.replace(/\n/g, '<br>'); // Newlines
 }
 
 function showTypingIndicator() {
@@ -1002,7 +1041,7 @@ async function sendChatMessage() {
   try {
     await waitForRateLimit();
     var context = JSON.stringify(cosmeData.map(c => ({n:c.name, b:c.brand, c:c.category, ing:c.ingredients})));
-    var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}`;
+    var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
     
     var res = await fetch(getApiUrl(false), {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -1064,7 +1103,7 @@ function importData(){ document.getElementById('importFile').click(); }
 function handleImport(e){
   var r=new FileReader(); r.onload=function(ev){ try{ var d=JSON.parse(ev.target.result); cosmeData=d.data||[]; chatHistories=d.chats||[]; saveData(); saveChatHistories(); render(); alert('復元しました'); }catch(x){alert('エラー');} }; r.readAsText(e.target.files[0]);
 }
-function showPhotoSheet(){ document.getElementById('photoSheet').style.display='block'; }
+function showPhotoSheet(){ document.getElementById('photoSheet').style.display='flex'; } /* Flex for center align */
 function hidePhotoSheet(){ document.getElementById('photoSheet').style.display='none'; }
 function escapeHtml(text) { if(text == null) return ''; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 </script>
