@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.8</title>
+<title>Cosme Genius Pro v10.9</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -224,6 +224,19 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .item-content { padding: 0 20px 20px; font-size: 0.9rem; color: var(--text-sub); border-top: 1px solid #f5f5f5; margin-top: 10px; padding-top: 15px; }
 .ingredients-box { background: #f9f9f9; padding: 10px; border-radius: 4px; font-size: 0.8rem; color: #555; margin-top: 10px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; }
 
+/* === Tag Selector in item detail === */
+.tag-selector { display: flex; gap: 6px; }
+.tag-btn {
+  flex: 1; padding: 9px 4px; font-size: 0.8rem; font-weight: 500;
+  background: #f5f5f5; color: #666; border: 1.5px solid #e0e0e0;
+  border-radius: 4px; margin: 0; width: auto; letter-spacing: 0;
+  transition: all 0.2s;
+}
+.tag-btn:active { transform: scale(0.97); }
+.tag-active-morning { background: #fff8e1 !important; color: #f39c12 !important; border-color: #ffe0b2 !important; font-weight: 700 !important; }
+.tag-active-night   { background: #e8eaf6 !important; color: #3f51b5 !important; border-color: #c5cae9 !important; font-weight: 700 !important; }
+.tag-active-both    { background: #f3e5f5 !important; color: #9c27b0 !important; border-color: #e1bee7 !important; font-weight: 700 !important; }
+
 /* === Cospa === */
 .cospa-card { background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #eee; position: relative; }
 .cospa-header { display: flex; justify-content: space-between; align-items: baseline; padding-right: 30px; }
@@ -280,7 +293,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.8</span>
+  <span class="brand-subtitle">PRO EDITION v10.9</span>
 </div>
 
 <!-- Tabs -->
@@ -493,17 +506,23 @@ let currentFilter = 'active';
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
-const IMAGE_MODEL = 'gemini-2.5-flash';
 
-// 思考モード設定: toggleの値を読んで動的に生成
+// 思考モード設定: OFFの時はthinkingConfigキー自体を送らない（モデルによる無視を防ぐ）
 function getGenConfig(isFast) {
   const thinkingOn = isFast
     ? document.getElementById('fastThinkingToggle')?.checked
     : document.getElementById('chatThinkingToggle')?.checked;
-  return {
-    temperature: isFast ? 0.2 : 0.7,
-    thinkingConfig: { thinkingBudget: thinkingOn ? 8192 : 0 }
-  };
+  const cfg = { temperature: isFast ? 0.2 : 0.7 };
+  if (thinkingOn) {
+    cfg.thinkingConfig = { thinkingBudget: 8192 };
+  }
+  // OFFの場合はthinkingConfigを送らない → モデルのデフォルト動作（非思考）になる
+  return cfg;
+}
+
+function getImageApiUrl() {
+  // 画像解析も検索用モデルを使用（設定に従う）
+  return `https://generativelanguage.googleapis.com/v1beta/models/${document.getElementById('fastModelSelect').value}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -536,9 +555,6 @@ function getApiUrl(isFast) {
     ? document.getElementById('fastModelSelect').value
     : document.getElementById('chatModelSelect').value;
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
-}
-function getImageApiUrl() {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
 
 async function waitForRateLimit() {
@@ -732,6 +748,27 @@ function markFinished(id) {
 }
 function saveEdit(id, key, val) { var i = cosmeData.find(x => x.id === id); if(i) { i[key] = val; saveData(); renderCospa(); } }
 
+function saveTagEdit(id, tag, clickedBtn) {
+  var item = cosmeData.find(x => x.id === id);
+  if(!item) return;
+  item.tag = tag;
+  saveData();
+  // ボタンのアクティブ状態を即時更新（再描画せずにUI反映）
+  var selector = clickedBtn.closest('.tag-selector');
+  selector.querySelectorAll('.tag-btn').forEach(b => {
+    b.classList.remove('tag-active-morning','tag-active-night','tag-active-both');
+  });
+  var cls = tag === '朝' ? 'tag-active-morning' : (tag === '晩' ? 'tag-active-night' : 'tag-active-both');
+  clickedBtn.classList.add(cls);
+  // サマリーのバッジも更新
+  var details = clickedBtn.closest('details');
+  var badge = details.querySelector('.badge.morning, .badge.night, .badge.both');
+  if(badge) {
+    badge.className = 'badge ' + (tag==='朝'?'morning': tag==='晩'?'night':'both');
+    badge.textContent = tag==='朝'?'朝': tag==='晩'?'夜':'朝夜';
+  }
+}
+
 function setFilter(type) {
   currentFilter = type;
   document.querySelectorAll('.filter-tab').forEach(el => el.classList.remove('active'));
@@ -778,6 +815,14 @@ function render() {
         <div class="flex-row" style="margin-top:15px;">
           <input type="number" value="${item.price}" placeholder="価格" onchange="saveEdit(${item.id},'price',this.value)" style="font-size:0.9rem;">
           <input type="date" value="${item.openDate}" onchange="saveEdit(${item.id},'openDate',this.value)" style="font-size:0.9rem;">
+        </div>
+        <div style="margin-top:10px;">
+          <label style="font-size:0.72rem; color:#888; margin-bottom:4px; display:block; font-weight:600;">使用タイミング</label>
+          <div class="tag-selector">
+            <button class="tag-btn ${item.tag==='朝'?'tag-active-morning':''}" onclick="saveTagEdit(${item.id},'朝',this)">☀️ 朝</button>
+            <button class="tag-btn ${item.tag==='晩'?'tag-active-night':''}" onclick="saveTagEdit(${item.id},'晩',this)">🌙 夜</button>
+            <button class="tag-btn ${item.tag==='朝晩'?'tag-active-both':''}" onclick="saveTagEdit(${item.id},'朝晩',this)">✨ 朝夜</button>
+          </div>
         </div>
         <div class="flex-row" style="margin-top:10px;">
           <button class="btn-secondary" onclick="markFinished(${item.id})">${item.finishDate?'使い切り解除':'使い切りにする'}</button>
