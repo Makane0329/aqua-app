@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.12</title>
+<title>Cosme Genius Pro v10.13</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -293,7 +293,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.12</span>
+  <span class="brand-subtitle">PRO EDITION v10.13</span>
 </div>
 
 <!-- Tabs -->
@@ -313,12 +313,12 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   <div id="tab-register" class="tab-content active">
     <div class="section-title"><span>アイテム登録</span></div>
 
-    <!-- 写真AI登録: シンプルボタン -->
+    <!-- 写真AI登録 -->
     <div class="photo-list-card" style="margin-bottom: 20px;">
       <div class="photo-list-item">
         <div>
           <div class="photo-list-label">📷 写真からAI登録</div>
-          <div class="photo-list-sub">アルバムから画像を選択して自動入力</div>
+          <div class="photo-list-sub">アルバムから画像を選択して自動入力 (1ステップ・高速)</div>
         </div>
         <div class="photo-list-arrow">›</div>
         <input type="file" accept="image/*" onchange="handleImageSelect(event)">
@@ -327,7 +327,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
     <!-- Manual Input Form -->
     <div class="card">
-      <!-- 商品名＋AI自動入力: 同じ高さで横並び -->
       <div class="name-search-row">
         <input type="text" id="itemName" placeholder="商品名 (必須)">
         <button onclick="triggerManualAISearch()" id="btn-ai-search" class="btn-accent ai-search-btn">AI自動入力</button>
@@ -507,12 +506,11 @@ let currentFilter = 'active';
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
 
-// 思考モード設定
-// gemini-3系はthinkingConfig非対応のため送信しない（送ると400エラーまたは遅延の原因）
+// 思考モード: gemini-2.5-pro / gemini-2.5-flash のみ対応
 function modelSupportsThinking(modelId) {
-  // gemini-2.5-pro / gemini-2.5-flash のみ対応
   return modelId && modelId.startsWith('gemini-2.5') && !modelId.includes('lite');
 }
+
 function getGenConfig(isFast) {
   const modelSelectId = isFast ? 'fastModelSelect' : 'chatModelSelect';
   const modelId = document.getElementById(modelSelectId)?.value || '';
@@ -522,7 +520,6 @@ function getGenConfig(isFast) {
 
   const cfg = { temperature: isFast ? 0.2 : 0.7 };
 
-  // thinkingConfigはgemini-2.5-pro/flashのみ送信
   if (thinkingToggle && modelSupportsThinking(modelId)) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
@@ -530,7 +527,6 @@ function getGenConfig(isFast) {
 }
 
 function getImageApiUrl() {
-  // 画像解析も検索用モデルを使用（設定に従う）
   return `https://generativelanguage.googleapis.com/v1beta/models/${document.getElementById('fastModelSelect').value}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
 
@@ -585,15 +581,12 @@ function setBtnLoading(btnId, isLoading, text='AI自動入力') {
   else { btn.disabled = false; btn.textContent = text; }
 }
 
-// JSONパース: responseMimeType 不使用時でもJSONを確実に抽出
+// JSONパース
 function parseAIJson(text) {
   if(!text) return null;
-  // Try raw JSON first
   try { return JSON.parse(text); } catch(e) {}
-  // Strip markdown code fences
   var clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
   try { return JSON.parse(clean); } catch(e) {}
-  // Extract first JSON object
   var start = clean.indexOf('{');
   var end = clean.lastIndexOf('}');
   if(start !== -1 && end !== -1 && end > start) {
@@ -602,19 +595,22 @@ function parseAIJson(text) {
   return null;
 }
 
-/* AI POST helper
-   jsonMode=true: JSON高速モード（検索・登録用）
-   jsonMode=false: 通常テキスト（チャット用）
-*/
+/* =====================================================
+   callGeminiAPI
+   ・リトライロジックを削除（クォータ節約のため）
+   ・gemini-3系はresponseMimeType非対応のため送信しない
+   ===================================================== */
 async function callGeminiAPI(url, parts, config, jsonMode = false) {
   var genConfig = Object.assign({}, config);
-  // gemini-3系はresponseMimeType非対応 → プロンプトベースのJSON指示のみ使用
+
+  // gemini-3系はresponseMimeType非対応
   var supportsJsonMode = !url.includes('gemini-3');
   if (jsonMode && supportsJsonMode) {
     genConfig.responseMimeType = "application/json";
   }
-  // maxOutputTokensは常に設定（検索用は短くて済む）
-  if (jsonMode && !genConfig.maxOutputTokens) genConfig.maxOutputTokens = 512;
+  if (jsonMode && !genConfig.maxOutputTokens) {
+    genConfig.maxOutputTokens = 512;
+  }
 
   var res = await fetch(url, {
     method: 'POST',
@@ -635,16 +631,12 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
         '\n設定でより軽量なモデル（Flash-Lite）への変更もお試しください。');
     }
 
-    // サーバー過負荷（high demand / Gemini 3系プレビューで頻発）
+    // サーバー過負荷
     if (res.status === 503 || errMsg.includes('high demand') || errMsg.includes('overloaded') || errMsg.includes('UNAVAILABLE')) {
       throw new Error('サーバーが混雑しています。しばらく待ってから再試行してください。\n（数秒〜数十秒後に再度お試しください）');
     }
 
-    // responseMimeType非対応 → JSONなしでリトライ
-    if (jsonMode && res.status === 400) {
-      return callGeminiAPI(url, parts, config, false);
-    }
-
+    // ★リトライなし: エラーをそのままスロー（旧コードの2重通信を排除）
     throw new Error(errMsg);
   }
 
@@ -655,63 +647,48 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
     throw new Error(`応答がブロックされました（理由: ${reason}）`);
   }
 
-  // 思考モデルはparts複数あり → text部分だけ取得
   var resParts = d.candidates[0]?.content?.parts || [];
   var textPart = resParts.filter(p => typeof p.text === 'string').pop();
-  var text = textPart?.text || '';
-
-  // JSONモードでパース不能なら通常モードでリトライ
-  if (jsonMode && text && !isValidJSON(text)) {
-    return callGeminiAPI(url, parts, config, false);
-  }
-
-  return text;
+  return textPart?.text || '';
 }
 
-function isValidJSON(str) {
-  if (!str) return false;
-  var s = str.trim().replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  try { JSON.parse(s); return true; } catch(e) { return false; }
-}
-
-/* Image Search */
+/* =====================================================
+   handleImageSelect
+   ★変更: 2ステップ→1ステップに統合（速度改善）
+   ===================================================== */
 async function handleImageSelect(e) {
   if(!validateApiKey() || isRequesting) return;
   var file = e.target.files[0];
   if(!file) return;
-  isRequesting = true; showOverlay("画像を解析中...");
+  isRequesting = true;
+  showOverlay("AI解析中...");
 
   try {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // Step1: 商品名・ブランド特定
-    var p1 = '{"itemName":"","brandName":""} の形式でこの化粧品のブランド名と商品名を返してください。';
-    var text1 = await callGeminiAPI(getImageApiUrl(), [
-      { text: p1 },
+    // ★1回の通信で全情報を取得（旧:2回→新:1回）
+    var combinedPrompt = `この化粧品画像を解析し、以下の情報をJSON形式で抽出してください。必ずJSONのみ返してください。
+{"itemName":"商品名","brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"特徴の要約","price":0,"releaseDate":"YYYY/MM/DD"}`;
+
+    var responseText = await callGeminiAPI(getImageApiUrl(), [
+      { text: combinedPrompt },
       { inlineData: { mimeType: "image/jpeg", data: base64 } }
-    ], getGenConfig(true), true);  // jsonMode=true → 高速
+    ], getGenConfig(true), true);
 
-    var j1 = parseAIJson(text1);
-    if(j1?.itemName) document.getElementById('itemName').value = j1.itemName;
-    if(j1?.brandName) document.getElementById('brand').value = j1.brandName;
-
-    // Step2: 詳細情報取得
-    if(j1?.itemName) {
-      document.getElementById('progressText').textContent = "詳細を取得中...";
-      await waitForRateLimit();
-      var p2 = `化粧品「${j1.brandName || ''} ${j1.itemName}」の情報: {"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"説明","price":0,"releaseDate":""}`;
-      var text2 = await callGeminiAPI(getApiUrl(true), [{ text: p2 }], getGenConfig(true), true);  // jsonMode=true
-      var j2 = parseAIJson(text2);
-      if(j2) {
-        if(j2.category) document.getElementById('categorySelect').value = j2.category;
-        if(j2.description) document.getElementById('description').value = j2.description;
-        if(j2.ingredients) document.getElementById('ingredients').value = j2.ingredients;
-        if(j2.price) document.getElementById('itemPrice').value = j2.price;
-        if(j2.releaseDate) document.getElementById('releaseDate').value = j2.releaseDate;
-      }
+    var result = parseAIJson(responseText);
+    if(result) {
+      if(result.itemName)   document.getElementById('itemName').value   = result.itemName;
+      if(result.brandName)  document.getElementById('brand').value      = result.brandName;
+      if(result.category)   document.getElementById('categorySelect').value = result.category;
+      if(result.description)document.getElementById('description').value= result.description;
+      if(result.ingredients)document.getElementById('ingredients').value= result.ingredients;
+      if(result.price)      document.getElementById('itemPrice').value  = result.price;
+      if(result.releaseDate)document.getElementById('releaseDate').value= result.releaseDate;
+      alert('AI登録が完了しました。内容を確認してリストに追加してください。');
+    } else {
+      alert('情報を取得できませんでした。画像をより鮮明なものにしてお試しください。');
     }
-    alert('AI登録が完了しました。内容を確認してリストに追加してください。');
   } catch(err) {
     alert("エラー: " + err.message);
   } finally {
@@ -748,19 +725,20 @@ async function triggerManualAISearch() {
 
   try {
     await waitForRateLimit();
-    var p = `化粧品「${name}」: {"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"説明","price":0,"releaseDate":""}`;
+    var p = `化粧品「${name}」の情報を以下のJSON形式で返してください。必ずJSONのみ返してください。
+{"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"説明","price":0,"releaseDate":""}`;
 
-    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], getGenConfig(true), true);  // jsonMode=true → 高速
+    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], getGenConfig(true), true);
     var j = parseAIJson(text);
 
     if(!j) throw new Error("情報を取得できませんでした。商品名をより正確に入力してみてください。");
 
-    if(j.brand) document.getElementById('brand').value = j.brand;
-    if(j.category) document.getElementById('categorySelect').value = j.category;
-    if(j.description) document.getElementById('description').value = j.description;
-    if(j.ingredients) document.getElementById('ingredients').value = j.ingredients;
-    if(j.price) document.getElementById('itemPrice').value = j.price;
-    if(j.releaseDate) document.getElementById('releaseDate').value = j.releaseDate;
+    if(j.brand)      document.getElementById('brand').value = j.brand;
+    if(j.category)   document.getElementById('categorySelect').value = j.category;
+    if(j.description)document.getElementById('description').value = j.description;
+    if(j.ingredients)document.getElementById('ingredients').value = j.ingredients;
+    if(j.price)      document.getElementById('itemPrice').value = j.price;
+    if(j.releaseDate)document.getElementById('releaseDate').value = j.releaseDate;
 
   } catch(err) {
     alert("検索エラー: " + err.message);
@@ -805,14 +783,12 @@ function saveTagEdit(id, tag, clickedBtn) {
   if(!item) return;
   item.tag = tag;
   saveData();
-  // ボタンのアクティブ状態を即時更新（再描画せずにUI反映）
   var selector = clickedBtn.closest('.tag-selector');
   selector.querySelectorAll('.tag-btn').forEach(b => {
     b.classList.remove('tag-active-morning','tag-active-night','tag-active-both');
   });
   var cls = tag === '朝' ? 'tag-active-morning' : (tag === '晩' ? 'tag-active-night' : 'tag-active-both');
   clickedBtn.classList.add(cls);
-  // サマリーのバッジも更新
   var details = clickedBtn.closest('details');
   var badge = details.querySelector('.badge.morning, .badge.night, .badge.both');
   if(badge) {
@@ -928,7 +904,10 @@ function getDays(i) {
 }
 function getDaily(i) { return i.price / getDays(i); }
 
-/* Chat */
+/* =====================================================
+   Chat
+   ★変更: コンテキストから ingredients を除外（クォータ節約）
+   ===================================================== */
 function createNewChat() {
   var id = 'chat_' + Date.now();
   chatHistories.unshift({ id: id, title: '新規チャット', date: new Date().toISOString(), messages: [{ type: 'ai', text: 'こんにちは！登録コスメに基づいたアドバイスをします。何でも聞いてください✨' }] });
@@ -1001,7 +980,19 @@ async function sendChatMessage() {
 
   try {
     await waitForRateLimit();
-    var context = JSON.stringify(cosmeData.map(c => ({n:c.name, b:c.brand, c:c.category, ing:c.ingredients})));
+
+    // ★成分(ingredients)を除外してトークン節約
+    // 成分キーワードが含まれる質問の場合のみ成分も送る
+    var needsIngredients = /成分|アレルギー|敏感|刺激|相性|配合/.test(txt);
+    var context = JSON.stringify(cosmeData.map(c => {
+      var obj = { n: c.name, b: c.brand, c: c.category };
+      if(needsIngredients && c.ingredients) {
+        // 成分は先頭100文字のみ（トークン節約）
+        obj.ing = c.ingredients.substring(0, 100);
+      }
+      return obj;
+    }));
+
     var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
     var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], getGenConfig(false));
     if(!ans) ans = "回答を取得できませんでした。";
@@ -1035,8 +1026,6 @@ function loadModelSettings() {
   var cm = localStorage.getItem('chatModel_v1') || DEFAULT_CHAT_MODEL;
   var fm = localStorage.getItem('fastModel_v1') || DEFAULT_FAST_MODEL;
 
-  // gemini-3系が保存されていても安定モデルに自動修正しない（ユーザーが意図的に選んだ可能性あり）
-  // ただし、セレクトボックスに存在しないモデル名の場合はデフォルトに戻す
   var cmSel = document.getElementById('chatModelSelect');
   var fmSel = document.getElementById('fastModelSelect');
   if ([...cmSel.options].some(o => o.value === cm)) cmSel.value = cm;
@@ -1044,7 +1033,6 @@ function loadModelSettings() {
   if ([...fmSel.options].some(o => o.value === fm)) fmSel.value = fm;
   else { fmSel.value = DEFAULT_FAST_MODEL; localStorage.setItem('fastModel_v1', DEFAULT_FAST_MODEL); }
 
-  // 思考モード: デフォルトはチャット=ON、検索=OFF
   var chatThinking = localStorage.getItem('chatThinking_v1');
   var fastThinking = localStorage.getItem('fastThinking_v1');
   document.getElementById('chatThinkingToggle').checked = chatThinking === null ? true : chatThinking === 'true';
