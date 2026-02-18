@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.9</title>
+<title>Cosme Genius Pro v10.10</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -293,7 +293,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.9</span>
+  <span class="brand-subtitle">PRO EDITION v10.10</span>
 </div>
 
 <!-- Tabs -->
@@ -559,7 +559,7 @@ function getApiUrl(isFast) {
 
 async function waitForRateLimit() {
   var now = Date.now();
-  if (now - lastRequestTime < 1000) await new Promise(r => setTimeout(r, 1000 - (now - lastRequestTime)));
+  if (now - lastRequestTime < 200) await new Promise(r => setTimeout(r, 200 - (now - lastRequestTime)));
   lastRequestTime = Date.now();
 }
 
@@ -593,30 +593,45 @@ function parseAIJson(text) {
   return null;
 }
 
-/* AI POST helper - responseMimeType を使わずJSONを指示文で要求する
-   (responseMimeType はモデルによって未対応でエラーになることがある) */
-async function callGeminiAPI(url, parts, config) {
+/* AI POST helper
+   jsonMode=true: responseMimeType "application/json" を使用 → 高速・確実（検索・登録用）
+   jsonMode=false: 通常テキスト出力（チャット用）
+*/
+async function callGeminiAPI(url, parts, config, jsonMode = false) {
+  var genConfig = Object.assign({}, config);
+  if (jsonMode) {
+    genConfig.responseMimeType = "application/json";
+    // maxOutputTokens未指定なら512に制限（JSON応答は短くて済む → 速い）
+    if (!genConfig.maxOutputTokens) genConfig.maxOutputTokens = 512;
+  }
+
   var res = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
       contents: [{ parts: parts }],
-      generationConfig: config
+      generationConfig: genConfig
     })
   });
   if(!res.ok) {
     var errJson = await res.json().catch(() => ({}));
     var errMsg = errJson?.error?.message || `HTTP ${res.status}`;
-    // クォータ超過の場合は分かりやすいメッセージに変換
     if(errMsg.includes('quota') || errMsg.includes('Quota') || res.status === 429) {
       var retryMatch = errMsg.match(/retry in ([\d.]+)s/i);
       var waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : null;
-      throw new Error('APIの無料枠の上限に達しました。' + (waitSec ? `約${waitSec}秒後にお試しください。` : 'しばらく待ってから再試行してください。') + '\n\n有料プランへのアップグレードや、設定でより軽量なモデル（Flash-Lite）への変更もご検討ください。');
+      throw new Error('APIの無料枠の上限に達しました。' + (waitSec ? `約${waitSec}秒後にお試しください。` : 'しばらく待ってから再試行してください。') + '\n\n設定でより軽量なモデル（Flash-Lite）への変更もお試しください。');
+    }
+    // responseMimeType非対応モデルの場合はJSONモードなしでリトライ
+    if(jsonMode && (res.status === 400 || errMsg.includes('responseMimeType'))) {
+      return callGeminiAPI(url, parts, config, false);
     }
     throw new Error(errMsg);
   }
   var d = await res.json();
-  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // 思考モデルは parts が複数ある場合があるため最後のtextを使う
+  var parts2 = d.candidates?.[0]?.content?.parts || [];
+  var textPart = parts2.filter(p => p.text).pop();
+  return textPart?.text || '';
 }
 
 /* Image Search */
@@ -631,12 +646,11 @@ async function handleImageSelect(e) {
     await waitForRateLimit();
 
     // Step1: 商品名・ブランド特定
-    var p1 = `この化粧品のブランド名と商品名を特定してください。必ずJSON形式のみで出力してください（説明文不要）:
-{"itemName":"商品名","brandName":"ブランド名"}`;
+    var p1 = '{"itemName":"","brandName":""} の形式でこの化粧品のブランド名と商品名を返してください。';
     var text1 = await callGeminiAPI(getImageApiUrl(), [
       { text: p1 },
       { inlineData: { mimeType: "image/jpeg", data: base64 } }
-    ], getGenConfig(true));
+    ], getGenConfig(true), true);  // jsonMode=true → 高速
 
     var j1 = parseAIJson(text1);
     if(j1?.itemName) document.getElementById('itemName').value = j1.itemName;
@@ -646,9 +660,8 @@ async function handleImageSelect(e) {
     if(j1?.itemName) {
       document.getElementById('progressText').textContent = "詳細を取得中...";
       await waitForRateLimit();
-      var p2 = `化粧品「${j1.brandName || ''} ${j1.itemName}」の詳細情報をJSON形式のみで出力してください（説明文不要）:
-{"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分テキスト","description":"製品説明","price":数値または0,"releaseDate":"YYYY-MM-DDまたは空文字"}`;
-      var text2 = await callGeminiAPI(getApiUrl(true), [{ text: p2 }], getGenConfig(true));
+      var p2 = `化粧品「${j1.brandName || ''} ${j1.itemName}」の情報: {"category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"説明","price":0,"releaseDate":""}`;
+      var text2 = await callGeminiAPI(getApiUrl(true), [{ text: p2 }], getGenConfig(true), true);  // jsonMode=true
       var j2 = parseAIJson(text2);
       if(j2) {
         if(j2.category) document.getElementById('categorySelect').value = j2.category;
@@ -695,10 +708,9 @@ async function triggerManualAISearch() {
 
   try {
     await waitForRateLimit();
-    var p = `化粧品「${name}」の詳細情報を検索してJSON形式のみで出力してください（前置き・説明文不要）:
-{"brand":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分テキスト","description":"製品説明","price":数値または0,"releaseDate":"YYYY-MM-DDまたは空文字"}`;
+    var p = `化粧品「${name}」: {"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"説明","price":0,"releaseDate":""}`;
 
-    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], getGenConfig(true));
+    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], getGenConfig(true), true);  // jsonMode=true → 高速
     var j = parseAIJson(text);
 
     if(!j) throw new Error("情報を取得できませんでした。商品名をより正確に入力してみてください。");
