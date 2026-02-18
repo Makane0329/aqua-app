@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.3</title>
+<title>Cosme Genius Pro v10.5</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
 :root {
   --bg-color: #f2f2f0;
   --card-bg: #ffffff;
-  --text-main: #2b2b2b;
+  --text-main: #333333;
   --text-sub: #555555;
   --accent-color: #a89f91;
-  --accent-dark: #5e5a55;
+  --accent-dark: #8d8579;
   --header-bg: #e6e5e3;
   --line-color: #e0e0e0;
   
@@ -23,6 +23,7 @@
   --font-sans: 'Zen Kaku Gothic New', -apple-system, BlinkMacSystemFont, sans-serif;
   --safe-bottom: env(safe-area-inset-bottom);
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-float: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -121,7 +122,7 @@ body {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 20px 100px;
+  padding: 20px 20px 120px; /* チャット欄対策で下部余白増 */
 }
 
 /* === Components === */
@@ -149,15 +150,23 @@ label { display: block; font-size: 0.75rem; color: var(--text-sub); margin-botto
 
 input, select, textarea {
   width: 100%;
-  padding: 12px 10px;
+  padding: 14px 12px;
   border: 1px solid #ddd;
   background: #fafafa;
-  border-radius: 2px;
+  border-radius: 4px;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text-main);
   transition: all 0.3s;
+  appearance: none; -webkit-appearance: none;
 }
+select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px top 50%;
+  background-size: 10px auto;
+}
+
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--accent-color);
@@ -167,17 +176,17 @@ input::placeholder, textarea::placeholder { color: #bbb; }
 
 button {
   width: 100%;
-  padding: 15px;
+  padding: 16px;
   background: var(--text-main);
   color: #fff;
   border: none;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   letter-spacing: 0.05em;
   cursor: pointer;
   transition: opacity 0.3s, transform 0.2s;
-  border-radius: 2px;
+  border-radius: 4px;
   margin-top: 10px;
   position: relative;
   overflow: hidden;
@@ -190,13 +199,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .btn-text {
   background: transparent !important; border: none !important; padding: 5px 10px !important;
   color: var(--accent-dark) !important; width: auto !important; margin: 0 !important; font-size: 0.8rem;
-}
-
-/* Spinner for Button */
-.spinner-inline {
-  display: inline-block; width: 14px; height: 14px; margin-right: 8px;
-  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
-  border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle;
 }
 
 /* === List Items === */
@@ -248,34 +250,64 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .cospa-card {
   background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #eee;
+  position: relative;
 }
-.cospa-header { display: flex; justify-content: space-between; align-items: baseline; }
+.cospa-header { display: flex; justify-content: space-between; align-items: baseline; padding-right: 30px; }
 .cospa-price { font-family: var(--font-serif); font-size: 1.6rem; color: var(--text-main); font-weight: 600; }
 .cospa-unit { font-size: 0.8rem; color: #999; margin-left: 3px; }
 .cospa-bar-bg { width: 100%; height: 4px; background: #eee; margin-top: 12px; border-radius: 2px; overflow: hidden; position: relative; }
 .cospa-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--text-main)); position: absolute; left: 0; top: 0; }
 .cospa-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 8px; }
 
-/* === Chat UI (Improved) === */
+.cospa-delete-btn {
+  position: absolute; top: 15px; right: 15px;
+  width: 24px; height: 24px; padding: 0; margin: 0;
+  background: transparent; color: #ccc; border: none; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.cospa-delete-btn:hover { color: #d32f2f; }
+
+/* === Chat UI (Fast & Readable) === */
 .chat-area { padding-bottom: 90px; display: flex; flex-direction: column; gap: 20px; }
 .msg-row { display: flex; width: 100%; }
 .msg-row.user { justify-content: flex-end; }
 .msg-row.ai { justify-content: flex-start; }
 
 .msg-bubble {
-  max-width: 88%; padding: 16px 20px; font-size: 1rem; line-height: 1.7; border-radius: 12px;
-  white-space: pre-wrap; word-break: break-word;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  max-width: 90%; 
+  padding: 18px 22px; 
+  font-size: 1rem; 
+  line-height: 1.8; 
+  border-radius: 12px;
+  white-space: pre-wrap; 
+  word-break: break-word;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
 }
-.msg-row.user .msg-bubble { background: #444; color: #fff; border-bottom-right-radius: 2px; font-weight: 400; }
-.msg-row.ai .msg-bubble { background: #fff; border: 1px solid #dcdcdc; color: #222; border-bottom-left-radius: 2px; font-weight: 500; }
+
+/* User Bubble */
+.msg-row.user .msg-bubble {
+  background: #3a3a3a;
+  color: #f0f0f0;
+  border-bottom-right-radius: 2px;
+  font-weight: 400;
+}
+
+/* AI Bubble */
+.msg-row.ai .msg-bubble {
+  background: #fcfbf9;
+  border: 1px solid #dcdcdc;
+  color: #333;
+  border-bottom-left-radius: 2px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
 
 /* Typing Indicator */
 .typing-indicator {
-  display: flex; gap: 4px; padding: 10px 14px; background: #fff; border: 1px solid #dcdcdc; border-radius: 12px; border-bottom-left-radius: 2px; width: fit-content;
+  display: flex; gap: 4px; padding: 12px 16px; background: #fcfbf9; border: 1px solid #dcdcdc; border-radius: 12px; border-bottom-left-radius: 2px; width: fit-content;
 }
 .typing-indicator span {
-  width: 6px; height: 6px; background: #aaa; border-radius: 50%;
+  width: 6px; height: 6px; background: #888; border-radius: 50%;
   animation: typing 1.4s infinite ease-in-out both;
 }
 .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
@@ -287,24 +319,67 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   position: fixed; bottom: 0; left: 0; right: 0;
   background: rgba(242, 242, 240, 0.98);
   backdrop-filter: blur(10px);
-  padding: 10px 15px;
-  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding: 12px 15px;
+  padding-bottom: calc(15px + var(--safe-bottom));
   border-top: 1px solid rgba(0,0,0,0.05);
   display: flex; gap: 10px; align-items: flex-end;
   z-index: 2000;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
 }
 .chat-input {
   flex: 1; border: 1px solid #ccc; background: #fff;
   border-radius: 20px; padding: 12px 16px; font-size: 16px;
   min-height: 48px; max-height: 120px;
   margin: 0; transition: border-color 0.2s;
-  resize: none; line-height: 1.4; color: #333;
+  resize: none; line-height: 1.5; color: #333;
 }
 .chat-input:focus { border-color: var(--accent-color); }
 .send-btn {
   width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* === Photo Action Sheet === */
+.photo-trigger-btn {
+  background: #fff; color: var(--text-main); border: 1px solid #ccc;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  position: relative;
+}
+.photo-trigger-btn::after {
+  content: '▼'; font-size: 10px; color: #999; margin-left: 5px;
+}
+
+#photoSheet {
+  display: none; position: fixed; inset: 0; z-index: 2500;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  animation: fadeInBg 0.3s forwards;
+}
+#photoSheetContent {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: #f2f2f0;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  transform: translateY(100%);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
+}
+@keyframes slideUp { to { transform: translateY(0); } }
+@keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+
+.sheet-title { text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 15px; font-weight: 600; }
+.sheet-btn {
+  width: 100%; padding: 18px; background: #fff; border: none;
+  font-size: 1rem; color: var(--text-main); font-weight: 500;
+  margin-bottom: 10px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+.sheet-btn:active { background: #eee; transform: scale(0.99); }
+.sheet-cancel {
+  margin-top: 10px; background: #e0e0e0; color: #333; font-weight: 600;
 }
 
 /* === Utils === */
@@ -317,21 +392,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .alert-box { background: #fff3e0; padding: 15px; font-size: 0.85rem; color: #e65100; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ffe0b2; }
 .code-display { font-family: monospace; font-size: 0.75rem; color: #666; background: #eee; padding: 4px 8px; border-radius: 4px; margin-top: 5px; display: inline-block; }
 
-/* File Upload Popup (Centered) */
-.file-upload-label {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border: 1px dashed #aaa; padding: 25px; background: #fafafa; border-radius: 4px;
-  margin-bottom: 15px; cursor: pointer; transition: 0.3s; color: #666;
-}
-.file-upload-label:hover { border-color: var(--text-main); background: #fff; }
-
-#photoSheet > div {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  bottom: auto !important; width: 90%; max-width: 340px; border-radius: 12px !important;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-}
-
-/* Global Overlay */
 .progress-overlay {
   position: fixed; top:0; left:0; width:100%; height:100%;
   background: rgba(255,255,255,0.85); z-index: 3000;
@@ -350,7 +410,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.3</span>
+  <span class="brand-subtitle">PRO EDITION v10.5</span>
 </div>
 
 <!-- Tabs -->
@@ -370,27 +430,31 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   <div id="tab-register" class="tab-content active">
     <div class="section-title">
       <span>アイテム登録</span>
-      <button class="btn-text" onclick="showPhotoSheet()">📷 写真でAI登録</button>
     </div>
 
-    <!-- Centered Modal -->
-    <div id="photoSheet" style="display:none;position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,0.6);backdrop-filter:blur(3px);" onclick="hidePhotoSheet()">
-      <div style="background:var(--bg-color);padding:30px 20px;border-radius:20px;" onclick="event.stopPropagation()">
-        <p class="text-center" style="margin-bottom:20px;font-family:var(--font-serif);font-size:1.1rem;color:var(--text-main);">写真を選択してください</p>
-        <label class="file-upload-label">
-          <span style="font-size:1.5rem;margin-bottom:5px;">📸</span><span>カメラを起動</span>
+    <!-- Photo Trigger Button -->
+    <button class="photo-trigger-btn" onclick="showPhotoSheet()">
+      <span>📷 写真でAI登録する</span>
+    </button>
+
+    <!-- Bottom Action Sheet -->
+    <div id="photoSheet" onclick="hidePhotoSheet()">
+      <div id="photoSheetContent" onclick="event.stopPropagation()">
+        <div class="sheet-title">写真を選択</div>
+        <label class="sheet-btn">
+          <span>📷 カメラを起動</span>
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event)">
         </label>
-        <label class="file-upload-label">
-          <span style="font-size:1.5rem;margin-bottom:5px;">🖼️</span><span>アルバムから選択</span>
+        <label class="sheet-btn">
+          <span>🖼️ アルバムから選択</span>
           <input type="file" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
         </label>
-        <button onclick="hidePhotoSheet()" class="btn-secondary">キャンセル</button>
+        <button class="sheet-btn sheet-cancel" onclick="hidePhotoSheet()">キャンセル</button>
       </div>
     </div>
 
     <!-- Manual Input Form -->
-    <div class="card">
+    <div class="card" style="margin-top:20px;">
       <div class="input-group flex-row">
         <input type="text" id="itemName" placeholder="商品名 (必須)">
         <button onclick="triggerManualAISearch()" id="btn-ai-search" class="btn-accent" style="width:auto; padding:0 20px; font-size:0.8rem; margin:0; white-space:nowrap;">AI自動入力</button>
@@ -541,7 +605,7 @@ let chatHistories = JSON.parse(localStorage.getItem('chatHistories_v1')) || [];
 let currentChatId = null;
 let isRequesting = false;
 let lastRequestTime = 0;
-let currentFilter = 'active'; // 'active', 'finished', 'all'
+let currentFilter = 'active';
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
@@ -604,7 +668,6 @@ function setBtnLoading(btnId, isLoading, text='AI自動入力') {
   }
 }
 
-/* Robust JSON Parser */
 function parseAIJson(text) {
   try { return JSON.parse(text); } catch(e) {}
   var clean = text.replace(/```json\s*|\s*```/g, '').trim();
@@ -742,13 +805,13 @@ function addItem() {
 }
 function saveData() { localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData)); }
 function removeItem(id) { if(confirm('削除しますか？')) { cosmeData = cosmeData.filter(i => i.id !== id); saveData(); render(); renderCospa(); } }
+function removeCospaItem(id) { if(confirm('このアイテムを削除しますか？')) { cosmeData = cosmeData.filter(i => i.id !== id); saveData(); render(); renderCospa(); } }
 function markFinished(id) {
   var i = cosmeData.find(x => x.id === id);
   if(i) { i.finishDate = i.finishDate ? null : new Date().toISOString().split('T')[0]; saveData(); render(); renderCospa(); }
 }
 function saveEdit(id, key, val) { var i = cosmeData.find(x => x.id === id); if(i) { i[key] = val; saveData(); renderCospa(); } }
 
-/* Filter & Render */
 function setFilter(type) {
   currentFilter = type;
   document.querySelectorAll('.filter-tab').forEach(el => el.classList.remove('active'));
@@ -758,11 +821,10 @@ function setFilter(type) {
 
 function render() {
   var type = document.getElementById('sortSelect').value;
-  // フィルタリング
   var d = cosmeData.filter(item => {
     if(currentFilter === 'active') return !item.finishDate;
     if(currentFilter === 'finished') return item.finishDate;
-    return true; // all
+    return true; 
   });
 
   if (type === 'time') d.sort((a,b) => (a.tag||'').localeCompare(b.tag||''));
@@ -830,6 +892,7 @@ function renderCospa() {
     var barWidth = Math.min(100, (daily / 150) * 100);
     html += `
     <div class="cospa-card">
+      <button class="cospa-delete-btn" onclick="removeCospaItem(${item.id})">🗑️</button>
       <div class="cospa-header">
         <div><div style="font-size:0.75rem;color:#888;">${escapeHtml(item.brand)}</div><div style="font-weight:500;">${escapeHtml(item.name)}</div></div>
         <div><span class="cospa-price">¥${daily}</span><span class="cospa-unit">/日</span></div>
@@ -850,7 +913,6 @@ function getDays(i) {
 }
 function getDaily(i) { return i.price / getDays(i); }
 
-/* Chat Logic */
 function createNewChat() {
   var id = 'chat_' + Date.now();
   chatHistories.unshift({ id: id, title: '新規チャット', date: new Date().toISOString(), messages: [{ type: 'ai', text: 'こんにちは！登録コスメに基づいたアドバイスをします。何でも聞いてください✨' }] });
@@ -861,7 +923,7 @@ function loadChat(id) {
   var chat = chatHistories.find(c => c.id === id);
   var area = document.getElementById('chatHistory');
   area.innerHTML = '';
-  chat.messages.forEach(m => appendMsg(m.type, m.text, false)); // 初期ロード時はアニメなし
+  chat.messages.forEach(m => appendMsg(m.type, m.text, false));
   renderChatList();
 }
 
@@ -882,22 +944,24 @@ function appendMsg(type, text, animate = false) {
   }
 }
 
-// 1文字ずつ表示する関数
+// Gemini風の高速タイプライター表示
 function typeWriter(element, text) {
   element.textContent = '';
   let i = 0;
+  const charsPerFrame = 3; // 一度に追加する文字数
+  const delay = 5; // 更新間隔(ms)
+
   function type() {
     if (i < text.length) {
-      element.textContent += text.charAt(i);
-      i++;
-      setTimeout(type, 20); // スピード調整 (ms)
+      element.textContent += text.substring(i, i + charsPerFrame);
+      i += charsPerFrame;
       scrollToBottom();
+      setTimeout(type, delay);
     }
   }
   type();
 }
 
-// ローディング表示
 function showTypingIndicator() {
   var div = document.createElement('div');
   div.className = 'msg-row ai';
@@ -928,13 +992,11 @@ async function sendChatMessage() {
   appendMsg('user', txt);
   scrollToBottom();
 
-  // ユーザー発言保存
   var chat = chatHistories.find(c => c.id === currentChatId);
   chat.messages.push({ type: 'user', text: txt });
   if(chat.messages.length === 2) chat.title = txt.substring(0, 20);
   saveChatHistories();
 
-  // ローディング表示
   showTypingIndicator();
 
   try {
@@ -950,7 +1012,7 @@ async function sendChatMessage() {
     var ans = d.candidates?.[0]?.content?.parts?.[0]?.text || "エラーが発生しました";
     
     removeTypingIndicator();
-    appendMsg('ai', ans, true); // アニメーション付きで表示
+    appendMsg('ai', ans, true);
     
     chat.messages.push({ type: 'ai', text: ans });
     saveChatHistories();
