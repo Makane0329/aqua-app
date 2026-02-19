@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.14 Fast</title>
+<title>Cosme Genius Pro v10.15 Fast</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -41,7 +41,6 @@ body {
 }
 ::-webkit-scrollbar { display: none; }
 
-/* === Header === */
 .header-area {
   padding: 50px 20px 30px;
   background: linear-gradient(to bottom, #e6e5e3, #f2f2f0);
@@ -56,7 +55,6 @@ body {
   color: var(--text-sub); margin-top: 8px; display: block; font-weight: 400;
 }
 
-/* === Tabs === */
 .tabs-sticky-wrapper {
   position: -webkit-sticky; position: sticky; top: 0; z-index: 100;
   background: rgba(242, 242, 240, 0.95);
@@ -79,10 +77,8 @@ body {
   width: 20px; height: 2px; background-color: var(--accent-color);
 }
 
-/* === Container === */
 .container { max-width: 600px; width: 100%; margin: 0 auto; padding: 20px 20px 120px; }
 
-/* === Components === */
 .section-title {
   font-family: var(--font-serif); font-size: 1.3rem; color: var(--text-main);
   margin: 40px 0 20px; padding-bottom: 8px; border-bottom: 1px solid var(--accent-color);
@@ -119,42 +115,29 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   color: var(--accent-dark) !important; width: auto !important; margin: 0 !important; font-size: 0.8rem;
 }
 
-/* === Toggle Switch === */
 .toggle-label { display: flex; align-items: center; cursor: pointer; }
 .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .toggle-slider {
   position: absolute; inset: 0; background: #ccc; border-radius: 24px;
-  transition: background 0.2s;
-  cursor: pointer;
+  transition: background 0.2s; cursor: pointer;
 }
 .toggle-slider::before {
   content: ''; position: absolute;
   width: 18px; height: 18px; left: 3px; top: 3px;
   background: white; border-radius: 50%;
-  transition: transform 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 .toggle-switch input:checked + .toggle-slider { background: var(--accent-color); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
 
-/* === 写真AI登録: リスト形式ボタン === */
 .photo-list-card {
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: var(--shadow-soft);
-  overflow: hidden;
-  margin-bottom: 0;
+  background: #fff; border-radius: 4px; box-shadow: var(--shadow-soft);
+  overflow: hidden; margin-bottom: 0;
 }
 .photo-list-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
-  border-bottom: 1px solid #f0f0f0;
-  cursor: pointer;
-  transition: background 0.15s;
-  position: relative;
+  display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+  border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.15s; position: relative;
 }
 .photo-list-item:last-child { border-bottom: none; }
 .photo-list-item:active { background: #f5f5f5; }
@@ -162,43 +145,20 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   position: absolute; inset: 0; opacity: 0; cursor: pointer;
   width: 100%; height: 100%; padding: 0; border: none; background: transparent; font-size: 16px;
 }
-.photo-list-icon {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: #f0eee9; display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; flex-shrink: 0;
-}
 .photo-list-label { font-size: 0.95rem; font-weight: 500; color: var(--text-main); }
 .photo-list-sub { font-size: 0.75rem; color: #999; margin-top: 1px; }
 .photo-list-arrow { margin-left: auto; color: #ccc; font-size: 0.9rem; flex-shrink: 0; }
 
-/* === AI自動入力ボタン: 入力欄と同じ高さ === */
 .name-search-row {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-  margin-bottom: 20px;
+  display: flex; gap: 10px; align-items: stretch; margin-bottom: 20px;
 }
-.name-search-row input {
-  flex: 1;
-  margin: 0;
-}
+.name-search-row input { flex: 1; margin: 0; }
 .name-search-row .ai-search-btn {
-  flex-shrink: 0;
-  width: auto;
-  padding: 0 18px;
-  margin: 0;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  border-radius: 4px;
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: unset;
-  height: auto;
+  flex-shrink: 0; width: auto; padding: 0 18px; margin: 0; font-size: 0.85rem;
+  white-space: nowrap; border-radius: 4px; align-self: stretch;
+  display: flex; align-items: center; justify-content: center; min-height: unset; height: auto;
 }
 
-/* === List Items === */
 .filter-tabs {
   display: flex; gap: 5px; margin-bottom: 15px; background: #e0e0e0;
   padding: 4px; border-radius: 6px;
@@ -224,20 +184,17 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .item-content { padding: 0 20px 20px; font-size: 0.9rem; color: var(--text-sub); border-top: 1px solid #f5f5f5; margin-top: 10px; padding-top: 15px; }
 .ingredients-box { background: #f9f9f9; padding: 10px; border-radius: 4px; font-size: 0.8rem; color: #555; margin-top: 10px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; }
 
-/* === Tag Selector in item detail === */
 .tag-selector { display: flex; gap: 6px; }
 .tag-btn {
   flex: 1; padding: 9px 4px; font-size: 0.8rem; font-weight: 500;
   background: #f5f5f5; color: #666; border: 1.5px solid #e0e0e0;
-  border-radius: 4px; margin: 0; width: auto; letter-spacing: 0;
-  transition: all 0.2s;
+  border-radius: 4px; margin: 0; width: auto; letter-spacing: 0; transition: all 0.2s;
 }
 .tag-btn:active { transform: scale(0.97); }
 .tag-active-morning { background: #fff8e1 !important; color: #f39c12 !important; border-color: #ffe0b2 !important; font-weight: 700 !important; }
 .tag-active-night   { background: #e8eaf6 !important; color: #3f51b5 !important; border-color: #c5cae9 !important; font-weight: 700 !important; }
 .tag-active-both    { background: #f3e5f5 !important; color: #9c27b0 !important; border-color: #e1bee7 !important; font-weight: 700 !important; }
 
-/* === Cospa === */
 .cospa-card { background: #fff; padding: 20px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #eee; position: relative; }
 .cospa-header { display: flex; justify-content: space-between; align-items: baseline; padding-right: 30px; }
 .cospa-price { font-family: var(--font-serif); font-size: 1.6rem; color: var(--text-main); font-weight: 600; }
@@ -248,7 +205,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .cospa-delete-btn { position: absolute; top: 15px; right: 15px; width: 24px; height: 24px; padding: 0; margin: 0; background: transparent; color: #ccc; border: none; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
 .cospa-delete-btn:hover { color: #d32f2f; }
 
-/* === Chat UI === */
 .chat-area { padding-bottom: 120px; display: flex; flex-direction: column; gap: 20px; }
 .msg-row { display: flex; width: 100%; }
 .msg-row.user { justify-content: flex-end; }
@@ -274,7 +230,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .chat-input:focus { border-color: var(--accent-color); }
 .send-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-/* === Utils === */
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -290,13 +245,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 </head>
 <body>
 
-<!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.14 Fast</span>
+  <span class="brand-subtitle">PRO EDITION v10.15 Fast</span>
 </div>
 
-<!-- Tabs -->
 <div class="tabs-sticky-wrapper">
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('register')" id="btn-register">登録</button>
@@ -306,14 +259,12 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   </div>
 </div>
 
-<!-- Main Content -->
 <div class="container">
 
   <!-- ================= REGISTER TAB ================= -->
   <div id="tab-register" class="tab-content active">
     <div class="section-title"><span>アイテム登録</span></div>
 
-    <!-- 写真AI登録 -->
     <div class="photo-list-card" style="margin-bottom: 20px;">
       <div class="photo-list-item">
         <div>
@@ -325,10 +276,9 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       </div>
     </div>
 
-    <!-- Manual Input Form -->
     <div class="card">
       <div class="name-search-row">
-        <input type="text" id="itemName" placeholder="商品名 (必須)">
+        <input type="text" id="itemName" placeholder="商品名 (ニックネーム・略称でもOK)">
         <button onclick="triggerManualAISearch()" id="btn-ai-search" class="btn-accent ai-search-btn">AI自動入力</button>
       </div>
       <div class="input-group"><input type="text" id="brand" placeholder="ブランド名"></div>
@@ -432,7 +382,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
       </div>
 
-      <!-- チャット用モデル -->
       <div class="input-group" style="margin-top:30px;">
         <label>チャット用モデル</label>
         <select id="chatModelSelect" onchange="updateModelCodeDisplay()">
@@ -454,7 +403,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         </div>
       </div>
 
-      <!-- 検索・登録用モデル -->
       <div class="input-group">
         <label>検索・登録用モデル</label>
         <select id="fastModelSelect" onchange="updateModelCodeDisplay()">
@@ -488,7 +436,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   </div>
 </div>
 
-<!-- Global Overlay -->
 <div id="progressOverlay" class="progress-overlay">
   <div class="progress-spinner"></div>
   <div id="progressText" style="font-family:var(--font-serif); font-size:1.1rem; color:#555;">処理中...</div>
@@ -506,7 +453,6 @@ let currentFilter = 'active';
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
 
-// 思考モード: gemini-2.5-pro / gemini-2.5-flash のみ対応
 function modelSupportsThinking(modelId) {
   return modelId && modelId.startsWith('gemini-2.5') && !modelId.includes('lite');
 }
@@ -517,9 +463,7 @@ function getGenConfig(isFast) {
   const thinkingToggle = isFast
     ? document.getElementById('fastThinkingToggle')?.checked
     : document.getElementById('chatThinkingToggle')?.checked;
-
   const cfg = { temperature: isFast ? 0.2 : 0.7 };
-
   if (thinkingToggle && modelSupportsThinking(modelId)) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
@@ -562,13 +506,11 @@ function getApiUrl(isFast) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
 
+// ★修正1: 200ms待機を削除して即時実行（高速化の核心）
 async function waitForRateLimit() {
-  var now = Date.now();
-  if (now - lastRequestTime < 200) await new Promise(r => setTimeout(r, 200 - (now - lastRequestTime)));
   lastRequestTime = Date.now();
 }
 
-/* UI Helpers */
 function showOverlay(txt) {
   document.getElementById('progressOverlay').style.display = 'flex';
   document.getElementById('progressText').textContent = txt;
@@ -581,7 +523,6 @@ function setBtnLoading(btnId, isLoading, text='AI自動入力') {
   else { btn.disabled = false; btn.textContent = text; }
 }
 
-// JSONパース
 function parseAIJson(text) {
   if(!text) return null;
   try { return JSON.parse(text); } catch(e) {}
@@ -595,21 +536,15 @@ function parseAIJson(text) {
   return null;
 }
 
-/* =====================================================
-   callGeminiAPI
-   ・リトライロジックを削除（クォータ節約のため）
-   ・gemini-3系はresponseMimeType非対応のため送信しない
-   ===================================================== */
 async function callGeminiAPI(url, parts, config, jsonMode = false) {
   var genConfig = Object.assign({}, config);
-
-  // gemini-3系はresponseMimeType非対応
   var supportsJsonMode = !url.includes('gemini-3');
   if (jsonMode && supportsJsonMode) {
     genConfig.responseMimeType = "application/json";
   }
+  // ★修正2: maxOutputTokensのデフォルトを512→200に削減（応答速度改善）
   if (jsonMode && !genConfig.maxOutputTokens) {
-    genConfig.maxOutputTokens = 512;
+    genConfig.maxOutputTokens = 200;
   }
 
   var res = await fetch(url, {
@@ -621,8 +556,6 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
   if (!res.ok) {
     var errJson = await res.json().catch(() => ({}));
     var errMsg = errJson?.error?.message || `HTTP ${res.status}`;
-
-    // クォータ超過
     if (res.status === 429 || errMsg.includes('quota') || errMsg.includes('Quota')) {
       var retryMatch = errMsg.match(/retry in ([\d.]+)s/i);
       var waitSec = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : null;
@@ -630,33 +563,22 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
         (waitSec ? `約${waitSec}秒後にお試しください。` : 'しばらく待ってから再試行してください。') +
         '\n設定でより軽量なモデル（Flash-Lite）への変更もお試しください。');
     }
-
-    // サーバー過負荷
     if (res.status === 503 || errMsg.includes('high demand') || errMsg.includes('overloaded') || errMsg.includes('UNAVAILABLE')) {
       throw new Error('サーバーが混雑しています。しばらく待ってから再試行してください。\n（数秒〜数十秒後に再度お試しください）');
     }
-
-    // ★リトライなし: エラーをそのままスロー（旧コードの2重通信を排除）
     throw new Error(errMsg);
   }
 
   var d = await res.json();
-
   if (!d.candidates || d.candidates.length === 0) {
     var reason = d.promptFeedback?.blockReason || '不明';
     throw new Error(`応答がブロックされました（理由: ${reason}）`);
   }
-
   var resParts = d.candidates[0]?.content?.parts || [];
   var textPart = resParts.filter(p => typeof p.text === 'string').pop();
   return textPart?.text || '';
 }
 
-/* =====================================================
-   handleImageSelect
-   ★変更: 2ステップ→1ステップに統合（速度改善）
-   ★変更: 思考モード強制OFF
-   ===================================================== */
 async function handleImageSelect(e) {
   if(!validateApiKey() || isRequesting) return;
   var file = e.target.files[0];
@@ -668,14 +590,12 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // ★1回の通信で全情報を取得（旧:2回→新:1回）
     var combinedPrompt = `この化粧品画像を解析し、以下の情報をJSON形式で抽出してください。必ずJSONのみ返してください。
 {"itemName":"商品名","brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"特徴の要約","price":0,"releaseDate":"YYYY/MM/DD"}`;
 
-    // ★高速化修正: 画像解析でも思考モードをOFFにして速度優先
     var imgConfig = getGenConfig(true);
     if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
-    imgConfig.temperature = 0.1; // 安定性重視
+    imgConfig.temperature = 0.1;
 
     var responseText = await callGeminiAPI(getImageApiUrl(), [
       { text: combinedPrompt },
@@ -720,7 +640,11 @@ function compressImage(file) {
   });
 }
 
-/* Text Search (AI自動入力) */
+/* =====================================================
+   triggerManualAISearch
+   ★修正3: プロンプトを曖昧名対応＋短縮化
+   ★修正4: maxOutputTokens=200を明示指定
+   ===================================================== */
 async function triggerManualAISearch() {
   if(!validateApiKey() || isRequesting) return;
   var name = document.getElementById('itemName').value.trim();
@@ -731,16 +655,16 @@ async function triggerManualAISearch() {
 
   try {
     await waitForRateLimit();
-    // プロンプトを微調整して、より直接的にJSONを要求（トークン節約）
-    var p = `化粧品「${name}」の情報をJSONで出力:
-{"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"全成分","description":"短い説明","price":0,"releaseDate":""}`;
 
-    // ★高速化の核心修正★
-    // ユーザー設定で「思考モード」がONになっていても、データ検索時は強制OFFにする
-    // これにより5～10秒かかっていた処理が、モデルの本来の速度（0.5～1秒）になる
+    // ★曖昧な商品名・略称・ニックネームでも推測して回答するよう指示
+    // ★全成分は重いので主要成分5つまでに絞り、応答を短縮
+    var p = `日本の化粧品「${name}」に最も近い商品を1つ特定し、JSONのみ返せ。商品名が不完全・略称・ニックネームでも必ず推測して回答すること。不明項目は空文字。
+{"brand":"","category":"洗顔料|化粧水|乳液|美容液|クリーム|その他","ingredients":"主要成分5つまで","description":"1文以内","price":0,"releaseDate":""}`;
+
     var searchConfig = getGenConfig(true);
-    if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig; 
-    searchConfig.temperature = 0; // 迷いをなくして最速応答させる
+    if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
+    searchConfig.temperature = 0.1; // わずかな柔軟性（曖昧名推測のため）
+    searchConfig.maxOutputTokens = 200; // ★明示指定で応答を短く・速く
 
     var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], searchConfig, true);
     var j = parseAIJson(text);
@@ -762,7 +686,6 @@ async function triggerManualAISearch() {
   }
 }
 
-/* Data Logic */
 function addItem() {
   var item = {
     id: Date.now(),
@@ -918,10 +841,6 @@ function getDays(i) {
 }
 function getDaily(i) { return i.price / getDays(i); }
 
-/* =====================================================
-   Chat
-   ★変更: コンテキストから ingredients を除外（クォータ節約）
-   ===================================================== */
 function createNewChat() {
   var id = 'chat_' + Date.now();
   chatHistories.unshift({ id: id, title: '新規チャット', date: new Date().toISOString(), messages: [{ type: 'ai', text: 'こんにちは！登録コスメに基づいたアドバイスをします。何でも聞いてください✨' }] });
@@ -994,19 +913,14 @@ async function sendChatMessage() {
 
   try {
     await waitForRateLimit();
-
-    // ★成分(ingredients)を除外してトークン節約
-    // 成分キーワードが含まれる質問の場合のみ成分も送る
     var needsIngredients = /成分|アレルギー|敏感|刺激|相性|配合/.test(txt);
     var context = JSON.stringify(cosmeData.map(c => {
       var obj = { n: c.name, b: c.brand, c: c.category };
       if(needsIngredients && c.ingredients) {
-        // 成分は先頭100文字のみ（トークン節約）
         obj.ing = c.ingredients.substring(0, 100);
       }
       return obj;
     }));
-
     var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
     var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], getGenConfig(false));
     if(!ans) ans = "回答を取得できませんでした。";
@@ -1035,23 +949,19 @@ function toggleChatHistory() {
   renderChatList();
 }
 
-/* Settings */
 function loadModelSettings() {
   var cm = localStorage.getItem('chatModel_v1') || DEFAULT_CHAT_MODEL;
   var fm = localStorage.getItem('fastModel_v1') || DEFAULT_FAST_MODEL;
-
   var cmSel = document.getElementById('chatModelSelect');
   var fmSel = document.getElementById('fastModelSelect');
   if ([...cmSel.options].some(o => o.value === cm)) cmSel.value = cm;
   else { cmSel.value = DEFAULT_CHAT_MODEL; localStorage.setItem('chatModel_v1', DEFAULT_CHAT_MODEL); }
   if ([...fmSel.options].some(o => o.value === fm)) fmSel.value = fm;
   else { fmSel.value = DEFAULT_FAST_MODEL; localStorage.setItem('fastModel_v1', DEFAULT_FAST_MODEL); }
-
   var chatThinking = localStorage.getItem('chatThinking_v1');
   var fastThinking = localStorage.getItem('fastThinking_v1');
   document.getElementById('chatThinkingToggle').checked = chatThinking === null ? true : chatThinking === 'true';
   document.getElementById('fastThinkingToggle').checked = fastThinking === null ? false : fastThinking === 'true';
-
   updateModelCodeDisplay();
 }
 function updateModelCodeDisplay() {
@@ -1068,7 +978,6 @@ function saveSettings() {
 }
 function clearApiKey() { localStorage.removeItem('geminiApiKey_v1'); document.getElementById('geminiApiKey').value = ''; alert('APIキーを削除しました'); }
 
-/* Data IO */
 function exportData() {
   var b = new Blob([JSON.stringify({data:cosmeData, chats:chatHistories})], {type:'application/json'});
   var a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='cosme_backup.json'; a.click();
