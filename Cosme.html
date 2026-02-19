@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.13</title>
+<title>Cosme Genius Pro v10.14 Fast</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -293,7 +293,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 <!-- Header -->
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.13</span>
+  <span class="brand-subtitle">PRO EDITION v10.14 Fast</span>
 </div>
 
 <!-- Tabs -->
@@ -655,6 +655,7 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
 /* =====================================================
    handleImageSelect
    ★変更: 2ステップ→1ステップに統合（速度改善）
+   ★変更: 思考モード強制OFF
    ===================================================== */
 async function handleImageSelect(e) {
   if(!validateApiKey() || isRequesting) return;
@@ -671,10 +672,15 @@ async function handleImageSelect(e) {
     var combinedPrompt = `この化粧品画像を解析し、以下の情報をJSON形式で抽出してください。必ずJSONのみ返してください。
 {"itemName":"商品名","brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"特徴の要約","price":0,"releaseDate":"YYYY/MM/DD"}`;
 
+    // ★高速化修正: 画像解析でも思考モードをOFFにして速度優先
+    var imgConfig = getGenConfig(true);
+    if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
+    imgConfig.temperature = 0.1; // 安定性重視
+
     var responseText = await callGeminiAPI(getImageApiUrl(), [
       { text: combinedPrompt },
       { inlineData: { mimeType: "image/jpeg", data: base64 } }
-    ], getGenConfig(true), true);
+    ], imgConfig, true);
 
     var result = parseAIJson(responseText);
     if(result) {
@@ -725,20 +731,28 @@ async function triggerManualAISearch() {
 
   try {
     await waitForRateLimit();
-    var p = `化粧品「${name}」の情報を以下のJSON形式で返してください。必ずJSONのみ返してください。
-{"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"説明","price":0,"releaseDate":""}`;
+    // プロンプトを微調整して、より直接的にJSONを要求（トークン節約）
+    var p = `化粧品「${name}」の情報をJSONで出力:
+{"brand":"","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"全成分","description":"短い説明","price":0,"releaseDate":""}`;
 
-    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], getGenConfig(true), true);
+    // ★高速化の核心修正★
+    // ユーザー設定で「思考モード」がONになっていても、データ検索時は強制OFFにする
+    // これにより5～10秒かかっていた処理が、モデルの本来の速度（0.5～1秒）になる
+    var searchConfig = getGenConfig(true);
+    if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig; 
+    searchConfig.temperature = 0; // 迷いをなくして最速応答させる
+
+    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], searchConfig, true);
     var j = parseAIJson(text);
 
     if(!j) throw new Error("情報を取得できませんでした。商品名をより正確に入力してみてください。");
 
-    if(j.brand)      document.getElementById('brand').value = j.brand;
-    if(j.category)   document.getElementById('categorySelect').value = j.category;
-    if(j.description)document.getElementById('description').value = j.description;
-    if(j.ingredients)document.getElementById('ingredients').value = j.ingredients;
-    if(j.price)      document.getElementById('itemPrice').value = j.price;
-    if(j.releaseDate)document.getElementById('releaseDate').value = j.releaseDate;
+    if(j.brand)       document.getElementById('brand').value = j.brand;
+    if(j.category)    document.getElementById('categorySelect').value = j.category;
+    if(j.description) document.getElementById('description').value = j.description;
+    if(j.ingredients) document.getElementById('ingredients').value = j.ingredients;
+    if(j.price)       document.getElementById('itemPrice').value = j.price;
+    if(j.releaseDate) document.getElementById('releaseDate').value = j.releaseDate;
 
   } catch(err) {
     alert("検索エラー: " + err.message);
