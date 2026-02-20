@@ -253,12 +253,13 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .send-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
 .chat-options {
-  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
-  font-size: 0.75rem; color: var(--text-sub); width: 100%;
+  display: flex; gap: 6px; justify-content: center; flex-wrap: nowrap;
+  font-size: 0.7rem; color: var(--text-sub); width: 100%;
 }
 .chat-options label {
   display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 600; cursor: pointer; white-space: nowrap;
-  background: rgba(0,0,0,0.04); padding: 5px 10px; border-radius: 20px; transition: background 0.2s;
+  background: rgba(0,0,0,0.04); padding: 5px 8px; border-radius: 20px; transition: background 0.2s;
+  flex-shrink: 0;
 }
 .chat-options label:active { background: rgba(0,0,0,0.08); }
 .chat-options input[type="checkbox"] {
@@ -270,9 +271,10 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .chat-select {
   appearance: none; -webkit-appearance: none;
   background: rgba(0,0,0,0.04) url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 8px center / 8px auto;
-  border: none; border-radius: 20px; padding: 5px 24px 5px 12px;
-  font-size: 0.75rem; font-weight: 600; color: var(--text-main); cursor: pointer;
+  border: none; border-radius: 20px; padding: 5px 22px 5px 10px;
+  font-size: 0.7rem; font-weight: 600; color: var(--text-main); cursor: pointer;
   outline: none; font-family: var(--font-sans);
+  flex-shrink: 1; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;
 }
 .chat-select:active { background-color: rgba(0,0,0,0.08); }
 
@@ -408,11 +410,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <div class="chat-options">
         <!-- ▼ 成分のON/OFFをトークン節約用のプルダウンに変更 -->
         <select id="chatDataLevel" class="chat-select" onchange="syncSettingsOptions(); saveProfile(true)">
-          <option value="none">コスメ送らない</option>
-          <option value="name">商品名のみ(節約)</option>
-          <option value="ingredients">成分も送る(精密)</option>
+          <option value="none">送らない</option>
+          <option value="name">商品名(節約)</option>
+          <option value="ingredients">成分(精密)</option>
         </select>
-        <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフ反映</label>
+        <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフ</label>
         <label><input type="checkbox" id="chatOptCospa" onchange="syncSettingsOptions(); saveProfile(true)"> コスパ</label>
       </div>
     </div>
