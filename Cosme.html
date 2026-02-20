@@ -173,7 +173,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .summary-top-row { display: flex; align-items: flex-start; justify-content: space-between; width: 100%; }
 .summary-bottom-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .item-brand { font-size: 0.7rem; color: #666; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 2px; }
-.item-name { font-size: 1.05rem; font-weight: 600; color: var(--text-main); white-space: normal; word-break: break-all; line-height: 1.4; }
+.item-name { font-size: 1.05rem; font-weight: 600; color: var(--text-main); white-space: normal; word-break: break-all; line-height: 1.4; transition: opacity 0.3s; }
 .item-badges { display: flex; gap: 5px; flex-shrink: 0; align-items: center; flex-wrap: wrap; }
 .badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 2px; font-weight: 600; }
 .badge.morning { background: #fff8e1; color: #f39c12; border: 1px solid #ffe0b2; }
@@ -256,7 +256,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 }
 .chip.selected { background: var(--accent-color); color: #fff; border-color: var(--accent-color); font-weight: 600; }
 .chip:active { transform: scale(0.96); }
-.weather-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #eef7ff; border: 1px solid #c5dfff; border-radius: 4px; font-size: 0.82rem; color: #2a6ab0; margin-top: 8px; }
+.weather-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #eef7ff; border: 1px solid #c5dfff; border-radius: 4px; font-size: 0.82rem; color: #2a6ab0; margin-top: 8px; transition: opacity 0.3s; }
 .weather-badge .w-icon { font-size: 1.1rem; }
 </style>
 </head>
@@ -264,7 +264,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.17</span>
+  <span class="brand-subtitle">PRO EDITION v10.18</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -395,15 +395,15 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
     <div class="section-title"><span>プロフィール設定</span></div>
     <div class="card">
       <div class="input-group">
-        <label class="profile-section-label">年齢</label>
-        <input type="number" id="profileAge" placeholder="例: 28" min="10" max="100" style="width:120px;">
-      </div>
-
-      <div class="input-group">
         <label class="profile-section-label">居住地域</label>
         <input type="text" id="profileRegion" placeholder="例: 東京都 / 富山市 / 北海道">
         <div id="weatherInfo" style="margin-top:8px;"></div>
-        <button onclick="fetchWeather()" class="btn-secondary" style="margin-top:8px; width:auto; padding:8px 16px; font-size:0.8rem;">🌤 天気・環境を取得</button>
+        <button onclick="fetchWeather(false)" class="btn-secondary" style="margin-top:8px; width:auto; padding:8px 16px; font-size:0.8rem;">🌤 今の天気を手動取得</button>
+      </div>
+
+      <div class="input-group">
+        <label class="profile-section-label">年齢</label>
+        <input type="number" id="profileAge" placeholder="例: 28" min="10" max="100" style="width:120px;">
       </div>
 
       <div class="input-group">
@@ -568,11 +568,14 @@ function saveProfile() {
     skinConcernExtra: document.getElementById('skinConcernExtra').value,
     lifestyle: getSelectedChips('lifestyleGroup'),
     sleep: getSelectedChips('sleepGroup'),
-    weatherCache: userProfile.weatherCache || null
+    weatherCache: userProfile.weatherCache || null,
+    weatherLastFetched: userProfile.weatherLastFetched || null
   };
   localStorage.setItem('userProfile_v1', JSON.stringify(userProfile));
   alert('プロフィールを保存しました');
+  checkAndFetchWeather();
 }
+
 function loadProfile() {
   if (!userProfile) return;
   if (userProfile.age) document.getElementById('profileAge').value = userProfile.age;
@@ -583,7 +586,11 @@ function loadProfile() {
   setSelectedChips('lifestyleGroup', userProfile.lifestyle);
   setSelectedChips('sleepGroup', userProfile.sleep);
   if (userProfile.weatherCache) showWeatherBadge(userProfile.weatherCache);
+  
+  // ロード時に天気の自動更新をチェック
+  checkAndFetchWeather();
 }
+
 function getProfileContext() {
   if (!userProfile) return '';
   const parts = [];
@@ -602,22 +609,60 @@ function getProfileContext() {
   return parts.length ? `ユーザープロフィール=[${parts.join('、')}]` : '';
 }
 
-// ===== 天気取得 (OpenStreetMap Nominatim に変更: 日本語に強い) =====
-async function fetchWeather() {
+// ===== 天気取得 (0時, 6時, 12時, 18時をまたいだら自動取得) =====
+function checkAndFetchWeather() {
   const region = document.getElementById('profileRegion').value.trim();
-  if (!region) return alert('地域名を入力してください');
+  if (!region) return;
+
+  const lastFetch = userProfile.weatherLastFetched || 0;
+  const now = Date.now();
+  const lastDate = new Date(lastFetch);
+  const nowDate = new Date(now);
+
+  let shouldFetch = false;
+
+  if (now - lastFetch > 24 * 60 * 60 * 1000) {
+    shouldFetch = true; // 24時間以上経過
+  } else if (lastDate.getDate() !== nowDate.getDate()) {
+    shouldFetch = true; // 日をまたいだ
+  } else {
+    // 0, 6, 12, 18 の境界チェック (6時間ごとのスロットが変わったか)
+    const getSlot = (h) => Math.floor(h / 6); 
+    if (getSlot(lastDate.getHours()) !== getSlot(nowDate.getHours())) {
+      shouldFetch = true;
+    }
+  }
+
+  if (shouldFetch) {
+    fetchWeather(true); // true = サイレント（裏側で取得してアラートを出さない）
+  }
+}
+// 1時間ごとに裏側でチェックを走らせる
+setInterval(checkAndFetchWeather, 60 * 60 * 1000);
+
+async function fetchWeather(isSilent = false) {
+  const region = document.getElementById('profileRegion').value.trim();
+  if (!region) {
+    if (!isSilent) alert('地域名を入力してください');
+    return;
+  }
+  
+  if (!isSilent) {
+    document.getElementById('weatherInfo').innerHTML = `<span style="font-size:0.8rem; color:#888;">取得中...</span>`;
+  }
+
   try {
-    // Nominatim Geocoding
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(region)}&format=json&limit=1`);
     const geoData = await geoRes.json();
     if (!geoData || geoData.length === 0) {
-        return alert('地域が見つかりませんでした。「都道府県」や「市区町村」の名前で再試行してください（例: 東京都、富山市）。');
+        if (!isSilent) alert('地域が見つかりませんでした。「都道府県」や「市区町村」の名前で再試行してください（例: 東京都、富山市）。');
+        document.getElementById('weatherInfo').innerHTML = '';
+        return;
     }
     const latitude = geoData[0].lat;
     const longitude = geoData[0].lon;
-    const name = region; // 入力された名前をそのまま使う
+    const name = region; 
     
-    // Weather (Open-Meteo)
     const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature&timezone=auto`);
     const wData = await wRes.json();
     const cur = wData.current;
@@ -629,11 +674,15 @@ async function fetchWeather() {
       desc: weatherCodeToDesc(cur.weather_code),
       uv: getUVLevel(latitude)
     };
+    
     userProfile.weatherCache = cache;
+    userProfile.weatherLastFetched = Date.now();
     localStorage.setItem('userProfile_v1', JSON.stringify(userProfile));
+    
     showWeatherBadge(cache);
   } catch(e) {
-    alert('天気取得に失敗しました: ' + e.message);
+    if (!isSilent) alert('天気取得に失敗しました: ' + e.message);
+    document.getElementById('weatherInfo').innerHTML = '';
   }
 }
 function weatherCodeToDesc(code) {
@@ -744,12 +793,24 @@ function parseAIJson(text) {
   return null;
 }
 
-async function callGeminiAPI(url, parts, config, jsonMode = false) {
+// ★ 高速化の要：Schema機能を使い、AIの思考の無駄を省きJSONのパースエラーを根絶する
+async function callGeminiAPI(url, parts, config, useSchema = false) {
   var genConfig = Object.assign({}, config);
-  var supportsJsonMode = !url.includes('gemini-3');
-  // JSONモードを有効化するとエラーが減り高速化します
-  if (jsonMode && supportsJsonMode) {
+  
+  if (useSchema) {
     genConfig.responseMimeType = "application/json";
+    genConfig.responseSchema = {
+      type: "OBJECT",
+      properties: {
+        itemName: { type: "STRING" },
+        brand: { type: "STRING" },
+        category: { type: "STRING" },
+        ingredients: { type: "STRING" },
+        description: { type: "STRING" },
+        price: { type: "NUMBER" }
+      },
+      required: ["itemName", "brand", "category", "ingredients", "description", "price"]
+    };
   }
 
   var res = await fetch(url, {
@@ -795,8 +856,8 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // 出力を極限まで減らして高速化
-    var combinedPrompt = `画像を解析し以下のJSONフォーマットで返せ。{"brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"主要成分3つ","description":"15文字以内の特徴","price":0,"itemName":"商品名"}`;
+    // プロンプトを元に戻し、全成分と詳しい特徴を要求
+    var combinedPrompt = `この化粧品画像を解析し、詳細情報を抽出してください。全成分と詳しい説明（特徴）は絶対に省略せずに記述してください。\n必ずJSONフォーマットのみで出力してください。`;
 
     var imgConfig = getGenConfig(true);
     if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
@@ -809,7 +870,7 @@ async function handleImageSelect(e) {
     var result = parseAIJson(responseText);
     if(result) {
       if(result.itemName)   document.getElementById('itemName').value   = result.itemName;
-      if(result.brandName)  document.getElementById('brand').value      = result.brandName;
+      if(result.brand)      document.getElementById('brand').value      = result.brand; // Schemaのキーに合わせる
       if(result.category)   document.getElementById('categorySelect').value = result.category;
       if(result.description)document.getElementById('description').value= result.description;
       if(result.ingredients)document.getElementById('ingredients').value= result.ingredients;
@@ -832,7 +893,7 @@ function compressImage(file) {
       var img = new Image();
       img.onload = () => {
         var c = document.getElementById('compressionCanvas');
-        var scale = Math.min(1000/img.width, 1);
+        var scale = Math.min(800/img.width, 1); // 軽くするため少し縮小率を強めに
         c.width = img.width * scale; c.height = img.height * scale;
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
         r(c.toDataURL('image/jpeg', 0.8));
@@ -843,10 +904,6 @@ function compressImage(file) {
   });
 }
 
-/* =====================================================
-   triggerManualAISearch
-   ★ 高速化とエラー回避: プロンプト短縮、maxOutputTokens制限解除
-   ===================================================== */
 async function triggerManualAISearch() {
   if(!validateApiKey() || isRequesting) return;
   var name = document.getElementById('itemName').value.trim();
@@ -858,9 +915,8 @@ async function triggerManualAISearch() {
   try {
     await waitForRateLimit();
 
-    // 出力を極限まで減らして、高速化と途切れ（パースエラー）を防止
-    var p = `化粧品「${name}」の情報をJSONのみで出力せよ。略称も推測。
-{"brand":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"主要成分を3つ","description":"15文字以内の特徴","price":価格数値}`;
+    // プロンプトを元に戻し、全成分と詳しい特徴を要求
+    var p = `化粧品「${name}」の詳細情報を検索してください。略称も推測して。全成分と詳しい説明（特徴）は絶対に省略せずに記述してください。\n必ずJSONフォーマットのみで出力してください。`;
 
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
@@ -906,10 +962,7 @@ function addItem() {
 function saveData() { localStorage.setItem('cosmeData_v8', JSON.stringify(cosmeData)); }
 function removeItem(id) { if(confirm('削除しますか？')) { cosmeData = cosmeData.filter(i => i.id !== id); saveData(); render(); renderCospa(); } }
 function removeCospaItem(id) { if(confirm('このアイテムを削除しますか？')) { cosmeData = cosmeData.filter(i => i.id !== id); saveData(); render(); renderCospa(); } }
-function markFinished(id) {
-  var i = cosmeData.find(x => x.id === id);
-  if(i) { i.finishDate = i.finishDate ? null : new Date().toISOString().split('T')[0]; saveData(); render(); renderCospa(); }
-}
+
 function saveEdit(id, key, val) { var i = cosmeData.find(x => x.id === id); if(i) { i[key] = val; saveData(); renderCospa(); } }
 
 function saveTagEdit(id, tag, clickedBtn) {
@@ -940,7 +993,6 @@ function setFilter(type) {
 
 // ===== 開いているアコーディオンの状態を維持しながら描画 =====
 function render() {
-  // 描画前に開いているアイテムのIDを取得
   var openIds = Array.from(document.querySelectorAll('.item-card-details[open]')).map(el => parseInt(el.getAttribute('data-id')));
 
   var type = document.getElementById('sortSelect').value;
@@ -958,7 +1010,6 @@ function render() {
     var badgeClass = item.tag === '朝' ? 'morning' : (item.tag === '晩' ? 'night' : 'both');
     var badgeLabel = item.tag === '朝' ? '朝' : (item.tag === '晩' ? '夜' : '朝夜');
     var categoryLabel = item.category || 'その他';
-    // 前に開いていたなら open 属性を付与
     var isOpen = openIds.includes(item.id) ? 'open' : '';
     
     html += `
@@ -1007,14 +1058,58 @@ function render() {
   document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;font-size:0.9rem;">該当するアイテムはありません</div>';
 }
 
+// ★ 修正：使い切り状態を変更した際に、画面全体の再描画（render）を行わず、対象のDOMだけを更新してその場に残すようにしました。
 function saveFinishDate(id, val) {
   var i = cosmeData.find(x => x.id === id);
   if (!i) return;
   i.finishDate = val || null;
   saveData();
-  // 描画後もアコーディオンが開いたまま維持される
-  render();
+  updateItemDOM(id);
   renderCospa();
+}
+
+function markFinished(id) {
+  var i = cosmeData.find(x => x.id === id);
+  if(i) { 
+    i.finishDate = i.finishDate ? null : new Date().toISOString().split('T')[0]; 
+    saveData(); 
+    updateItemDOM(id);
+    renderCospa(); 
+  }
+}
+
+// 対象アイテムの見た目だけを更新する関数
+function updateItemDOM(id) {
+  var item = cosmeData.find(x => x.id === id);
+  if(!item) return;
+  var details = document.querySelector(`.item-card-details[data-id="${id}"]`);
+  if(!details) return;
+
+  var nameEl = details.querySelector('.item-name');
+  if(nameEl) {
+    nameEl.style.textDecoration = item.finishDate ? 'line-through' : 'none';
+    nameEl.style.opacity = item.finishDate ? '0.6' : '1';
+  }
+
+  var badgesEl = details.querySelector('.item-badges');
+  var finishedBadge = badgesEl.querySelector('.badge.finished');
+  if(item.finishDate) {
+    if(!finishedBadge) {
+      badgesEl.insertAdjacentHTML('beforeend', '<span class="badge finished">使い切り</span>');
+    }
+  } else {
+    if(finishedBadge) finishedBadge.remove();
+  }
+
+  var dateInput = details.querySelector('input[type="date"][onchange*="saveFinishDate"]');
+  if(dateInput && dateInput.value !== (item.finishDate || '')) {
+    dateInput.value = item.finishDate || '';
+  }
+
+  var btn = details.querySelector('button[onclick*="markFinished"]');
+  if(btn) {
+    btn.textContent = item.finishDate ? '使い切り解除' : '今日で使い切り';
+  }
 }
 
 function renderCospa() {
