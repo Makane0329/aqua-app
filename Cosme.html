@@ -320,11 +320,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
     <div class="photo-list-card" style="margin-bottom: 20px;">
       <div class="photo-list-item">
         <div>
-          <div class="photo-list-label">📷 写真からAI精密登録</div>
+          <div class="photo-list-label" id="photo-ai-label">📷 写真からAI精密登録</div>
           <div class="photo-list-sub">最新の公式情報から成分を検索して自動入力</div>
         </div>
         <div class="photo-list-arrow">›</div>
-        <input type="file" accept="image/*" onchange="handleImageSelect(event)">
+        <input type="file" id="photo-upload-input" accept="image/*" onchange="handleImageSelect(event)">
       </div>
     </div>
 
@@ -603,22 +603,17 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   </div>
 </div>
 
-<div id="progressOverlay" class="progress-overlay">
-  <div class="progress-spinner"></div>
-  <div id="progressText" style="font-family:var(--font-serif); font-size:1.1rem; color:#555; text-align:center;">成分情報を精密に収集中...</div>
-  <div id="progressTime">約 -- 秒</div>
-</div>
 <canvas id="compressionCanvas" style="display:none;"></canvas>
 
 <script>
 let cosmeData = JSON.parse(localStorage.getItem('cosmeData_v8')) || [];
 let chatHistories = JSON.parse(localStorage.getItem('chatHistories_v1')) || [];
 let currentChatId = null;
-let isRequesting = false;
+let isAutoInputRunning = false;
+let isChatRequesting = false;
 let lastRequestTime = 0;
 let currentFilter = 'active';
 let userProfile = JSON.parse(localStorage.getItem('userProfile_v1')) || {};
-let countdownTimer = null;
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
@@ -851,11 +846,6 @@ function getGenConfig(isFast) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
   
-  // ★ 自動入力の時は、公式情報を取得して成分の正確性を高めるために検索グラウンディングを有効化
-  if (isFast) {
-    cfg.tools = [{ "google_search": {} }];
-  }
-  
   return cfg;
 }
 
@@ -900,55 +890,40 @@ async function waitForRateLimit() {
   lastRequestTime = Date.now();
 }
 
-// ===== カウントダウン付きプログレス表示 =====
-function startProgress(isFastMode) {
-  const overlay = document.getElementById('progressOverlay');
-  const textEl = document.getElementById('progressText');
-  const timeEl = document.getElementById('progressTime');
-  
-  overlay.style.display = 'flex';
-  textEl.innerHTML = "AIが公式情報から<br>正確な成分を検索中...";
-  
-  let modelId = '';
-  let thinking = false;
-  if(isFastMode) {
-      modelId = document.getElementById('fastModelSelect').value;
-      thinking = document.getElementById('fastThinkingToggle').checked;
-  } else {
-      modelId = document.getElementById('chatModelSelect').value;
-      thinking = document.getElementById('chatThinkingToggle').checked;
-  }
-  
-  // モデル設定に基づく大まかな予測秒数
+// ===== ボタン内カウントダウン用関数 =====
+function getEstTime(isFastMode) {
+  let modelId = isFastMode ? document.getElementById('fastModelSelect').value : document.getElementById('chatModelSelect').value;
+  let thinking = isFastMode ? document.getElementById('fastThinkingToggle').checked : document.getElementById('chatThinkingToggle').checked;
   let estTime = 12; 
   if(modelId.includes('pro')) estTime += 5;
   if(thinking && modelSupportsThinking(modelId)) estTime += 15;
+  return estTime;
+}
+
+function startButtonCountdown(btnEl, isFastMode, defaultText) {
+  btnEl.dataset.originalText = defaultText;
+  if (btnEl.tagName === 'BUTTON') btnEl.disabled = true;
+  let time = getEstTime(isFastMode);
+  btnEl.innerHTML = `検索中... 残り${time}秒`;
   
-  timeEl.textContent = `残り ${estTime} 秒`;
-  
-  clearInterval(countdownTimer);
-  countdownTimer = setInterval(() => {
-    estTime--;
-    if (estTime > 0) {
-      timeEl.textContent = `残り ${estTime} 秒`;
+  const timer = setInterval(() => {
+    time--;
+    if (time > 0) {
+      btnEl.innerHTML = `検索中... 残り${time}秒`;
     } else {
-      // 0になったら止めるのではなく、最終フェーズのアナウンスに変える
-      timeEl.textContent = "データ最終整形中...";
-      clearInterval(countdownTimer);
+      btnEl.innerHTML = "最終整形中...";
+      clearInterval(timer);
     }
   }, 1000);
+  return timer;
 }
 
-function stopProgress() {
-  clearInterval(countdownTimer);
-  document.getElementById('progressOverlay').style.display = 'none';
-}
-
-function setBtnLoading(btnId, isLoading, text='AI自動入力') {
-  var btn = document.getElementById(btnId);
-  if(!btn) return;
-  if(isLoading) { btn.disabled = true; btn.textContent = '検索中...'; }
-  else { btn.disabled = false; btn.textContent = text; }
+function stopButtonCountdown(btnEl, timer) {
+  clearInterval(timer);
+  if (btnEl.tagName === 'BUTTON') btnEl.disabled = false;
+  if(btnEl.dataset.originalText) {
+    btnEl.innerHTML = btnEl.dataset.originalText;
+  }
 }
 
 function parseAIJson(text) {
@@ -964,7 +939,7 @@ function parseAIJson(text) {
   return null;
 }
 
-async function callGeminiAPI(url, parts, config, useSchema = false) {
+async function callGeminiAPI(url, parts, config, useSchema = false, useSearch = false) {
   var genConfig = Object.assign({}, config);
   
   // ★ JSONスキーマの記述を厳格化してエラーを防ぐ
@@ -984,10 +959,19 @@ async function callGeminiAPI(url, parts, config, useSchema = false) {
     };
   }
 
+  let payload = {
+    contents: [{ parts: parts }],
+    generationConfig: genConfig
+  };
+
+  if (useSearch) {
+    payload.tools = [{ "google_search": {} }];
+  }
+
   var res = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ contents: [{ parts: parts }], generationConfig: genConfig })
+    body: JSON.stringify(payload)
   });
 
   if (!res.ok) {
@@ -1017,11 +1001,15 @@ async function callGeminiAPI(url, parts, config, useSchema = false) {
 }
 
 async function handleImageSelect(e) {
-  if(!validateApiKey() || isRequesting) return;
+  if(!validateApiKey() || isAutoInputRunning) return;
   var file = e.target.files[0];
   if(!file) return;
-  isRequesting = true;
-  startProgress(true); // カウントダウン開始
+  isAutoInputRunning = true;
+  
+  const labelEl = document.getElementById('photo-ai-label');
+  const inputEl = document.getElementById('photo-upload-input');
+  inputEl.disabled = true;
+  const timer = startButtonCountdown(labelEl, true, '📷 写真からAI精密登録');
 
   try {
     var base64 = (await compressImage(file)).split(',')[1];
@@ -1038,7 +1026,7 @@ async function handleImageSelect(e) {
     var responseText = await callGeminiAPI(getImageApiUrl(), [
       { text: combinedPrompt },
       { inlineData: { mimeType: "image/jpeg", data: base64 } }
-    ], imgConfig, true);
+    ], imgConfig, true, true);
 
     var result = parseAIJson(responseText);
     if(result) {
@@ -1055,8 +1043,9 @@ async function handleImageSelect(e) {
   } catch(err) {
     alert("エラー: " + err.message);
   } finally {
-    isRequesting = false; 
-    stopProgress(); // カウントダウン停止
+    isAutoInputRunning = false; 
+    stopButtonCountdown(labelEl, timer);
+    inputEl.disabled = false;
     e.target.value = '';
   }
 }
@@ -1080,13 +1069,13 @@ function compressImage(file) {
 }
 
 async function triggerManualAISearch() {
-  if(!validateApiKey() || isRequesting) return;
+  if(!validateApiKey() || isAutoInputRunning) return;
   var name = document.getElementById('itemName').value.trim();
   if(!name) return alert("商品名を入力してください");
 
-  isRequesting = true;
-  setBtnLoading('btn-ai-search', true);
-  startProgress(true); // カウントダウン開始
+  isAutoInputRunning = true;
+  const btnEl = document.getElementById('btn-ai-search');
+  const timer = startButtonCountdown(btnEl, true, 'AI自動入力');
 
   try {
     await waitForRateLimit();
@@ -1099,7 +1088,7 @@ async function triggerManualAISearch() {
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
 
-    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], searchConfig, true);
+    var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], searchConfig, true, true);
     var j = parseAIJson(text);
 
     if(!j) throw new Error("情報を取得できませんでした。商品名をより正確に入力してみてください。");
@@ -1113,9 +1102,8 @@ async function triggerManualAISearch() {
   } catch(err) {
     alert("検索エラー: " + err.message);
   } finally {
-    isRequesting = false;
-    setBtnLoading('btn-ai-search', false);
-    stopProgress(); // カウントダウン停止
+    isAutoInputRunning = false;
+    stopButtonCountdown(btnEl, timer);
   }
 }
 
@@ -1385,12 +1373,12 @@ function removeTypingIndicator() {
 function adjustChatHeight(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
 
 async function sendChatMessage() {
-  if(!validateApiKey() || isRequesting) return;
+  if(!validateApiKey() || isChatRequesting) return;
   var input = document.getElementById('chatInput');
   var txt = input.value.trim();
   if(!txt) return;
   input.value = ''; input.style.height = 'auto';
-  isRequesting = true;
+  isChatRequesting = true;
   appendMsg('user', txt);
   scrollToBottom();
 
@@ -1449,7 +1437,7 @@ async function sendChatMessage() {
     removeTypingIndicator();
     appendMsg('ai', "通信エラー: " + err.message);
   } finally {
-    isRequesting = false; scrollToBottom();
+    isChatRequesting = false; scrollToBottom();
   }
 }
 function saveChatHistories() { localStorage.setItem('chatHistories_v1', JSON.stringify(chatHistories)); }
