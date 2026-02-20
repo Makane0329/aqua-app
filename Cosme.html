@@ -131,6 +131,11 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .toggle-switch input:checked + .toggle-slider { background: var(--accent-color); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
 
+/* プロフィール用の小型トグルスイッチ */
+.toggle-switch.small { width: 36px; height: 20px; }
+.toggle-switch.small .toggle-slider::before { width: 14px; height: 14px; left: 3px; top: 3px; }
+.toggle-switch.small input:checked + .toggle-slider::before { transform: translateX(16px); }
+
 .photo-list-card {
   background: #fff; border-radius: 4px; box-shadow: var(--shadow-soft);
   overflow: hidden; margin-bottom: 0;
@@ -264,7 +269,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.19</span>
+  <span class="brand-subtitle">PRO EDITION v10.20</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -391,23 +396,47 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   <!-- ================= SETTINGS TAB ================= -->
   <div id="tab-settings" class="tab-content">
 
+    <!-- 相談連携設定 -->
+    <div class="section-title"><span>相談連携設定</span></div>
+    <div class="card" style="padding-bottom: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">登録コスメ情報を反映する</div>
+        <label class="toggle-label">
+          <div class="toggle-switch">
+            <input type="checkbox" id="reflectItems" onchange="saveProfile(true)">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+      </div>
+      <div style="font-size:0.75rem; color:#888; margin-top:5px;">※オフにすると手持ちアイテムを考慮しない一般的な回答になります</div>
+    </div>
+
     <!-- 自分の属性 -->
     <div class="section-title"><span>プロフィール設定</span></div>
     <div class="card">
       <div class="input-group">
-        <label class="profile-section-label">居住地域</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label class="profile-section-label" style="margin-bottom:0;">居住地域</label>
+          <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectRegion" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
+        </div>
         <input type="text" id="profileRegion" placeholder="例: 東京都 / 富山市 / 北海道">
         <div id="weatherInfo" style="margin-top:8px;"></div>
         <button onclick="fetchWeather(false)" class="btn-secondary" style="margin-top:8px; width:auto; padding:8px 16px; font-size:0.8rem;">🌤 今の天気を手動取得</button>
       </div>
 
       <div class="input-group">
-        <label class="profile-section-label">年齢</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label class="profile-section-label" style="margin-bottom:0;">年齢</label>
+          <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectAge" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
+        </div>
         <input type="number" id="profileAge" placeholder="例: 28" min="10" max="100" style="width:120px;">
       </div>
 
       <div class="input-group">
-        <label class="profile-section-label">肌質</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label class="profile-section-label" style="margin-bottom:0;">肌質</label>
+          <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectSkinType" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
+        </div>
         <div class="chip-group" id="skinTypeGroup">
           <div class="chip" onclick="toggleChip(this,'skinType')">普通肌</div>
           <div class="chip" onclick="toggleChip(this,'skinType')">乾燥肌</div>
@@ -418,7 +447,10 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       </div>
 
       <div class="input-group">
-        <label class="profile-section-label">今の悩み（複数選択可）</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label class="profile-section-label" style="margin-bottom:0;">今の悩み（複数選択可）</label>
+          <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectConcerns" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
+        </div>
         <div class="chip-group" id="skinConcernGroup">
           <div class="chip" onclick="toggleChip(this,'skinConcern')">シミ</div>
           <div class="chip" onclick="toggleChip(this,'skinConcern')">しわ</div>
@@ -431,7 +463,10 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       </div>
 
       <div class="input-group">
-        <label class="profile-section-label">生活習慣（日中の過ごし方）</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label class="profile-section-label" style="margin-bottom:0;">生活習慣（日中の過ごし方）</label>
+          <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectLifestyle" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
+        </div>
         <div class="chip-group" id="lifestyleGroup">
           <div class="chip" onclick="toggleChip(this,'lifestyle')">在宅ワーク</div>
           <div class="chip" onclick="toggleChip(this,'lifestyle')">オフィス勤務</div>
@@ -444,7 +479,10 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       </div>
 
       <div class="input-group">
-        <label class="profile-section-label">平均睡眠時間</label>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label class="profile-section-label" style="margin-bottom:0;">平均睡眠時間</label>
+          <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectSleep" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
+        </div>
         <div class="chip-group" id="sleepGroup">
           <div class="chip" onclick="toggleChip(this,'sleep')">5時間未満</div>
           <div class="chip" onclick="toggleChip(this,'sleep')">5〜6時間</div>
@@ -559,7 +597,7 @@ function setSelectedChips(groupId, values) {
 }
 
 // ===== プロフィール =====
-function saveProfile() {
+function saveProfile(isSilent = false) {
   userProfile = {
     age: document.getElementById('profileAge').value,
     region: document.getElementById('profileRegion').value,
@@ -569,10 +607,19 @@ function saveProfile() {
     lifestyle: getSelectedChips('lifestyleGroup'),
     sleep: getSelectedChips('sleepGroup'),
     weatherCache: userProfile.weatherCache || null,
-    weatherLastFetched: userProfile.weatherLastFetched || null
+    weatherLastFetched: userProfile.weatherLastFetched || null,
+    chatReflect: {
+      items: document.getElementById('reflectItems').checked,
+      region: document.getElementById('reflectRegion').checked,
+      age: document.getElementById('reflectAge').checked,
+      skinType: document.getElementById('reflectSkinType').checked,
+      concerns: document.getElementById('reflectConcerns').checked,
+      lifestyle: document.getElementById('reflectLifestyle').checked,
+      sleep: document.getElementById('reflectSleep').checked
+    }
   };
   localStorage.setItem('userProfile_v1', JSON.stringify(userProfile));
-  alert('プロフィールを保存しました');
+  if(!isSilent) alert('プロフィールを保存しました');
   checkAndFetchWeather();
 }
 
@@ -587,25 +634,41 @@ function loadProfile() {
   setSelectedChips('sleepGroup', userProfile.sleep);
   if (userProfile.weatherCache) showWeatherBadge(userProfile.weatherCache);
   
+  const reflect = userProfile.chatReflect || {items:true, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
+  document.getElementById('reflectItems').checked = reflect.items !== false;
+  document.getElementById('reflectRegion').checked = reflect.region !== false;
+  document.getElementById('reflectAge').checked = reflect.age !== false;
+  document.getElementById('reflectSkinType').checked = reflect.skinType !== false;
+  document.getElementById('reflectConcerns').checked = reflect.concerns !== false;
+  document.getElementById('reflectLifestyle').checked = reflect.lifestyle !== false;
+  document.getElementById('reflectSleep').checked = reflect.sleep !== false;
+
   // ロード時に天気の自動更新をチェック
   checkAndFetchWeather();
 }
 
 function getProfileContext() {
   if (!userProfile) return '';
+  const reflect = userProfile.chatReflect || {items:true, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
   const parts = [];
-  if (userProfile.age) parts.push(`年齢:${userProfile.age}歳`);
-  if (userProfile.region) parts.push(`居住地:${userProfile.region}`);
-  if (userProfile.skinType?.length) parts.push(`肌質:${userProfile.skinType.join('・')}`);
-  const concerns = [...(userProfile.skinConcerns||[])];
-  if (userProfile.skinConcernExtra) concerns.push(userProfile.skinConcernExtra);
-  if (concerns.length) parts.push(`肌悩み:${concerns.join('・')}`);
-  if (userProfile.lifestyle?.length) parts.push(`生活習慣:${userProfile.lifestyle.join('・')}`);
-  if (userProfile.sleep?.length) parts.push(`睡眠:${userProfile.sleep[0]}`);
-  if (userProfile.weatherCache) {
+  
+  if (reflect.age !== false && userProfile.age) parts.push(`年齢:${userProfile.age}歳`);
+  if (reflect.region !== false && userProfile.region) parts.push(`居住地:${userProfile.region}`);
+  if (reflect.skinType !== false && userProfile.skinType?.length) parts.push(`肌質:${userProfile.skinType.join('・')}`);
+  
+  if (reflect.concerns !== false) {
+    const concerns = [...(userProfile.skinConcerns||[])];
+    if (userProfile.skinConcernExtra) concerns.push(userProfile.skinConcernExtra);
+    if (concerns.length) parts.push(`肌悩み:${concerns.join('・')}`);
+  }
+  
+  if (reflect.lifestyle !== false && userProfile.lifestyle?.length) parts.push(`生活習慣:${userProfile.lifestyle.join('・')}`);
+  if (reflect.sleep !== false && userProfile.sleep?.length) parts.push(`睡眠:${userProfile.sleep[0]}`);
+  if (reflect.region !== false && userProfile.weatherCache) {
     const w = userProfile.weatherCache;
     parts.push(`現在の環境:${w.desc} 気温${w.temp}℃ 湿度${w.humidity}%`);
   }
+  
   return parts.length ? `ユーザープロフィール=[${parts.join('、')}]` : '';
 }
 
@@ -1228,15 +1291,23 @@ async function sendChatMessage() {
   try {
     await waitForRateLimit();
     var needsIngredients = /成分|アレルギー|敏感|刺激|相性|配合/.test(txt);
-    var context = JSON.stringify(cosmeData.map(c => {
-      var obj = { n: c.name, b: c.brand, c: c.category };
-      if(needsIngredients && c.ingredients) {
-        obj.ing = c.ingredients.substring(0, 100);
-      }
-      return obj;
-    }));
+    
+    // 登録アイテムの反映設定チェック
+    const reflect = userProfile.chatReflect || {items:true};
+    let contextStr = '';
+    if (reflect.items !== false && cosmeData.length > 0) {
+      var context = JSON.stringify(cosmeData.map(c => {
+        var obj = { n: c.name, b: c.brand, c: c.category };
+        if(needsIngredients && c.ingredients) {
+          obj.ing = c.ingredients.substring(0, 100);
+        }
+        return obj;
+      }));
+      contextStr = `ユーザーの所持コスメ=${context}。`;
+    }
+
     var profileCtx = getProfileContext();
-    var prompt = `役割:美容部員。${profileCtx ? profileCtx + '。' : ''}ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
+    var prompt = `役割:美容部員。${profileCtx ? profileCtx + '。' : ''}${contextStr}質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
     var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], getGenConfig(false));
     if(!ans) ans = "回答を取得できませんでした。";
     removeTypingIndicator();
