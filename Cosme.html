@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.16</title>
+<title>Cosme Genius Pro</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -264,7 +264,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.16</span>
+  <span class="brand-subtitle">PRO EDITION v10.17</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -401,7 +401,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
       <div class="input-group">
         <label class="profile-section-label">居住地域</label>
-        <input type="text" id="profileRegion" placeholder="例: 東京都 / 沖縄 / 北海道">
+        <input type="text" id="profileRegion" placeholder="例: 東京都 / 富山市 / 北海道">
         <div id="weatherInfo" style="margin-top:8px;"></div>
         <button onclick="fetchWeather()" class="btn-secondary" style="margin-top:8px; width:auto; padding:8px 16px; font-size:0.8rem;">🌤 天気・環境を取得</button>
       </div>
@@ -544,11 +544,6 @@ const SINGLE_SELECT_GROUPS = ['skinType', 'sleep'];
 function toggleChip(el, group) {
   const isSingle = SINGLE_SELECT_GROUPS.includes(group);
   if (isSingle) {
-    // 同グループの他を全解除
-    document.querySelectorAll(`#${group}Group .chip, [id$="Group"] .chip`).forEach(c => {
-      // find chips in same implicit group by dataset
-    });
-    // find siblings with same onclick pattern
     el.closest('.chip-group').querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
   }
   el.classList.toggle('selected');
@@ -607,17 +602,22 @@ function getProfileContext() {
   return parts.length ? `ユーザープロフィール=[${parts.join('、')}]` : '';
 }
 
-// ===== 天気取得 (Open-Meteo / Geocoding) =====
+// ===== 天気取得 (OpenStreetMap Nominatim に変更: 日本語に強い) =====
 async function fetchWeather() {
   const region = document.getElementById('profileRegion').value.trim();
   if (!region) return alert('地域名を入力してください');
   try {
-    // Geocoding
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(region)}&count=1&language=ja`);
+    // Nominatim Geocoding
+    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(region)}&format=json&limit=1`);
     const geoData = await geoRes.json();
-    if (!geoData.results?.length) return alert('地域が見つかりませんでした');
-    const { latitude, longitude, name } = geoData.results[0];
-    // Weather
+    if (!geoData || geoData.length === 0) {
+        return alert('地域が見つかりませんでした。「都道府県」や「市区町村」の名前で再試行してください（例: 東京都、富山市）。');
+    }
+    const latitude = geoData[0].lat;
+    const longitude = geoData[0].lon;
+    const name = region; // 入力された名前をそのまま使う
+    
+    // Weather (Open-Meteo)
     const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature&timezone=auto`);
     const wData = await wRes.json();
     const cur = wData.current;
@@ -671,7 +671,7 @@ function getGenConfig(isFast) {
   const thinkingToggle = isFast
     ? document.getElementById('fastThinkingToggle')?.checked
     : document.getElementById('chatThinkingToggle')?.checked;
-  const cfg = { temperature: isFast ? 0.2 : 0.7 };
+  const cfg = { temperature: isFast ? 0.1 : 0.7 };
   if (thinkingToggle && modelSupportsThinking(modelId)) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
@@ -747,11 +747,9 @@ function parseAIJson(text) {
 async function callGeminiAPI(url, parts, config, jsonMode = false) {
   var genConfig = Object.assign({}, config);
   var supportsJsonMode = !url.includes('gemini-3');
+  // JSONモードを有効化するとエラーが減り高速化します
   if (jsonMode && supportsJsonMode) {
     genConfig.responseMimeType = "application/json";
-  }
-  if (jsonMode && !genConfig.maxOutputTokens) {
-    genConfig.maxOutputTokens = 200;
   }
 
   var res = await fetch(url, {
@@ -797,13 +795,11 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // ★ 発売日フィールド削除に合わせて price のみ残す
-    var combinedPrompt = `この化粧品画像を解析し、以下の情報をJSON形式で抽出してください。必ずJSONのみ返してください。
-{"itemName":"商品名","brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"特徴の要約","price":0}`;
+    // 出力を極限まで減らして高速化
+    var combinedPrompt = `画像を解析し以下のJSONフォーマットで返せ。{"brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"主要成分3つ","description":"15文字以内の特徴","price":0,"itemName":"商品名"}`;
 
     var imgConfig = getGenConfig(true);
     if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
-    imgConfig.temperature = 0.1;
 
     var responseText = await callGeminiAPI(getImageApiUrl(), [
       { text: combinedPrompt },
@@ -849,8 +845,7 @@ function compressImage(file) {
 
 /* =====================================================
    triggerManualAISearch
-   ★ 高速化: 発売日なし・主要成分5つ・maxOutputTokens=150
-   ★ 並列化: AbortController不使用でシンプルに即リクエスト
+   ★ 高速化とエラー回避: プロンプト短縮、maxOutputTokens制限解除
    ===================================================== */
 async function triggerManualAISearch() {
   if(!validateApiKey() || isRequesting) return;
@@ -863,13 +858,12 @@ async function triggerManualAISearch() {
   try {
     await waitForRateLimit();
 
-    var p = `日本の化粧品「${name}」を特定しJSONのみ返せ。略称・ニックネームでも必ず推測。不明は空文字。
-{"brand":"","category":"洗顔料|化粧水|乳液|美容液|クリーム|その他","ingredients":"主要成分5つ","description":"1文","price":0}`;
+    // 出力を極限まで減らして、高速化と途切れ（パースエラー）を防止
+    var p = `化粧品「${name}」の情報をJSONのみで出力せよ。略称も推測。
+{"brand":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他","ingredients":"主要成分を3つ","description":"15文字以内の特徴","price":価格数値}`;
 
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
-    searchConfig.temperature = 0.1;
-    searchConfig.maxOutputTokens = 150; // ★ さらに短縮
 
     var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], searchConfig, true);
     var j = parseAIJson(text);
@@ -944,7 +938,11 @@ function setFilter(type) {
   render();
 }
 
+// ===== 開いているアコーディオンの状態を維持しながら描画 =====
 function render() {
+  // 描画前に開いているアイテムのIDを取得
+  var openIds = Array.from(document.querySelectorAll('.item-card-details[open]')).map(el => parseInt(el.getAttribute('data-id')));
+
   var type = document.getElementById('sortSelect').value;
   var d = cosmeData.filter(item => {
     if(currentFilter === 'active') return !item.finishDate;
@@ -960,8 +958,11 @@ function render() {
     var badgeClass = item.tag === '朝' ? 'morning' : (item.tag === '晩' ? 'night' : 'both');
     var badgeLabel = item.tag === '朝' ? '朝' : (item.tag === '晩' ? '夜' : '朝夜');
     var categoryLabel = item.category || 'その他';
+    // 前に開いていたなら open 属性を付与
+    var isOpen = openIds.includes(item.id) ? 'open' : '';
+    
     html += `
-    <details class="item-card-details">
+    <details class="item-card-details" data-id="${item.id}" ${isOpen}>
       <summary>
         <div class="summary-top-row">
           <div style="display:flex; flex-direction:column; width:100%; padding-right:10px;">
@@ -1011,6 +1012,7 @@ function saveFinishDate(id, val) {
   if (!i) return;
   i.finishDate = val || null;
   saveData();
+  // 描画後もアコーディオンが開いたまま維持される
   render();
   renderCospa();
 }
