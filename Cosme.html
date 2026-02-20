@@ -252,15 +252,18 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .chat-input:focus { border-color: var(--accent-color); }
 .send-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
+/* ▼ 段落ち対策：ボタン風のチップデザインにして綺麗に並べる */
 .chat-options {
-  display: flex; gap: 8px; justify-content: space-between; flex-wrap: nowrap;
-  font-size: 0.72rem; color: var(--text-sub); width: 100%; padding: 0 4px;
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  font-size: 0.75rem; color: var(--text-sub); width: 100%;
 }
 .chat-options label {
   display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 600; cursor: pointer; white-space: nowrap;
+  background: rgba(0,0,0,0.04); padding: 5px 10px; border-radius: 20px; transition: background 0.2s;
 }
+.chat-options label:active { background: rgba(0,0,0,0.08); }
 .chat-options input[type="checkbox"] {
-  width: 15px; height: 15px; margin: 0;
+  width: 14px; height: 14px; margin: 0;
   appearance: auto; -webkit-appearance: auto; cursor: pointer;
 }
 
@@ -271,12 +274,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .text-center { text-align: center; }
 .alert-box { background: #fff3e0; padding: 15px; font-size: 0.85rem; color: #e65100; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ffe0b2; }
 .code-display { font-family: monospace; font-size: 0.75rem; color: #666; background: #eee; padding: 4px 8px; border-radius: 4px; margin-top: 5px; display: inline-block; }
-
-/* プログレス・カウントダウン用スタイル */
-.progress-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.92); z-index: 3000; display:none; flex-direction:column; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-.progress-spinner { width: 45px; height: 45px; border: 4px solid #eaeaea; border-top-color: var(--accent-color); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
-#progressTime { font-family: var(--font-sans); font-size: 1.8rem; font-weight: 700; color: var(--accent-color); margin-top: 15px; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
-@keyframes spin { to {transform: rotate(360deg);} }
 
 .profile-section-label {
   font-size: 0.75rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.08em;
@@ -299,7 +296,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.50</span>
+  <span class="brand-subtitle">PRO EDITION v10.60</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -400,7 +397,8 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <button onclick="sendChatMessage()" class="send-btn">➤</button>
       </div>
       <div class="chat-options">
-        <label><input type="checkbox" id="chatOptIngredients" onchange="syncSettingsOptions(); saveProfile(true)"> 成分を考慮</label>
+        <!-- ▼ 短い文言に変更し、チップ風デザインに合わせる -->
+        <label><input type="checkbox" id="chatOptIngredients" onchange="syncSettingsOptions(); saveProfile(true)"> 成分考慮</label>
         <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフ反映</label>
         <label><input type="checkbox" id="chatOptCospa" onchange="syncSettingsOptions(); saveProfile(true)"> コスパ</label>
       </div>
@@ -832,7 +830,7 @@ function modelSupportsThinking(modelId) {
   return modelId && modelId.startsWith('gemini-2.5') && !modelId.includes('lite');
 }
 
-// ===== API通信設定（検索連携を追加して精度向上） =====
+// ===== API通信設定 =====
 function getGenConfig(isFast) {
   const modelSelectId = isFast ? 'fastModelSelect' : 'chatModelSelect';
   const modelId = document.getElementById(modelSelectId)?.value || '';
@@ -942,13 +940,13 @@ function parseAIJson(text) {
 async function callGeminiAPI(url, parts, config, useSchema = false, useSearch = false) {
   var genConfig = Object.assign({}, config);
   
-  // ★ 古いキャッシュ設定が残っていてもエラーにならないよう、明示的に不正な場所のtoolsを削除
   if (genConfig.tools) {
     delete genConfig.tools;
   }
   
-  // ★ JSONスキーマの記述を厳格化してエラーを防ぐ
-  if (useSchema) {
+  // ★ API制限対策：検索ツールを使う場合は、JSONモードの機能設定をAPIに送らないようにする
+  // 代わりにプロンプトで「JSONで返せ」と指定して回避する
+  if (useSchema && !useSearch) {
     genConfig.responseMimeType = "application/json";
     genConfig.responseSchema = {
       type: "OBJECT",
@@ -1020,10 +1018,18 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // ★ プロンプトを強化。公式情報の取得と成分の正確性を強く指示
+    // ★ プロンプト側にJSONのフォーマット指示を直接含めて、API側の制限を回避する
     var combinedPrompt = `あなたは化粧品の専門家です。この化粧品の画像から製品を特定し、最新の公式情報や信頼できる情報を検索して以下の情報を抽出してください。
 特に「全成分(ingredients)」は非常に重要です。パッケージや公式サイトの記載通りに、絶対に省略や間違いがないように正確に抽出してください。
-出力は指定されたJSONスキーマに厳密に従ってください。`;
+必ず以下のJSONフォーマットのみを出力してください。マークダウンなどの装飾は一切含めないでください。
+{
+  "itemName": "化粧品の正式な商品名",
+  "brand": "ブランド名・メーカー名",
+  "category": "洗顔料、化粧水、乳液、美容液、クリーム、その他のいずれかの文字列",
+  "ingredients": "水、グリセリン...のように全成分を省略せずコンマ区切りで正確に",
+  "description": "商品の特徴や効果などの説明",
+  "price": 一般的な税込価格（数値のみ）
+}`;
 
     var imgConfig = getGenConfig(true);
     if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig; // 画像検索とThinkingの相性回避
@@ -1085,10 +1091,18 @@ async function triggerManualAISearch() {
   try {
     await waitForRateLimit();
 
-    // ★ プロンプト強化
+    // ★ プロンプト側にJSONのフォーマット指示を直接含めて、API側の制限を回避する
     var p = `あなたは化粧品の専門家です。化粧品「${name}」の最新の公式情報や信頼できる情報を検索し、以下の情報を抽出してください。
 特に「全成分(ingredients)」は非常に重要です。パッケージや公式サイトの記載通りに、絶対に省略や間違いがないように正確に抽出してください。
-出力は指定されたJSONスキーマに厳密に従ってください。`;
+必ず以下のJSONフォーマットのみを出力してください。マークダウンなどの装飾は一切含めないでください。
+{
+  "itemName": "化粧品の正式な商品名",
+  "brand": "ブランド名・メーカー名",
+  "category": "洗顔料、化粧水、乳液、美容液、クリーム、その他のいずれかの文字列",
+  "ingredients": "水、グリセリン...のように全成分を省略せずコンマ区切りで正確に",
+  "description": "商品の特徴や効果などの説明",
+  "price": 一般的な税込価格（数値のみ）
+}`;
 
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
