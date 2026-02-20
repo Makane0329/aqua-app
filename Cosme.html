@@ -253,14 +253,14 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .send-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
 .chat-options {
-  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-  font-size: 0.75rem; color: var(--text-sub); width: 100%;
+  display: flex; gap: 8px; justify-content: space-between; flex-wrap: nowrap;
+  font-size: 0.72rem; color: var(--text-sub); width: 100%; padding: 0 4px;
 }
 .chat-options label {
-  display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 600; cursor: pointer; white-space: nowrap;
 }
 .chat-options input[type="checkbox"] {
-  width: 16px; height: 16px; margin: 0;
+  width: 15px; height: 15px; margin: 0;
   appearance: auto; -webkit-appearance: auto; cursor: pointer;
 }
 
@@ -400,9 +400,9 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <button onclick="sendChatMessage()" class="send-btn">➤</button>
       </div>
       <div class="chat-options">
-        <label><input type="checkbox" id="chatOptIngredients" onchange="syncSettingsOptions(); saveProfile(true)"> コスメと成分を考慮</label>
-        <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフィールを反映</label>
-        <label><input type="checkbox" id="chatOptCospa" onchange="syncSettingsOptions(); saveProfile(true)"> コスパを反映</label>
+        <label><input type="checkbox" id="chatOptIngredients" onchange="syncSettingsOptions(); saveProfile(true)"> 成分を考慮</label>
+        <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフ反映</label>
+        <label><input type="checkbox" id="chatOptCospa" onchange="syncSettingsOptions(); saveProfile(true)"> コスパ</label>
       </div>
     </div>
   </div>
@@ -941,6 +941,11 @@ function parseAIJson(text) {
 
 async function callGeminiAPI(url, parts, config, useSchema = false, useSearch = false) {
   var genConfig = Object.assign({}, config);
+  
+  // ★ 古いキャッシュ設定が残っていてもエラーにならないよう、明示的に不正な場所のtoolsを削除
+  if (genConfig.tools) {
+    delete genConfig.tools;
+  }
   
   // ★ JSONスキーマの記述を厳格化してエラーを防ぐ
   if (useSchema) {
