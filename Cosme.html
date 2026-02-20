@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Cosme Genius Pro v10.15 Fast</title>
+<title>Cosme Genius Pro v10.16</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
 
@@ -241,13 +241,30 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .progress-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.85); z-index: 3000; display:none; flex-direction:column; align-items:center; justify-content:center; }
 .progress-spinner { width: 40px; height: 40px; border: 3px solid #ddd; border-top-color: var(--accent-color); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
 @keyframes spin { to {transform: rotate(360deg);} }
+
+/* ===== 肌属性設定 ===== */
+.profile-section-label {
+  font-size: 0.75rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 8px; display: block;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.chip {
+  padding: 7px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;
+  background: #f0f0f0; color: #666; border: 1.5px solid #e0e0e0;
+  cursor: pointer; transition: all 0.2s; user-select: none;
+  margin: 0; width: auto; letter-spacing: 0;
+}
+.chip.selected { background: var(--accent-color); color: #fff; border-color: var(--accent-color); font-weight: 600; }
+.chip:active { transform: scale(0.96); }
+.weather-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #eef7ff; border: 1px solid #c5dfff; border-radius: 4px; font-size: 0.82rem; color: #2a6ab0; margin-top: 8px; }
+.weather-badge .w-icon { font-size: 1.1rem; }
 </style>
 </head>
 <body>
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.15 Fast</span>
+  <span class="brand-subtitle">PRO EDITION v10.16</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -299,7 +316,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <textarea id="ingredients" rows="3" placeholder="水, グリセリン..."></textarea>
       </div>
       <div class="input-group flex-row">
-        <input type="text" id="releaseDate" placeholder="発売日">
         <input type="number" id="itemPrice" placeholder="価格 (円)">
       </div>
       <div class="input-group">
@@ -374,7 +390,75 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
   <!-- ================= SETTINGS TAB ================= -->
   <div id="tab-settings" class="tab-content">
-    <div class="section-title"><span>設定</span></div>
+
+    <!-- 自分の属性 -->
+    <div class="section-title"><span>プロフィール設定</span></div>
+    <div class="card">
+      <div class="input-group">
+        <label class="profile-section-label">年齢</label>
+        <input type="number" id="profileAge" placeholder="例: 28" min="10" max="100" style="width:120px;">
+      </div>
+
+      <div class="input-group">
+        <label class="profile-section-label">居住地域</label>
+        <input type="text" id="profileRegion" placeholder="例: 東京都 / 沖縄 / 北海道">
+        <div id="weatherInfo" style="margin-top:8px;"></div>
+        <button onclick="fetchWeather()" class="btn-secondary" style="margin-top:8px; width:auto; padding:8px 16px; font-size:0.8rem;">🌤 天気・環境を取得</button>
+      </div>
+
+      <div class="input-group">
+        <label class="profile-section-label">肌質</label>
+        <div class="chip-group" id="skinTypeGroup">
+          <div class="chip" onclick="toggleChip(this,'skinType')">普通肌</div>
+          <div class="chip" onclick="toggleChip(this,'skinType')">乾燥肌</div>
+          <div class="chip" onclick="toggleChip(this,'skinType')">脂性肌</div>
+          <div class="chip" onclick="toggleChip(this,'skinType')">混合肌</div>
+          <div class="chip" onclick="toggleChip(this,'skinType')">敏感肌</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="profile-section-label">今の悩み（複数選択可）</label>
+        <div class="chip-group" id="skinConcernGroup">
+          <div class="chip" onclick="toggleChip(this,'skinConcern')">シミ</div>
+          <div class="chip" onclick="toggleChip(this,'skinConcern')">しわ</div>
+          <div class="chip" onclick="toggleChip(this,'skinConcern')">毛穴</div>
+          <div class="chip" onclick="toggleChip(this,'skinConcern')">ニキビ</div>
+          <div class="chip" onclick="toggleChip(this,'skinConcern')">くすみ</div>
+          <div class="chip" onclick="toggleChip(this,'skinConcern')">たるみ</div>
+        </div>
+        <textarea id="skinConcernExtra" rows="2" placeholder="その他の悩みを自由に入力..." style="margin-top:8px;"></textarea>
+      </div>
+
+      <div class="input-group">
+        <label class="profile-section-label">生活習慣（日中の過ごし方）</label>
+        <div class="chip-group" id="lifestyleGroup">
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">在宅ワーク</div>
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">オフィス勤務</div>
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">屋外が多い</div>
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">運動習慣あり</div>
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">外食が多い</div>
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">飲酒習慣あり</div>
+          <div class="chip" onclick="toggleChip(this,'lifestyle')">喫煙習慣あり</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="profile-section-label">平均睡眠時間</label>
+        <div class="chip-group" id="sleepGroup">
+          <div class="chip" onclick="toggleChip(this,'sleep')">5時間未満</div>
+          <div class="chip" onclick="toggleChip(this,'sleep')">5〜6時間</div>
+          <div class="chip" onclick="toggleChip(this,'sleep')">6〜7時間</div>
+          <div class="chip" onclick="toggleChip(this,'sleep')">7〜8時間</div>
+          <div class="chip" onclick="toggleChip(this,'sleep')">8時間以上</div>
+        </div>
+      </div>
+
+      <button onclick="saveProfile()" class="btn-accent">プロフィールを保存</button>
+    </div>
+
+    <!-- API・モデル設定 -->
+    <div class="section-title"><span>API設定</span></div>
     <div class="alert-box">APIキーはブラウザ内にのみ保存され、外部サーバーには送信されません。</div>
     <div class="card">
       <div class="input-group">
@@ -427,6 +511,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <button onclick="saveSettings()" class="btn-accent">設定を保存</button>
       <button onclick="clearApiKey()" class="btn-secondary" style="margin-top:20px; color:#c62828!important; border-color:#ef9a9a!important;">APIキーを削除</button>
     </div>
+
     <div class="section-title" style="margin-top:50px;"><span>データ管理</span></div>
     <div class="card">
       <button onclick="exportData()" class="btn-secondary">データを保存 (JSON)</button>
@@ -449,9 +534,132 @@ let currentChatId = null;
 let isRequesting = false;
 let lastRequestTime = 0;
 let currentFilter = 'active';
+let userProfile = JSON.parse(localStorage.getItem('userProfile_v1')) || {};
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
+
+// ===== チップ（複数選択 or 単一選択）=====
+const SINGLE_SELECT_GROUPS = ['skinType', 'sleep'];
+function toggleChip(el, group) {
+  const isSingle = SINGLE_SELECT_GROUPS.includes(group);
+  if (isSingle) {
+    // 同グループの他を全解除
+    document.querySelectorAll(`#${group}Group .chip, [id$="Group"] .chip`).forEach(c => {
+      // find chips in same implicit group by dataset
+    });
+    // find siblings with same onclick pattern
+    el.closest('.chip-group').querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  }
+  el.classList.toggle('selected');
+}
+function getSelectedChips(groupId) {
+  return [...document.querySelectorAll(`#${groupId} .chip.selected`)].map(c => c.textContent);
+}
+function setSelectedChips(groupId, values) {
+  if (!values || !values.length) return;
+  document.querySelectorAll(`#${groupId} .chip`).forEach(c => {
+    if (values.includes(c.textContent)) c.classList.add('selected');
+  });
+}
+
+// ===== プロフィール =====
+function saveProfile() {
+  userProfile = {
+    age: document.getElementById('profileAge').value,
+    region: document.getElementById('profileRegion').value,
+    skinType: getSelectedChips('skinTypeGroup'),
+    skinConcerns: getSelectedChips('skinConcernGroup'),
+    skinConcernExtra: document.getElementById('skinConcernExtra').value,
+    lifestyle: getSelectedChips('lifestyleGroup'),
+    sleep: getSelectedChips('sleepGroup'),
+    weatherCache: userProfile.weatherCache || null
+  };
+  localStorage.setItem('userProfile_v1', JSON.stringify(userProfile));
+  alert('プロフィールを保存しました');
+}
+function loadProfile() {
+  if (!userProfile) return;
+  if (userProfile.age) document.getElementById('profileAge').value = userProfile.age;
+  if (userProfile.region) document.getElementById('profileRegion').value = userProfile.region;
+  if (userProfile.skinConcernExtra) document.getElementById('skinConcernExtra').value = userProfile.skinConcernExtra;
+  setSelectedChips('skinTypeGroup', userProfile.skinType);
+  setSelectedChips('skinConcernGroup', userProfile.skinConcerns);
+  setSelectedChips('lifestyleGroup', userProfile.lifestyle);
+  setSelectedChips('sleepGroup', userProfile.sleep);
+  if (userProfile.weatherCache) showWeatherBadge(userProfile.weatherCache);
+}
+function getProfileContext() {
+  if (!userProfile) return '';
+  const parts = [];
+  if (userProfile.age) parts.push(`年齢:${userProfile.age}歳`);
+  if (userProfile.region) parts.push(`居住地:${userProfile.region}`);
+  if (userProfile.skinType?.length) parts.push(`肌質:${userProfile.skinType.join('・')}`);
+  const concerns = [...(userProfile.skinConcerns||[])];
+  if (userProfile.skinConcernExtra) concerns.push(userProfile.skinConcernExtra);
+  if (concerns.length) parts.push(`肌悩み:${concerns.join('・')}`);
+  if (userProfile.lifestyle?.length) parts.push(`生活習慣:${userProfile.lifestyle.join('・')}`);
+  if (userProfile.sleep?.length) parts.push(`睡眠:${userProfile.sleep[0]}`);
+  if (userProfile.weatherCache) {
+    const w = userProfile.weatherCache;
+    parts.push(`現在の環境:${w.desc} 気温${w.temp}℃ 湿度${w.humidity}%`);
+  }
+  return parts.length ? `ユーザープロフィール=[${parts.join('、')}]` : '';
+}
+
+// ===== 天気取得 (Open-Meteo / Geocoding) =====
+async function fetchWeather() {
+  const region = document.getElementById('profileRegion').value.trim();
+  if (!region) return alert('地域名を入力してください');
+  try {
+    // Geocoding
+    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(region)}&count=1&language=ja`);
+    const geoData = await geoRes.json();
+    if (!geoData.results?.length) return alert('地域が見つかりませんでした');
+    const { latitude, longitude, name } = geoData.results[0];
+    // Weather
+    const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature&timezone=auto`);
+    const wData = await wRes.json();
+    const cur = wData.current;
+    const cache = {
+      name, temp: Math.round(cur.temperature_2m),
+      feelsLike: Math.round(cur.apparent_temperature),
+      humidity: cur.relative_humidity_2m,
+      code: cur.weather_code,
+      desc: weatherCodeToDesc(cur.weather_code),
+      uv: getUVLevel(latitude)
+    };
+    userProfile.weatherCache = cache;
+    localStorage.setItem('userProfile_v1', JSON.stringify(userProfile));
+    showWeatherBadge(cache);
+  } catch(e) {
+    alert('天気取得に失敗しました: ' + e.message);
+  }
+}
+function weatherCodeToDesc(code) {
+  if (code === 0) return '快晴';
+  if (code <= 3) return '晴れ〜曇り';
+  if (code <= 49) return '霧・霧雨';
+  if (code <= 67) return '雨';
+  if (code <= 77) return '雪';
+  if (code <= 82) return 'にわか雨';
+  return '雷雨';
+}
+function getUVLevel(lat) {
+  const absLat = Math.abs(lat);
+  if (absLat < 25) return '非常に強い';
+  if (absLat < 35) return '強い';
+  if (absLat < 45) return '中程度';
+  return '弱い';
+}
+function showWeatherBadge(w) {
+  const icon = w.code === 0 ? '☀️' : w.code <= 3 ? '⛅' : w.code <= 67 ? '🌧️' : '❄️';
+  document.getElementById('weatherInfo').innerHTML = `
+    <div class="weather-badge">
+      <span class="w-icon">${icon}</span>
+      <span><b>${w.name}</b> ${w.desc} ${w.temp}℃（体感${w.feelsLike}℃）湿度${w.humidity}% UV:${w.uv}</span>
+    </div>`;
+}
 
 function modelSupportsThinking(modelId) {
   return modelId && modelId.startsWith('gemini-2.5') && !modelId.includes('lite');
@@ -478,6 +686,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('openDate').valueAsDate = new Date();
   document.getElementById('geminiApiKey').value = localStorage.getItem('geminiApiKey_v1') || '';
   loadModelSettings();
+  loadProfile();
   if(chatHistories.length > 0) { currentChatId = chatHistories[0].id; loadChat(currentChatId); }
   else { createNewChat(); }
   render(); renderCospa();
@@ -506,7 +715,6 @@ function getApiUrl(isFast) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${localStorage.getItem('geminiApiKey_v1')}`;
 }
 
-// ★修正1: 200ms待機を削除して即時実行（高速化の核心）
 async function waitForRateLimit() {
   lastRequestTime = Date.now();
 }
@@ -542,7 +750,6 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
   if (jsonMode && supportsJsonMode) {
     genConfig.responseMimeType = "application/json";
   }
-  // ★修正2: maxOutputTokensのデフォルトを512→200に削減（応答速度改善）
   if (jsonMode && !genConfig.maxOutputTokens) {
     genConfig.maxOutputTokens = 200;
   }
@@ -564,7 +771,7 @@ async function callGeminiAPI(url, parts, config, jsonMode = false) {
         '\n設定でより軽量なモデル（Flash-Lite）への変更もお試しください。');
     }
     if (res.status === 503 || errMsg.includes('high demand') || errMsg.includes('overloaded') || errMsg.includes('UNAVAILABLE')) {
-      throw new Error('サーバーが混雑しています。しばらく待ってから再試行してください。\n（数秒〜数十秒後に再度お試しください）');
+      throw new Error('サーバーが混雑しています。しばらく待ってから再試行してください。');
     }
     throw new Error(errMsg);
   }
@@ -590,8 +797,9 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
+    // ★ 発売日フィールド削除に合わせて price のみ残す
     var combinedPrompt = `この化粧品画像を解析し、以下の情報をJSON形式で抽出してください。必ずJSONのみ返してください。
-{"itemName":"商品名","brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"特徴の要約","price":0,"releaseDate":"YYYY/MM/DD"}`;
+{"itemName":"商品名","brandName":"ブランド名","category":"洗顔料/化粧水/乳液/美容液/クリーム/その他のいずれか","ingredients":"全成分","description":"特徴の要約","price":0}`;
 
     var imgConfig = getGenConfig(true);
     if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
@@ -610,7 +818,6 @@ async function handleImageSelect(e) {
       if(result.description)document.getElementById('description').value= result.description;
       if(result.ingredients)document.getElementById('ingredients').value= result.ingredients;
       if(result.price)      document.getElementById('itemPrice').value  = result.price;
-      if(result.releaseDate)document.getElementById('releaseDate').value= result.releaseDate;
       alert('AI登録が完了しました。内容を確認してリストに追加してください。');
     } else {
       alert('情報を取得できませんでした。画像をより鮮明なものにしてお試しください。');
@@ -642,8 +849,8 @@ function compressImage(file) {
 
 /* =====================================================
    triggerManualAISearch
-   ★修正3: プロンプトを曖昧名対応＋短縮化
-   ★修正4: maxOutputTokens=200を明示指定
+   ★ 高速化: 発売日なし・主要成分5つ・maxOutputTokens=150
+   ★ 並列化: AbortController不使用でシンプルに即リクエスト
    ===================================================== */
 async function triggerManualAISearch() {
   if(!validateApiKey() || isRequesting) return;
@@ -656,15 +863,13 @@ async function triggerManualAISearch() {
   try {
     await waitForRateLimit();
 
-    // ★曖昧な商品名・略称・ニックネームでも推測して回答するよう指示
-    // ★全成分は重いので主要成分5つまでに絞り、応答を短縮
-    var p = `日本の化粧品「${name}」に最も近い商品を1つ特定し、JSONのみ返せ。商品名が不完全・略称・ニックネームでも必ず推測して回答すること。不明項目は空文字。
-{"brand":"","category":"洗顔料|化粧水|乳液|美容液|クリーム|その他","ingredients":"主要成分5つまで","description":"1文以内","price":0,"releaseDate":""}`;
+    var p = `日本の化粧品「${name}」を特定しJSONのみ返せ。略称・ニックネームでも必ず推測。不明は空文字。
+{"brand":"","category":"洗顔料|化粧水|乳液|美容液|クリーム|その他","ingredients":"主要成分5つ","description":"1文","price":0}`;
 
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
-    searchConfig.temperature = 0.1; // わずかな柔軟性（曖昧名推測のため）
-    searchConfig.maxOutputTokens = 200; // ★明示指定で応答を短く・速く
+    searchConfig.temperature = 0.1;
+    searchConfig.maxOutputTokens = 150; // ★ さらに短縮
 
     var text = await callGeminiAPI(getApiUrl(true), [{ text: p }], searchConfig, true);
     var j = parseAIJson(text);
@@ -676,7 +881,6 @@ async function triggerManualAISearch() {
     if(j.description) document.getElementById('description').value = j.description;
     if(j.ingredients) document.getElementById('ingredients').value = j.ingredients;
     if(j.price)       document.getElementById('itemPrice').value = j.price;
-    if(j.releaseDate) document.getElementById('releaseDate').value = j.releaseDate;
 
   } catch(err) {
     alert("検索エラー: " + err.message);
@@ -694,7 +898,6 @@ function addItem() {
     category: document.getElementById('categorySelect').value,
     description: document.getElementById('description').value.trim(),
     ingredients: document.getElementById('ingredients').value.trim(),
-    releaseDate: document.getElementById('releaseDate').value,
     price: document.getElementById('itemPrice').value,
     openDate: document.getElementById('openDate').value,
     tag: document.getElementById('timeTag').value
@@ -702,7 +905,7 @@ function addItem() {
   if(!item.name) return alert('商品名は必須です');
   cosmeData.unshift(item);
   saveData(); render(); renderCospa();
-  ['itemName','brand','description','ingredients','itemPrice','releaseDate'].forEach(id => document.getElementById(id).value = '');
+  ['itemName','brand','description','ingredients','itemPrice'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('categorySelect').selectedIndex = 0;
   alert('追加しました');
 }
@@ -778,8 +981,12 @@ function render() {
         <p style="margin:5px 0;">${escapeHtml(item.description || '説明なし')}</p>
         ${item.ingredients ? `<div class="ingredients-box"><b>全成分:</b><br>${escapeHtml(item.ingredients)}</div>` : ''}
         <div class="flex-row" style="margin-top:15px;">
-          <input type="number" value="${item.price}" placeholder="価格" onchange="saveEdit(${item.id},'price',this.value)" style="font-size:0.9rem;">
-          <input type="date" value="${item.openDate}" onchange="saveEdit(${item.id},'openDate',this.value)" style="font-size:0.9rem;">
+          <input type="number" value="${item.price||''}" placeholder="価格" onchange="saveEdit(${item.id},'price',this.value)" style="font-size:0.9rem;">
+          <input type="date" value="${item.openDate||''}" onchange="saveEdit(${item.id},'openDate',this.value)" style="font-size:0.9rem;">
+        </div>
+        <div style="margin-top:10px;">
+          <label style="font-size:0.72rem; color:#888; margin-bottom:4px; display:block; font-weight:600;">使い切り日（手動入力）</label>
+          <input type="date" value="${item.finishDate||''}" onchange="saveFinishDate(${item.id},this.value)" style="font-size:0.9rem; width:100%;">
         </div>
         <div style="margin-top:10px;">
           <label style="font-size:0.72rem; color:#888; margin-bottom:4px; display:block; font-weight:600;">使用タイミング</label>
@@ -790,13 +997,22 @@ function render() {
           </div>
         </div>
         <div class="flex-row" style="margin-top:10px;">
-          <button class="btn-secondary" onclick="markFinished(${item.id})">${item.finishDate?'使い切り解除':'使い切りにする'}</button>
+          <button class="btn-secondary" onclick="markFinished(${item.id})">${item.finishDate?'使い切り解除':'今日で使い切り'}</button>
           <button class="btn-secondary" onclick="removeItem(${item.id})" style="color:red!important;border-color:#ffcccc!important;">削除</button>
         </div>
       </div>
     </details>`;
   });
   document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;font-size:0.9rem;">該当するアイテムはありません</div>';
+}
+
+function saveFinishDate(id, val) {
+  var i = cosmeData.find(x => x.id === id);
+  if (!i) return;
+  i.finishDate = val || null;
+  saveData();
+  render();
+  renderCospa();
 }
 
 function renderCospa() {
@@ -921,7 +1137,8 @@ async function sendChatMessage() {
       }
       return obj;
     }));
-    var prompt = `役割:美容部員。文脈:ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
+    var profileCtx = getProfileContext();
+    var prompt = `役割:美容部員。${profileCtx ? profileCtx + '。' : ''}ユーザーの所持コスメ=${context}。質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
     var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], getGenConfig(false));
     if(!ans) ans = "回答を取得できませんでした。";
     removeTypingIndicator();
@@ -979,12 +1196,12 @@ function saveSettings() {
 function clearApiKey() { localStorage.removeItem('geminiApiKey_v1'); document.getElementById('geminiApiKey').value = ''; alert('APIキーを削除しました'); }
 
 function exportData() {
-  var b = new Blob([JSON.stringify({data:cosmeData, chats:chatHistories})], {type:'application/json'});
+  var b = new Blob([JSON.stringify({data:cosmeData, chats:chatHistories, profile:userProfile})], {type:'application/json'});
   var a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='cosme_backup.json'; a.click();
 }
 function importData(){ document.getElementById('importFile').click(); }
 function handleImport(e){
-  var r=new FileReader(); r.onload=function(ev){ try{ var d=JSON.parse(ev.target.result); cosmeData=d.data||[]; chatHistories=d.chats||[]; saveData(); saveChatHistories(); render(); alert('復元しました'); }catch(x){alert('インポートエラー');} }; r.readAsText(e.target.files[0]);
+  var r=new FileReader(); r.onload=function(ev){ try{ var d=JSON.parse(ev.target.result); cosmeData=d.data||[]; chatHistories=d.chats||[]; if(d.profile){ userProfile=d.profile; localStorage.setItem('userProfile_v1',JSON.stringify(userProfile)); loadProfile(); } saveData(); saveChatHistories(); render(); alert('復元しました'); }catch(x){alert('インポートエラー');} }; r.readAsText(e.target.files[0]);
 }
 
 function escapeHtml(text) {
