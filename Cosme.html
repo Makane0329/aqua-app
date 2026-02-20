@@ -131,7 +131,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .toggle-switch input:checked + .toggle-slider { background: var(--accent-color); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
 
-/* プロフィール用の小型トグルスイッチ */
 .toggle-switch.small { width: 36px; height: 20px; }
 .toggle-switch.small .toggle-slider::before { width: 14px; height: 14px; left: 3px; top: 3px; }
 .toggle-switch.small input:checked + .toggle-slider::before { transform: translateX(16px); }
@@ -210,30 +209,60 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .cospa-delete-btn { position: absolute; top: 15px; right: 15px; width: 24px; height: 24px; padding: 0; margin: 0; background: transparent; color: #ccc; border: none; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
 .cospa-delete-btn:hover { color: #d32f2f; }
 
-.chat-area { padding-bottom: 120px; display: flex; flex-direction: column; gap: 20px; }
+.chat-area { padding-bottom: 140px; display: flex; flex-direction: column; gap: 24px; }
 .msg-row { display: flex; width: 100%; }
-.msg-row.user { justify-content: flex-end; }
-.msg-row.ai { justify-content: flex-start; }
-.msg-bubble { max-width: 90%; padding: 14px 18px; font-size: 1rem; line-height: 1.55; border-radius: 12px; word-break: break-word; box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
-.msg-row.user .msg-bubble { background: #3a3a3a; color: #f0f0f0; border-bottom-right-radius: 2px; font-weight: 400; white-space: pre-wrap; }
-.msg-row.ai .msg-bubble { background: #fcfbf9; border: 1px solid #dcdcdc; color: #333; border-bottom-left-radius: 2px; font-weight: 400; }
-.msg-bubble h3 { font-size: 1.1rem; font-weight: 700; margin: 1.2em 0 0.5em; color: #111; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.msg-bubble { word-break: break-word; }
+.msg-row.user { justify-content: flex-end; padding: 0 15px; }
+.msg-row.user .msg-bubble { 
+  background: #3a3a3a; color: #f0f0f0; 
+  padding: 12px 18px; font-size: 1.05rem; font-weight: 400; 
+  border-radius: 20px; border-bottom-right-radius: 4px;
+  max-width: 85%; line-height: 1.5; white-space: pre-wrap; 
+}
+.msg-row.ai { justify-content: flex-start; padding: 0 15px; }
+.msg-row.ai .msg-bubble { 
+  background: transparent; border: none; box-shadow: none; 
+  color: #222; border-radius: 0; padding: 0; 
+  font-size: 1.05rem; font-weight: 400; line-height: 1.75; 
+  max-width: 100%; width: 100%;
+}
+.msg-bubble h3 { font-size: 1.2rem; font-weight: 700; margin: 1.8em 0 0.6em; color: #111; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; }
 .msg-bubble h3:first-child { margin-top: 0; }
 .msg-bubble strong { font-weight: 700; color: #000; }
-.msg-bubble ul { padding-left: 1.2em; margin: 0.5em 0; }
-.msg-bubble li { margin-bottom: 0.3em; list-style-type: disc; }
+.msg-bubble ul { padding-left: 1.4em; margin: 0.8em 0; }
+.msg-bubble li { margin-bottom: 0.4em; list-style-type: disc; }
 .msg-bubble hr { border: 0; height: 1px; background: #e0e0e0; margin: 1.5em 0; }
 
-.typing-indicator { display: flex; gap: 4px; padding: 12px 16px; background: #fcfbf9; border: 1px solid #dcdcdc; border-radius: 12px; border-bottom-left-radius: 2px; width: fit-content; margin-bottom: 10px; }
+.typing-indicator { display: flex; gap: 4px; padding: 12px 0; background: transparent; border: none; width: fit-content; margin-bottom: 10px; }
 .typing-indicator span { width: 6px; height: 6px; background: #888; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
 .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
 .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-.chat-footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(242, 242, 240, 0.98); backdrop-filter: blur(10px); padding: 12px 15px; padding-bottom: calc(15px + var(--safe-bottom)); border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: flex-end; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.03); }
+.chat-footer {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(242, 242, 240, 0.98); backdrop-filter: blur(10px);
+  padding: 12px 15px; padding-bottom: calc(15px + var(--safe-bottom));
+  border-top: 1px solid rgba(0,0,0,0.05);
+  display: flex; flex-direction: column; gap: 10px; align-items: stretch;
+  z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+}
+.chat-input-row { display: flex; gap: 10px; align-items: flex-end; width: 100%; }
 .chat-input { flex: 1; border: 1px solid #ccc; background: #fff; border-radius: 20px; padding: 12px 16px; font-size: 16px; min-height: 48px; max-height: 120px; margin: 0; transition: border-color 0.2s; resize: none; line-height: 1.5; color: #333; }
 .chat-input:focus { border-color: var(--accent-color); }
 .send-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+.chat-options {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  font-size: 0.75rem; color: var(--text-sub); width: 100%;
+}
+.chat-options label {
+  display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 600; cursor: pointer;
+}
+.chat-options input[type="checkbox"] {
+  width: 16px; height: 16px; margin: 0;
+  appearance: auto; -webkit-appearance: auto; cursor: pointer;
+}
 
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -243,11 +272,12 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .alert-box { background: #fff3e0; padding: 15px; font-size: 0.85rem; color: #e65100; border-radius: 4px; margin-bottom: 20px; border: 1px solid #ffe0b2; }
 .code-display { font-family: monospace; font-size: 0.75rem; color: #666; background: #eee; padding: 4px 8px; border-radius: 4px; margin-top: 5px; display: inline-block; }
 
-.progress-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.85); z-index: 3000; display:none; flex-direction:column; align-items:center; justify-content:center; }
-.progress-spinner { width: 40px; height: 40px; border: 3px solid #ddd; border-top-color: var(--accent-color); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
+/* プログレス・カウントダウン用スタイル */
+.progress-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.92); z-index: 3000; display:none; flex-direction:column; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+.progress-spinner { width: 45px; height: 45px; border: 4px solid #eaeaea; border-top-color: var(--accent-color); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
+#progressTime { font-family: var(--font-sans); font-size: 1.8rem; font-weight: 700; color: var(--accent-color); margin-top: 15px; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 @keyframes spin { to {transform: rotate(360deg);} }
 
-/* ===== 肌属性設定 ===== */
 .profile-section-label {
   font-size: 0.75rem; color: var(--text-sub); font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; margin-bottom: 8px; display: block;
@@ -269,7 +299,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.20</span>
+  <span class="brand-subtitle">PRO EDITION v10.50</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -290,8 +320,8 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
     <div class="photo-list-card" style="margin-bottom: 20px;">
       <div class="photo-list-item">
         <div>
-          <div class="photo-list-label">📷 写真からAI登録</div>
-          <div class="photo-list-sub">アルバムから画像を選択して自動入力 (1ステップ・高速)</div>
+          <div class="photo-list-label">📷 写真からAI精密登録</div>
+          <div class="photo-list-sub">最新の公式情報から成分を検索して自動入力</div>
         </div>
         <div class="photo-list-arrow">›</div>
         <input type="file" accept="image/*" onchange="handleImageSelect(event)">
@@ -317,7 +347,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       </div>
       <div class="input-group"><textarea id="description" rows="2" placeholder="説明・メモ"></textarea></div>
       <div class="input-group">
-        <label>全成分 (AI登録で自動取得)</label>
+        <label>全成分 (AI登録で公式情報を取得します)</label>
         <textarea id="ingredients" rows="3" placeholder="水, グリセリン..."></textarea>
       </div>
       <div class="input-group flex-row">
@@ -365,8 +395,15 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
     <div id="chatHistoryContainer" style="display:none; background:#fff; margin-bottom:20px; padding:10px; border-radius:4px; box-shadow:0 2px 10px rgba(0,0,0,0.05);"></div>
     <div id="chatHistory" class="chat-area"></div>
     <div class="chat-footer">
-      <textarea id="chatInput" class="chat-input" placeholder="メッセージを入力..." rows="1" oninput="adjustChatHeight(this)"></textarea>
-      <button onclick="sendChatMessage()" class="send-btn">➤</button>
+      <div class="chat-input-row">
+        <textarea id="chatInput" class="chat-input" placeholder="メッセージを入力..." rows="1" oninput="adjustChatHeight(this)"></textarea>
+        <button onclick="sendChatMessage()" class="send-btn">➤</button>
+      </div>
+      <div class="chat-options">
+        <label><input type="checkbox" id="chatOptIngredients" onchange="syncSettingsOptions(); saveProfile(true)"> コスメと成分を考慮</label>
+        <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフィールを反映</label>
+        <label><input type="checkbox" id="chatOptCospa" onchange="syncSettingsOptions(); saveProfile(true)"> コスパを反映</label>
+      </div>
     </div>
   </div>
 
@@ -396,19 +433,26 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   <!-- ================= SETTINGS TAB ================= -->
   <div id="tab-settings" class="tab-content">
 
-    <!-- 相談連携設定 -->
     <div class="section-title"><span>相談連携設定</span></div>
     <div class="card" style="padding-bottom: 20px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">登録コスメ情報を反映する</div>
+        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">登録コスメ情報をデフォルトで反映する</div>
         <label class="toggle-label">
           <div class="toggle-switch">
-            <input type="checkbox" id="reflectItems" onchange="saveProfile(true)">
+            <input type="checkbox" id="reflectItems" onchange="syncChatOptions(); saveProfile(true)">
             <span class="toggle-slider"></span>
           </div>
         </label>
       </div>
-      <div style="font-size:0.75rem; color:#888; margin-top:5px;">※オフにすると手持ちアイテムを考慮しない一般的な回答になります</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
+        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">コスパ情報をデフォルトで反映する</div>
+        <label class="toggle-label">
+          <div class="toggle-switch">
+            <input type="checkbox" id="reflectCospa" onchange="syncChatOptions(); saveProfile(true)">
+            <span class="toggle-slider"></span>
+          </div>
+        </label>
+      </div>
     </div>
 
     <!-- 自分の属性 -->
@@ -464,7 +508,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
       <div class="input-group">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <label class="profile-section-label" style="margin-bottom:0;">生活習慣（日中の過ごし方）</label>
+          <label class="profile-section-label" style="margin-bottom:0;">生活習慣</label>
           <label class="toggle-label"><span style="font-size:0.7rem; color:#888; margin-right:5px;">相談に反映</span><div class="toggle-switch small"><input type="checkbox" id="reflectLifestyle" onchange="saveProfile(true)"><span class="toggle-slider"></span></div></label>
         </div>
         <div class="chip-group" id="lifestyleGroup">
@@ -561,7 +605,8 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div id="progressOverlay" class="progress-overlay">
   <div class="progress-spinner"></div>
-  <div id="progressText" style="font-family:var(--font-serif); font-size:1.1rem; color:#555;">処理中...</div>
+  <div id="progressText" style="font-family:var(--font-serif); font-size:1.1rem; color:#555; text-align:center;">成分情報を精密に収集中...</div>
+  <div id="progressTime">約 -- 秒</div>
 </div>
 <canvas id="compressionCanvas" style="display:none;"></canvas>
 
@@ -573,6 +618,7 @@ let isRequesting = false;
 let lastRequestTime = 0;
 let currentFilter = 'active';
 let userProfile = JSON.parse(localStorage.getItem('userProfile_v1')) || {};
+let countdownTimer = null;
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
 const DEFAULT_FAST_MODEL = 'gemini-2.5-flash-lite';
@@ -596,6 +642,16 @@ function setSelectedChips(groupId, values) {
   });
 }
 
+// ===== チャットのオプション同期 =====
+function syncChatOptions() {
+  document.getElementById('chatOptIngredients').checked = document.getElementById('reflectItems').checked;
+  document.getElementById('chatOptCospa').checked = document.getElementById('reflectCospa').checked;
+}
+function syncSettingsOptions() {
+  document.getElementById('reflectItems').checked = document.getElementById('chatOptIngredients').checked;
+  document.getElementById('reflectCospa').checked = document.getElementById('chatOptCospa').checked;
+}
+
 // ===== プロフィール =====
 function saveProfile(isSilent = false) {
   userProfile = {
@@ -609,7 +665,9 @@ function saveProfile(isSilent = false) {
     weatherCache: userProfile.weatherCache || null,
     weatherLastFetched: userProfile.weatherLastFetched || null,
     chatReflect: {
-      items: document.getElementById('reflectItems').checked,
+      items: document.getElementById('chatOptIngredients').checked,
+      useProfile: document.getElementById('chatOptProfile').checked,
+      cospa: document.getElementById('chatOptCospa').checked,
       region: document.getElementById('reflectRegion').checked,
       age: document.getElementById('reflectAge').checked,
       skinType: document.getElementById('reflectSkinType').checked,
@@ -634,8 +692,16 @@ function loadProfile() {
   setSelectedChips('sleepGroup', userProfile.sleep);
   if (userProfile.weatherCache) showWeatherBadge(userProfile.weatherCache);
   
-  const reflect = userProfile.chatReflect || {items:true, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
+  const reflect = userProfile.chatReflect || {items:true, useProfile:true, cospa:false, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
+  
   document.getElementById('reflectItems').checked = reflect.items !== false;
+  document.getElementById('chatOptIngredients').checked = reflect.items !== false;
+  
+  document.getElementById('reflectCospa').checked = reflect.cospa !== false;
+  document.getElementById('chatOptCospa').checked = reflect.cospa !== false;
+  
+  document.getElementById('chatOptProfile').checked = reflect.useProfile !== false;
+  
   document.getElementById('reflectRegion').checked = reflect.region !== false;
   document.getElementById('reflectAge').checked = reflect.age !== false;
   document.getElementById('reflectSkinType').checked = reflect.skinType !== false;
@@ -643,13 +709,12 @@ function loadProfile() {
   document.getElementById('reflectLifestyle').checked = reflect.lifestyle !== false;
   document.getElementById('reflectSleep').checked = reflect.sleep !== false;
 
-  // ロード時に天気の自動更新をチェック
   checkAndFetchWeather();
 }
 
 function getProfileContext() {
   if (!userProfile) return '';
-  const reflect = userProfile.chatReflect || {items:true, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
+  const reflect = userProfile.chatReflect || {items:true, useProfile:true, cospa:false, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
   const parts = [];
   
   if (reflect.age !== false && userProfile.age) parts.push(`年齢:${userProfile.age}歳`);
@@ -672,7 +737,7 @@ function getProfileContext() {
   return parts.length ? `ユーザープロフィール=[${parts.join('、')}]` : '';
 }
 
-// ===== 天気取得 (0時, 6時, 12時, 18時をまたいだら自動取得) =====
+// ===== 天気取得 =====
 function checkAndFetchWeather() {
   const region = document.getElementById('profileRegion').value.trim();
   if (!region) return;
@@ -683,13 +748,11 @@ function checkAndFetchWeather() {
   const nowDate = new Date(now);
 
   let shouldFetch = false;
-
   if (now - lastFetch > 24 * 60 * 60 * 1000) {
-    shouldFetch = true; // 24時間以上経過
+    shouldFetch = true;
   } else if (lastDate.getDate() !== nowDate.getDate()) {
-    shouldFetch = true; // 日をまたいだ
+    shouldFetch = true;
   } else {
-    // 0, 6, 12, 18 の境界チェック (6時間ごとのスロットが変わったか)
     const getSlot = (h) => Math.floor(h / 6); 
     if (getSlot(lastDate.getHours()) !== getSlot(nowDate.getHours())) {
       shouldFetch = true;
@@ -697,10 +760,9 @@ function checkAndFetchWeather() {
   }
 
   if (shouldFetch) {
-    fetchWeather(true); // true = サイレント（裏側で取得してアラートを出さない）
+    fetchWeather(true);
   }
 }
-// 1時間ごとに裏側でチェックを走らせる
 setInterval(checkAndFetchWeather, 60 * 60 * 1000);
 
 async function fetchWeather(isSilent = false) {
@@ -709,11 +771,9 @@ async function fetchWeather(isSilent = false) {
     if (!isSilent) alert('地域名を入力してください');
     return;
   }
-  
   if (!isSilent) {
     document.getElementById('weatherInfo').innerHTML = `<span style="font-size:0.8rem; color:#888;">取得中...</span>`;
   }
-
   try {
     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(region)}&format=json&limit=1`);
     const geoData = await geoRes.json();
@@ -777,17 +837,25 @@ function modelSupportsThinking(modelId) {
   return modelId && modelId.startsWith('gemini-2.5') && !modelId.includes('lite');
 }
 
+// ===== API通信設定（検索連携を追加して精度向上） =====
 function getGenConfig(isFast) {
   const modelSelectId = isFast ? 'fastModelSelect' : 'chatModelSelect';
   const modelId = document.getElementById(modelSelectId)?.value || '';
   const thinkingToggle = isFast
     ? document.getElementById('fastThinkingToggle')?.checked
     : document.getElementById('chatThinkingToggle')?.checked;
-  // ★ 高速化の要：検索時はAIの迷い（確率計算）をゼロにする極限設定
-  const cfg = isFast ? { temperature: 0.0, topK: 1, topP: 0.1 } : { temperature: 0.7 };
+  
+  const cfg = isFast ? { temperature: 0.1, topK: 1, topP: 0.1 } : { temperature: 0.7 };
+  
   if (thinkingToggle && modelSupportsThinking(modelId)) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
+  
+  // ★ 自動入力の時は、公式情報を取得して成分の正確性を高めるために検索グラウンディングを有効化
+  if (isFast) {
+    cfg.tools = [{ "google_search": {} }];
+  }
+  
   return cfg;
 }
 
@@ -832,11 +900,50 @@ async function waitForRateLimit() {
   lastRequestTime = Date.now();
 }
 
-function showOverlay(txt) {
-  document.getElementById('progressOverlay').style.display = 'flex';
-  document.getElementById('progressText').textContent = txt;
+// ===== カウントダウン付きプログレス表示 =====
+function startProgress(isFastMode) {
+  const overlay = document.getElementById('progressOverlay');
+  const textEl = document.getElementById('progressText');
+  const timeEl = document.getElementById('progressTime');
+  
+  overlay.style.display = 'flex';
+  textEl.innerHTML = "AIが公式情報から<br>正確な成分を検索中...";
+  
+  let modelId = '';
+  let thinking = false;
+  if(isFastMode) {
+      modelId = document.getElementById('fastModelSelect').value;
+      thinking = document.getElementById('fastThinkingToggle').checked;
+  } else {
+      modelId = document.getElementById('chatModelSelect').value;
+      thinking = document.getElementById('chatThinkingToggle').checked;
+  }
+  
+  // モデル設定に基づく大まかな予測秒数
+  let estTime = 12; 
+  if(modelId.includes('pro')) estTime += 5;
+  if(thinking && modelSupportsThinking(modelId)) estTime += 15;
+  
+  timeEl.textContent = `残り ${estTime} 秒`;
+  
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    estTime--;
+    if (estTime > 0) {
+      timeEl.textContent = `残り ${estTime} 秒`;
+    } else {
+      // 0になったら止めるのではなく、最終フェーズのアナウンスに変える
+      timeEl.textContent = "データ最終整形中...";
+      clearInterval(countdownTimer);
+    }
+  }, 1000);
 }
-function hideOverlay() { document.getElementById('progressOverlay').style.display = 'none'; }
+
+function stopProgress() {
+  clearInterval(countdownTimer);
+  document.getElementById('progressOverlay').style.display = 'none';
+}
+
 function setBtnLoading(btnId, isLoading, text='AI自動入力') {
   var btn = document.getElementById(btnId);
   if(!btn) return;
@@ -857,21 +964,21 @@ function parseAIJson(text) {
   return null;
 }
 
-// ★ 高速化の要：Schema機能を使い、AIの思考の無駄を省きJSONのパースエラーを根絶する
 async function callGeminiAPI(url, parts, config, useSchema = false) {
   var genConfig = Object.assign({}, config);
   
+  // ★ JSONスキーマの記述を厳格化してエラーを防ぐ
   if (useSchema) {
     genConfig.responseMimeType = "application/json";
     genConfig.responseSchema = {
       type: "OBJECT",
       properties: {
-        itemName: { type: "STRING" },
-        brand: { type: "STRING" },
-        category: { type: "STRING" },
-        ingredients: { type: "STRING" },
-        description: { type: "STRING" },
-        price: { type: "NUMBER" }
+        itemName: { type: "STRING", description: "化粧品の正式な商品名" },
+        brand: { type: "STRING", description: "ブランド名・メーカー名" },
+        category: { type: "STRING", description: "洗顔料、化粧水、乳液、美容液、クリーム、その他のいずれか" },
+        ingredients: { type: "STRING", description: "水、グリセリン...のように全成分を省略せずコンマ区切りで正確に" },
+        description: { type: "STRING", description: "商品の特徴や効果などの説明" },
+        price: { type: "NUMBER", description: "一般的な税込価格（数値のみ）" }
       },
       required: ["itemName", "brand", "category", "ingredients", "description", "price"]
     };
@@ -914,17 +1021,19 @@ async function handleImageSelect(e) {
   var file = e.target.files[0];
   if(!file) return;
   isRequesting = true;
-  showOverlay("AI解析中...");
+  startProgress(true); // カウントダウン開始
 
   try {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // ★ 超シンプル化：AIへの余計な指示を削り、パース時間を極限まで短縮
-    var combinedPrompt = `この化粧品の全成分と特徴を省略せず抽出せよ。`;
+    // ★ プロンプトを強化。公式情報の取得と成分の正確性を強く指示
+    var combinedPrompt = `あなたは化粧品の専門家です。この化粧品の画像から製品を特定し、最新の公式情報や信頼できる情報を検索して以下の情報を抽出してください。
+特に「全成分(ingredients)」は非常に重要です。パッケージや公式サイトの記載通りに、絶対に省略や間違いがないように正確に抽出してください。
+出力は指定されたJSONスキーマに厳密に従ってください。`;
 
     var imgConfig = getGenConfig(true);
-    if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
+    if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig; // 画像検索とThinkingの相性回避
 
     var responseText = await callGeminiAPI(getImageApiUrl(), [
       { text: combinedPrompt },
@@ -934,7 +1043,7 @@ async function handleImageSelect(e) {
     var result = parseAIJson(responseText);
     if(result) {
       if(result.itemName)   document.getElementById('itemName').value   = result.itemName;
-      if(result.brand)      document.getElementById('brand').value      = result.brand; // Schemaのキーに合わせる
+      if(result.brand)      document.getElementById('brand').value      = result.brand; 
       if(result.category)   document.getElementById('categorySelect').value = result.category;
       if(result.description)document.getElementById('description').value= result.description;
       if(result.ingredients)document.getElementById('ingredients').value= result.ingredients;
@@ -946,7 +1055,9 @@ async function handleImageSelect(e) {
   } catch(err) {
     alert("エラー: " + err.message);
   } finally {
-    isRequesting = false; hideOverlay(); e.target.value = '';
+    isRequesting = false; 
+    stopProgress(); // カウントダウン停止
+    e.target.value = '';
   }
 }
 
@@ -957,7 +1068,7 @@ function compressImage(file) {
       var img = new Image();
       img.onload = () => {
         var c = document.getElementById('compressionCanvas');
-        var scale = Math.min(800/img.width, 1); // 軽くするため少し縮小率を強めに
+        var scale = Math.min(800/img.width, 1);
         c.width = img.width * scale; c.height = img.height * scale;
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
         r(c.toDataURL('image/jpeg', 0.8));
@@ -975,12 +1086,15 @@ async function triggerManualAISearch() {
 
   isRequesting = true;
   setBtnLoading('btn-ai-search', true);
+  startProgress(true); // カウントダウン開始
 
   try {
     await waitForRateLimit();
 
-    // ★ 超シンプル化：AIへの余計な指示を削り、パース時間を極限まで短縮
-    var p = `化粧品「${name}」の全成分と特徴を省略せず抽出せよ。`;
+    // ★ プロンプト強化
+    var p = `あなたは化粧品の専門家です。化粧品「${name}」の最新の公式情報や信頼できる情報を検索し、以下の情報を抽出してください。
+特に「全成分(ingredients)」は非常に重要です。パッケージや公式サイトの記載通りに、絶対に省略や間違いがないように正確に抽出してください。
+出力は指定されたJSONスキーマに厳密に従ってください。`;
 
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
@@ -1001,6 +1115,7 @@ async function triggerManualAISearch() {
   } finally {
     isRequesting = false;
     setBtnLoading('btn-ai-search', false);
+    stopProgress(); // カウントダウン停止
   }
 }
 
@@ -1055,7 +1170,6 @@ function setFilter(type) {
   render();
 }
 
-// ===== 開いているアコーディオンの状態を維持しながら描画 =====
 function render() {
   var openIds = Array.from(document.querySelectorAll('.item-card-details[open]')).map(el => parseInt(el.getAttribute('data-id')));
 
@@ -1122,7 +1236,6 @@ function render() {
   document.getElementById('routineArea').innerHTML = html || '<div style="text-align:center;color:#999;margin-top:50px;font-size:0.9rem;">該当するアイテムはありません</div>';
 }
 
-// ★ 修正：使い切り状態を変更した際に、画面全体の再描画（render）を行わず、対象のDOMだけを更新してその場に残すようにしました。
 function saveFinishDate(id, val) {
   var i = cosmeData.find(x => x.id === id);
   if (!i) return;
@@ -1142,7 +1255,6 @@ function markFinished(id) {
   }
 }
 
-// 対象アイテムの見た目だけを更新する関数
 function updateItemDOM(id) {
   var item = cosmeData.find(x => x.id === id);
   if(!item) return;
@@ -1290,24 +1402,43 @@ async function sendChatMessage() {
 
   try {
     await waitForRateLimit();
-    var needsIngredients = /成分|アレルギー|敏感|刺激|相性|配合/.test(txt);
     
-    // 登録アイテムの反映設定チェック
-    const reflect = userProfile.chatReflect || {items:true};
+    // UIからのフラグ取得
+    const useIngredients = document.getElementById('chatOptIngredients').checked;
+    const useProfile = document.getElementById('chatOptProfile').checked;
+    const useCospa = document.getElementById('chatOptCospa').checked;
+
     let contextStr = '';
-    if (reflect.items !== false && cosmeData.length > 0) {
+    if ((useIngredients || useCospa) && cosmeData.length > 0) {
       var context = JSON.stringify(cosmeData.map(c => {
         var obj = { n: c.name, b: c.brand, c: c.category };
-        if(needsIngredients && c.ingredients) {
-          obj.ing = c.ingredients.substring(0, 100);
+        if(useIngredients && c.ingredients) {
+          obj.ing = c.ingredients;
+        }
+        if(useCospa && c.price && c.openDate) {
+          obj.price = c.price;
+          obj.days = getDays(c);
+          obj.dailyCost = Math.round(getDaily(c));
         }
         return obj;
       }));
-      contextStr = `ユーザーの所持コスメ=${context}。`;
+      
+      let reqStr = "ユーザーの所持コスメ情報=" + context + "。\n";
+      if (useIngredients) reqStr += "上記の所持コスメの成分の組み合わせや相性も踏まえて専門的に回答してください。\n";
+      if (useCospa) reqStr += "上記の所持コスメの1日あたりのコスト（dailyCost）も考慮し、コストパフォーマンスの観点からもアドバイスを含めてください。\n";
+      
+      contextStr = reqStr;
+    } else if (!useIngredients && !useCospa) {
+      contextStr = `一般的な化粧品の知識のみでレビューやアドバイスをしてください（ユーザーの所持品は考慮不要です）。`;
     }
 
-    var profileCtx = getProfileContext();
-    var prompt = `役割:美容部員。${profileCtx ? profileCtx + '。' : ''}${contextStr}質問:${txt}。回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
+    let profileCtx = '';
+    if (useProfile) {
+      profileCtx = getProfileContext();
+    }
+    
+    var prompt = `役割:美容部員。\n${profileCtx ? profileCtx + '\n' : ''}${contextStr}\n質問:${txt}\n回答は読みやすくするため、重要なポイントは**太字**に、見出しは### を使い、箇条書きは- を使って整形してください。`;
+    
     var ans = await callGeminiAPI(getApiUrl(false), [{ text: prompt }], getGenConfig(false));
     if(!ans) ans = "回答を取得できませんでした。";
     removeTypingIndicator();
