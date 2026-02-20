@@ -252,7 +252,6 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 .chat-input:focus { border-color: var(--accent-color); }
 .send-btn { width: 48px; height: 48px; border-radius: 50%; padding: 0; margin: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--text-main); flex-shrink: 0; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-/* ▼ 段落ち対策：ボタン風のチップデザインにして綺麗に並べる */
 .chat-options {
   display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
   font-size: 0.75rem; color: var(--text-sub); width: 100%;
@@ -266,6 +265,16 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   width: 14px; height: 14px; margin: 0;
   appearance: auto; -webkit-appearance: auto; cursor: pointer;
 }
+
+/* ▼ プルダウン（セレクトボックス）をチップ風にするCSS */
+.chat-select {
+  appearance: none; -webkit-appearance: none;
+  background: rgba(0,0,0,0.04) url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 8px center / 8px auto;
+  border: none; border-radius: 20px; padding: 5px 24px 5px 12px;
+  font-size: 0.75rem; font-weight: 600; color: var(--text-main); cursor: pointer;
+  outline: none; font-family: var(--font-sans);
+}
+.chat-select:active { background-color: rgba(0,0,0,0.08); }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -296,7 +305,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.60</span>
+  <span class="brand-subtitle">PRO EDITION v10.70</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -397,8 +406,12 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <button onclick="sendChatMessage()" class="send-btn">➤</button>
       </div>
       <div class="chat-options">
-        <!-- ▼ 短い文言に変更し、チップ風デザインに合わせる -->
-        <label><input type="checkbox" id="chatOptIngredients" onchange="syncSettingsOptions(); saveProfile(true)"> 成分考慮</label>
+        <!-- ▼ 成分のON/OFFをトークン節約用のプルダウンに変更 -->
+        <select id="chatDataLevel" class="chat-select" onchange="syncSettingsOptions(); saveProfile(true)">
+          <option value="none">コスメ送らない</option>
+          <option value="name">商品名のみ(節約)</option>
+          <option value="ingredients">成分も送る(精密)</option>
+        </select>
         <label><input type="checkbox" id="chatOptProfile" onchange="saveProfile(true)"> プロフ反映</label>
         <label><input type="checkbox" id="chatOptCospa" onchange="syncSettingsOptions(); saveProfile(true)"> コスパ</label>
       </div>
@@ -433,17 +446,20 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
     <div class="section-title"><span>相談連携設定</span></div>
     <div class="card" style="padding-bottom: 20px;">
+      <div style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 15px; line-height: 1.6; background: #f9f9f9; padding: 12px; border-radius: 4px; border: 1px solid #eee;">
+        💡 <b>トークン節約のコツ</b><br>
+        「成分」まで送信すると的確なアドバイスが貰えますが、APIの文字数（トークン）を大きく消費します。普段は<b>「商品名のみ」</b>にしておき、成分の相性を聞きたい時だけ切り替えるのがおすすめです。
+      </div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">登録コスメ情報をデフォルトで反映する</div>
-        <label class="toggle-label">
-          <div class="toggle-switch">
-            <input type="checkbox" id="reflectItems" onchange="syncChatOptions(); saveProfile(true)">
-            <span class="toggle-slider"></span>
-          </div>
-        </label>
+        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">登録コスメの送信量</div>
+        <select id="settingDataLevel" class="chat-select" onchange="syncChatOptions(); saveProfile(true)" style="padding: 8px 30px 8px 15px; font-size: 0.85rem;">
+          <option value="none">送らない</option>
+          <option value="name">商品名のみ (節約)</option>
+          <option value="ingredients">成分も送る (精密)</option>
+        </select>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
-        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">コスパ情報をデフォルトで反映する</div>
+        <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">コスパ情報を反映する</div>
         <label class="toggle-label">
           <div class="toggle-switch">
             <input type="checkbox" id="reflectCospa" onchange="syncChatOptions(); saveProfile(true)">
@@ -598,6 +614,29 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
       <button onclick="importData()" class="btn-secondary">データを復元 (JSON)</button>
       <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
     </div>
+
+    <!-- アプリの使い方＆ヒント -->
+    <div class="section-title" style="margin-top:50px;"><span>アプリの使い方＆ヒント</span></div>
+    <div class="card" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.7;">
+      <h3 style="font-size: 1rem; color: var(--accent-dark); margin-top: 0; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px;">📖 簡単な使い方ガイド</h3>
+      <ol style="padding-left: 1.2rem; margin-bottom: 25px;">
+        <li style="margin-bottom: 8px;"><b>登録：</b> 手持ちのコスメを登録！写真を撮るだけでAIが成分や価格を自動入力してくれます。</li>
+        <li style="margin-bottom: 8px;"><b>相談：</b> あなた専用の美容部員AIに相談！「この美容液と相性の良い化粧水は？」「今の天気に合うスキンケアは？」など、あなたの肌質や持っているコスメに合わせてアドバイスしてくれます。</li>
+        <li style="margin-bottom: 8px;"><b>コスパ：</b> 登録した価格と使い切った期間から、1日あたりのコスパを自動で計算してくれます。</li>
+        <li><b>設定：</b> あなたの肌質や生活習慣を設定しておくと、AIがそれを覚えてよりあなたにぴったりの回答をしてくれます。</li>
+      </ol>
+
+      <h3 style="font-size: 1rem; color: var(--accent-dark); margin-top: 0; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px;">💡 AIを無料で賢く使うコツ</h3>
+      <p style="margin-bottom: 12px; font-size: 0.8rem; color: var(--text-sub);">
+        AIに考えてもらうたびに、見えない「文字数（トークン）」というエネルギーを使っています。無料枠を使い切ってエラー（制限）にならないためのちょっとしたヒントです。
+      </p>
+      <ul style="padding-left: 1.2rem; margin-bottom: 0;">
+        <li style="margin-bottom: 10px;"><b>写真での登録は少しずつ：</b><br>AIにとって写真を読み解くのは大仕事です。一度に何個も連続で登録するとAIが疲れて制限がかかることがあるので、いくつか登録したら少し時間を置くのがおすすめです。</li>
+        <li style="margin-bottom: 10px;"><b>普段の相談は「商品名のみ」で節約：</b><br>相談画面で「成分も送る」を選ぶと、登録した全成分の長いテキストを毎回AIに送るためエネルギーを大きく消費します。普段の相談は<b>「商品名のみ」</b>にしておき、成分の相性が気になる時だけ切り替えるのが長持ちの秘訣です。</li>
+        <li><b>「思考モード」はここぞという時に：</b><br>API設定にある「思考モード」をオンにすると、AIが裏で深く推理するためエネルギー消費がグンと跳ね上がります。真剣な肌悩みを相談する時など、特別な時だけオンにしましょう。</li>
+      </ul>
+    </div>
+
   </div>
 </div>
 
@@ -637,11 +676,11 @@ function setSelectedChips(groupId, values) {
 
 // ===== チャットのオプション同期 =====
 function syncChatOptions() {
-  document.getElementById('chatOptIngredients').checked = document.getElementById('reflectItems').checked;
+  document.getElementById('chatDataLevel').value = document.getElementById('settingDataLevel').value;
   document.getElementById('chatOptCospa').checked = document.getElementById('reflectCospa').checked;
 }
 function syncSettingsOptions() {
-  document.getElementById('reflectItems').checked = document.getElementById('chatOptIngredients').checked;
+  document.getElementById('settingDataLevel').value = document.getElementById('chatDataLevel').value;
   document.getElementById('reflectCospa').checked = document.getElementById('chatOptCospa').checked;
 }
 
@@ -658,7 +697,7 @@ function saveProfile(isSilent = false) {
     weatherCache: userProfile.weatherCache || null,
     weatherLastFetched: userProfile.weatherLastFetched || null,
     chatReflect: {
-      items: document.getElementById('chatOptIngredients').checked,
+      dataLevel: document.getElementById('chatDataLevel').value,
       useProfile: document.getElementById('chatOptProfile').checked,
       cospa: document.getElementById('chatOptCospa').checked,
       region: document.getElementById('reflectRegion').checked,
@@ -685,10 +724,15 @@ function loadProfile() {
   setSelectedChips('sleepGroup', userProfile.sleep);
   if (userProfile.weatherCache) showWeatherBadge(userProfile.weatherCache);
   
-  const reflect = userProfile.chatReflect || {items:true, useProfile:true, cospa:false, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
+  const reflect = userProfile.chatReflect || { dataLevel: 'name', useProfile:true, cospa:false, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true };
   
-  document.getElementById('reflectItems').checked = reflect.items !== false;
-  document.getElementById('chatOptIngredients').checked = reflect.items !== false;
+  // 過去バージョンからの互換性維持
+  if (reflect.dataLevel === undefined) {
+    reflect.dataLevel = (reflect.items !== false) ? 'ingredients' : 'none';
+  }
+
+  document.getElementById('settingDataLevel').value = reflect.dataLevel;
+  document.getElementById('chatDataLevel').value = reflect.dataLevel;
   
   document.getElementById('reflectCospa').checked = reflect.cospa !== false;
   document.getElementById('chatOptCospa').checked = reflect.cospa !== false;
@@ -707,7 +751,7 @@ function loadProfile() {
 
 function getProfileContext() {
   if (!userProfile) return '';
-  const reflect = userProfile.chatReflect || {items:true, useProfile:true, cospa:false, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
+  const reflect = userProfile.chatReflect || { dataLevel: 'name', useProfile:true, cospa:false, region:true, age:true, skinType:true, concerns:true, lifestyle:true, sleep:true};
   const parts = [];
   
   if (reflect.age !== false && userProfile.age) parts.push(`年齢:${userProfile.age}歳`);
@@ -944,8 +988,6 @@ async function callGeminiAPI(url, parts, config, useSchema = false, useSearch = 
     delete genConfig.tools;
   }
   
-  // ★ API制限対策：検索ツールを使う場合は、JSONモードの機能設定をAPIに送らないようにする
-  // 代わりにプロンプトで「JSONで返せ」と指定して回避する
   if (useSchema && !useSearch) {
     genConfig.responseMimeType = "application/json";
     genConfig.responseSchema = {
@@ -1018,7 +1060,6 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // ★ プロンプト側にJSONのフォーマット指示を直接含めて、API側の制限を回避する
     var combinedPrompt = `あなたは化粧品の専門家です。この化粧品の画像から製品を特定し、最新の公式情報や信頼できる情報を検索して以下の情報を抽出してください。
 特に「全成分(ingredients)」は非常に重要です。パッケージや公式サイトの記載通りに、絶対に省略や間違いがないように正確に抽出してください。
 必ず以下のJSONフォーマットのみを出力してください。マークダウンなどの装飾は一切含めないでください。
@@ -1091,7 +1132,6 @@ async function triggerManualAISearch() {
   try {
     await waitForRateLimit();
 
-    // ★ プロンプト側にJSONのフォーマット指示を直接含めて、API側の制限を回避する
     var p = `あなたは化粧品の専門家です。化粧品「${name}」の最新の公式情報や信頼できる情報を検索し、以下の情報を抽出してください。
 特に「全成分(ingredients)」は非常に重要です。パッケージや公式サイトの記載通りに、絶対に省略や間違いがないように正確に抽出してください。
 必ず以下のJSONフォーマットのみを出力してください。マークダウンなどの装飾は一切含めないでください。
@@ -1222,7 +1262,7 @@ function render() {
           <input type="date" value="${item.openDate||''}" onchange="saveEdit(${item.id},'openDate',this.value)" style="font-size:0.9rem;">
         </div>
         <div style="margin-top:10px;">
-          <label style="font-size:0.72rem; color:#888; margin-bottom:4px; display:block; font-weight:600;">使い切り日（手動入力）</label>
+          <label style="font-size:0.72rem; color:#888; margin-bottom:4px; display:block; font-weight:600;">使い切り日（手バック力）</label>
           <input type="date" value="${item.finishDate||''}" onchange="saveFinishDate(${item.id},this.value)" style="font-size:0.9rem; width:100%;">
         </div>
         <div style="margin-top:10px;">
@@ -1411,15 +1451,17 @@ async function sendChatMessage() {
     await waitForRateLimit();
     
     // UIからのフラグ取得
-    const useIngredients = document.getElementById('chatOptIngredients').checked;
+    const dataLevel = document.getElementById('chatDataLevel').value;
     const useProfile = document.getElementById('chatOptProfile').checked;
     const useCospa = document.getElementById('chatOptCospa').checked;
 
     let contextStr = '';
-    if ((useIngredients || useCospa) && cosmeData.length > 0) {
+    // ★ 送信量設定が「none(送らない)」以外なら、最低でも名前・ブランド・カテゴリを送る
+    if (dataLevel !== 'none' && cosmeData.length > 0) {
       var context = JSON.stringify(cosmeData.map(c => {
         var obj = { n: c.name, b: c.brand, c: c.category };
-        if(useIngredients && c.ingredients) {
+        // ★ 送信量設定が「ingredients(成分も送る)」の時だけ、成分データを含める
+        if(dataLevel === 'ingredients' && c.ingredients) {
           obj.ing = c.ingredients;
         }
         if(useCospa && c.price && c.openDate) {
@@ -1431,11 +1473,11 @@ async function sendChatMessage() {
       }));
       
       let reqStr = "ユーザーの所持コスメ情報=" + context + "。\n";
-      if (useIngredients) reqStr += "上記の所持コスメの成分の組み合わせや相性も踏まえて専門的に回答してください。\n";
+      if (dataLevel === 'ingredients') reqStr += "上記の所持コスメの成分の組み合わせや相性も踏まえて専門的に回答してください。\n";
       if (useCospa) reqStr += "上記の所持コスメの1日あたりのコスト（dailyCost）も考慮し、コストパフォーマンスの観点からもアドバイスを含めてください。\n";
       
       contextStr = reqStr;
-    } else if (!useIngredients && !useCospa) {
+    } else {
       contextStr = `一般的な化粧品の知識のみでレビューやアドバイスをしてください（ユーザーの所持品は考慮不要です）。`;
     }
 
