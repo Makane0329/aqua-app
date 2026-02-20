@@ -264,7 +264,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
 <div class="header-area">
   <h1 class="brand-title">COSME GENIUS</h1>
-  <span class="brand-subtitle">PRO EDITION v10.18</span>
+  <span class="brand-subtitle">PRO EDITION v10.19</span>
 </div>
 
 <div class="tabs-sticky-wrapper">
@@ -720,7 +720,8 @@ function getGenConfig(isFast) {
   const thinkingToggle = isFast
     ? document.getElementById('fastThinkingToggle')?.checked
     : document.getElementById('chatThinkingToggle')?.checked;
-  const cfg = { temperature: isFast ? 0.1 : 0.7 };
+  // ★ 高速化の要：検索時はAIの迷い（確率計算）をゼロにする極限設定
+  const cfg = isFast ? { temperature: 0.0, topK: 1, topP: 0.1 } : { temperature: 0.7 };
   if (thinkingToggle && modelSupportsThinking(modelId)) {
     cfg.thinkingConfig = { thinkingBudget: 8192 };
   }
@@ -856,8 +857,8 @@ async function handleImageSelect(e) {
     var base64 = (await compressImage(file)).split(',')[1];
     await waitForRateLimit();
 
-    // プロンプトを元に戻し、全成分と詳しい特徴を要求
-    var combinedPrompt = `この化粧品画像を解析し、詳細情報を抽出してください。全成分と詳しい説明（特徴）は絶対に省略せずに記述してください。\n必ずJSONフォーマットのみで出力してください。`;
+    // ★ 超シンプル化：AIへの余計な指示を削り、パース時間を極限まで短縮
+    var combinedPrompt = `この化粧品の全成分と特徴を省略せず抽出せよ。`;
 
     var imgConfig = getGenConfig(true);
     if(imgConfig.thinkingConfig) delete imgConfig.thinkingConfig;
@@ -915,8 +916,8 @@ async function triggerManualAISearch() {
   try {
     await waitForRateLimit();
 
-    // プロンプトを元に戻し、全成分と詳しい特徴を要求
-    var p = `化粧品「${name}」の詳細情報を検索してください。略称も推測して。全成分と詳しい説明（特徴）は絶対に省略せずに記述してください。\n必ずJSONフォーマットのみで出力してください。`;
+    // ★ 超シンプル化：AIへの余計な指示を削り、パース時間を極限まで短縮
+    var p = `化粧品「${name}」の全成分と特徴を省略せず抽出せよ。`;
 
     var searchConfig = getGenConfig(true);
     if (searchConfig.thinkingConfig) delete searchConfig.thinkingConfig;
