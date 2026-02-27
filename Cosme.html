@@ -424,7 +424,7 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
   <div id="tab-cospa" class="tab-content">
     <div class="section-title"><span>コスパ分析</span></div>
     <div id="cospaTopSummary" style="margin-bottom:30px; text-align:center;"></div>
-    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap: wrap;">
+    <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap: wrap;">
       <select id="cospaCategory" onchange="renderCospa()" style="font-size:0.85rem; width:48%;">
         <option value="all">全カテゴリ</option>
         <option value="洗顔料">洗顔料</option>
@@ -439,6 +439,12 @@ button:disabled { background: #ccc; cursor: not-allowed; transform: none; }
         <option value="days_desc">長く使っている順</option>
         <option value="days_asc">使用期間が短い順</option>
       </select>
+    </div>
+    <!-- ▼ 使用状況フィルタータブ -->
+    <div class="filter-tabs" style="margin-bottom:20px;">
+      <div class="filter-tab active" id="cospa-filter-active" onclick="setCospaFilter('active')">使用中</div>
+      <div class="filter-tab" id="cospa-filter-finished" onclick="setCospaFilter('finished')">使い切り</div>
+      <div class="filter-tab" id="cospa-filter-all" onclick="setCospaFilter('all')">全て</div>
     </div>
     <div id="cospaList"></div>
   </div>
@@ -652,6 +658,7 @@ let isAutoInputRunning = false;
 let isChatRequesting = false;
 let lastRequestTime = 0;
 let currentFilter = 'active';
+let currentCospaFilter = 'active'; // ▼ コスパタブ用フィルター状態
 let userProfile = JSON.parse(localStorage.getItem('userProfile_v1')) || {};
 
 const DEFAULT_CHAT_MODEL = 'gemini-3-flash-preview';
@@ -1219,6 +1226,14 @@ function setFilter(type) {
   render();
 }
 
+// ▼ コスパタブ用フィルター切り替え
+function setCospaFilter(type) {
+  currentCospaFilter = type;
+  document.querySelectorAll('#tab-cospa .filter-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('cospa-filter-' + type).classList.add('active');
+  renderCospa();
+}
+
 function render() {
   var openIds = Array.from(document.querySelectorAll('.item-card-details[open]')).map(el => parseInt(el.getAttribute('data-id')));
 
@@ -1340,7 +1355,17 @@ function updateItemDOM(id) {
 function renderCospa() {
   var cat = document.getElementById('cospaCategory').value;
   var sort = document.getElementById('cospaSort').value;
-  var list = cosmeData.filter(i => (cat==='all'||i.category===cat) && i.price && i.openDate);
+
+  // ▼ 使用状況フィルターを適用
+  var list = cosmeData.filter(i => {
+    if(!i.price || !i.openDate) return false;
+    if(currentCospaFilter === 'active') return !i.finishDate;
+    if(currentCospaFilter === 'finished') return !!i.finishDate;
+    return true;
+  });
+
+  list = list.filter(i => cat === 'all' || i.category === cat);
+
   list.sort((a,b) => {
     var da = getDaily(a), db = getDaily(b);
     var daysA = getDays(a), daysB = getDays(b);
@@ -1350,6 +1375,7 @@ function renderCospa() {
     if(sort === 'days_asc') return daysA - daysB;
     return 0;
   });
+
   var html = '', totalDaily = 0;
   list.forEach(item => {
     var days = getDays(item);
@@ -1370,6 +1396,8 @@ function renderCospa() {
   document.getElementById('cospaList').innerHTML = html || '<div class="text-center" style="margin-top:40px;color:#ccc;">データ不足</div>';
   if(list.length > 0) {
     document.getElementById('cospaTopSummary').innerHTML = `<div style="font-size:0.9rem; color:#888; font-family:var(--font-serif);">1日あたりの合計</div><div style="font-size:3rem; line-height:1; font-family:var(--font-serif); color:var(--text-main);">¥${Math.round(totalDaily)}</div>`;
+  } else {
+    document.getElementById('cospaTopSummary').innerHTML = '';
   }
 }
 function getDays(i) {
